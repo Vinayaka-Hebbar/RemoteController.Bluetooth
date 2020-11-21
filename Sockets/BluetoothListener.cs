@@ -18,6 +18,7 @@ namespace RemoteController.Sockets
         private ServiceClass codService;
         private byte[] m_activeServiceRecordBytes; // As passed to WSASetService(REGISTER).
 
+        #region Constructors
         public BluetoothListener(Guid service)
         {
             InitServiceRecord(service);
@@ -40,7 +41,8 @@ namespace RemoteController.Sockets
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
             serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
             option = new SocketOption(serverSocket);
-        }
+        } 
+        #endregion
 
         public SocketOption Option
         {

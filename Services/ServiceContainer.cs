@@ -8,7 +8,7 @@ namespace RemoteController.Services
         static readonly object _lock = new object();
         private readonly TaskCollection tasks;
 
-        static ServiceContainer current;
+        volatile static ServiceContainer current;
 
         private ServiceContainer()
         {
@@ -36,15 +36,12 @@ namespace RemoteController.Services
             }
         }
 
-
-
         public T GetService<T>(Guid id) where T : TaskService
         {
             lock (_lock)
             {
                 if (tasks.TryGetValue(id, out TaskService task))
                     return (T)task;
-
                 return null;
             }
         }
@@ -77,7 +74,7 @@ namespace RemoteController.Services
             }
         }
 
-        readonly struct Comparer : IEqualityComparer<Guid>
+        internal readonly struct Comparer : IEqualityComparer<Guid>
         {
             public bool Equals(Guid x, Guid y)
             {
