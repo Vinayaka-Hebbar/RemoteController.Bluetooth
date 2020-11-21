@@ -1,13 +1,13 @@
-﻿using RemoteController.Sockets;
-using System;
+﻿using RemoteController.Core;
+using System.Threading;
 using System.Windows.Input;
 
 namespace RemoteController.ViewModels
 {
     public sealed class ReceiverViewModel : ViewModelBase
     {
-        private BluetoothListener listener;
-        private static readonly Guid Service = new Guid("{7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B}");
+        private RemoteServer server;
+
 
         private Command.RelayCommand start;
         public ICommand Start
@@ -27,33 +27,35 @@ namespace RemoteController.ViewModels
             {
 
                 if (stop == null)
-                    stop = new Command.RelayCommand(OnStop, CanStop);
+                    stop = new Command.RelayCommand(StopServer, CanStop);
                 return stop;
             }
         }
 
-        private void OnStop()
+        private void StopServer()
         {
-            listener.Stop();
+            server.Dispose();
+            server = null;
         }
 
         private bool CanStop()
         {
-            return listener != null && listener.Active;
+            return server != null;
         }
 
         private bool CheckListener()
         {
-            return listener == null || !listener.Active;
+            return server == null;
         }
 
         private void OnStart()
         {
-            if (listener == null)
+            if(server != null)
             {
-                listener = new BluetoothListener(Service);
+                StopServer();
             }
-            listener.Start();
+            server = new RemoteServer();
+            server.Start();
         }
     }
 }

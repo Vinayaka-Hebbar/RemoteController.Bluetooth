@@ -1,4 +1,5 @@
 ﻿using RemoteController.Desktop;
+using RemoteController.Messages;
 using RemoteController.Win32.Hooks;
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ namespace RemoteController.Core
             ClientState.LastHookEvent_Keyboard = DateTime.Now;
             //Console.WriteLine("Sending clipboard to server");
 
-            _dispatcher.Clipboard(e.Value);
+            _dispatcher.Process(new ClipboardMessage(e.Value));
         }
 
         private void OnGlobalHookMouseWheel(object sender, MouseWheelEventArgs e)
@@ -86,7 +87,7 @@ namespace RemoteController.Core
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.Now;
-            _dispatcher.MouseWheel(e.DeltaX, e.DeltaY);
+            _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
 
         }
         private void OnGlobalHookMouseDown(object sender, MouseButtonEventArgs e)
@@ -97,7 +98,7 @@ namespace RemoteController.Core
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.Now;
-            _dispatcher.MouseDown(e.Button);
+            _dispatcher.Process(new MouseButtonMessage(e.Button, true));
 
 
         }
@@ -109,7 +110,7 @@ namespace RemoteController.Core
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.Now;
-            _dispatcher.MouseUp(e.Button);
+            _dispatcher.Process(new MouseButtonMessage(e.Button, false));
 
         }
         private void OnGlobalHookMouseMove(object sender, MouseMoveEventArgs e)
@@ -138,7 +139,7 @@ namespace RemoteController.Core
                 }
 
                 //send over the net
-                _dispatcher.MouseMove(ClientState.VirtualX, ClientState.VirtualY);
+                _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
             }
             else
             {
@@ -167,7 +168,7 @@ namespace RemoteController.Core
                 return;
 
             ClientState.LastHookEvent_Keyboard = DateTime.Now;
-            _dispatcher.KeyDown(e.Key);
+            _dispatcher.Process(new KeyPressMessage(e.Key, true));
 
         }
 
@@ -180,7 +181,7 @@ namespace RemoteController.Core
                 return;
 
             ClientState.LastHookEvent_Keyboard = DateTime.Now;
-            _dispatcher.KeyUp(e.Key);
+            _dispatcher.Process(new KeyPressMessage(e.Key, false));
 
         }
         private bool ShouldHookBailKeyboard()

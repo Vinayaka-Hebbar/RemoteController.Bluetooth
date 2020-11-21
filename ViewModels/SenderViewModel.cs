@@ -1,6 +1,6 @@
 ﻿using RemoteController.Bluetooth;
+using RemoteController.Core;
 using RemoteController.Model;
-using RemoteController.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,7 +16,7 @@ namespace RemoteController.ViewModels
 
         private readonly Guid _serviceClassId;
         private Device selectedDevice;
-        private SenderService task;
+        private RemoteClient client;
 
         public SenderViewModel()
         {
@@ -85,17 +85,18 @@ namespace RemoteController.ViewModels
 
         private void OnConnect(object arg)
         {
-            task = new SenderService(SelectedDevice, _serviceClassId);
-            task.Completed += OnStop;
-            ServiceContainer.Current.AddSevice(task);
-            task.Start();
-            State = DisconnectState;
-        }
-
-        private void OnStop(TaskService obj)
-        {
-            ServiceContainer.Current.RemoveService(obj.Id);
-            State = ConnectState;
+            if (client != null)
+            {
+                client.Dispose();
+                client = null;
+                State = ConnectState;
+            }
+            else
+            {
+                client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
+                client.Start();
+                State = DisconnectState;
+            }
         }
 
         public async Task InitAsync()
@@ -110,20 +111,6 @@ namespace RemoteController.ViewModels
             foreach (Device device in devices)
             {
                 Devices.Add(device);
-            }
-            task = ServiceContainer.Current.GetService<SenderService>(_serviceClassId);
-            if (task != null)
-            {
-                Device device = task.Device;
-                if (Devices.Contains(device))
-                {
-                    SelectedDevice = device;
-                    State = DisconnectState;
-                }
-                else
-                {
-                    task.Dispose();
-                }
             }
         }
 
@@ -165,7 +152,7 @@ namespace RemoteController.ViewModels
         /// Gets the devices.
         /// </summary>
         /// <returns>The list of the devices.</returns>
-        public async Task<IList<Device>> GetDevices()
+        public static async Task<IList<Device>> GetDevices()
         {
             // for not block the UI it will run in a different threat
             Task<List<Device>> task = Task.Run(() =>

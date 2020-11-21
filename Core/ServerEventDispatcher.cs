@@ -1,175 +1,78 @@
-﻿using RemoteController.Win32.Hooks;
+﻿using RemoteController.Messages;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RemoteController.Core
 {
-    public class ServerEventDispatcher
+    public class ServerEventDispatcher : IDisposable
     {
         private readonly ServerConnectionManager _manager;
+        private readonly EventWaitHandle eventHandle;
+        private readonly ConcurrentQueue<IMessage> messages = new ConcurrentQueue<IMessage>();
+        bool isRunning;
 
         public ServerEventDispatcher(ServerConnectionManager manager)
         {
             _manager = manager;
+            eventHandle = new AutoResetEvent(false);
+            messages = new ConcurrentQueue<IMessage>();
         }
 
-        public void MoveScreenRight()
+        public void StartDispatcher()
         {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MoveScreenRight().ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-
-            });
-        }
-        public void MoveScreenLeft()
-        {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MoveScreenLeft().ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-
-            });
+            isRunning = true;
+            var task = new Task(DispatchMessages, creationOptions: TaskCreationOptions.LongRunning);
+            task.ConfigureAwait(false);
+            task.Start();
         }
 
-        public void Clipboard(string value)
+        async void DispatchMessages()
         {
-            if (!_manager.IsConnected)
-                return;
-            _manager.Clipboard(value).ContinueWith(task1 =>
+            while (isRunning)
             {
-                if (task1.IsFaulted)
+                if (eventHandle.WaitOne() && isRunning)
                 {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
+                    var count = messages.Count;
+                    while (count > 0)
+                    {
+                        count--;
+                        if (messages.TryDequeue(out IMessage message))
+                        {
+                            await _manager.Send(message);
+                        }
+                    }
                 }
-
-            });
+            }
         }
 
-        public void MouseWheel(int deltaX, int deltaY)
+        public void Process(IMessage message)
         {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MouseWheel(deltaX, deltaY).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-
-            });
+            messages.Enqueue(message);
+            eventHandle.Set();
         }
 
-        public void MouseDown(MouseButton button)
-        {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MouseDown(button).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-                else
-                {
+        private bool disposed;
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    isRunning = false;
+                    eventHandle.Set();
+                    eventHandle.Dispose();
                 }
-            });
+                disposed = true;
+            }
         }
 
-        public void MouseUp(MouseButton button)
+        public void Dispose()
         {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MouseUp(button).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-                else
-                {
-
-                }
-            });
-        }
-
-        public void MouseMove(double virtualX, double virtualY)
-        {
-            if (!_manager.IsConnected)
-                return;
-            _manager.MouseMove(virtualX, virtualY).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-                else
-                {
-
-                }
-            });
-        }
-
-        public void KeyDown(Key key)
-        {
-            if (!_manager.IsConnected)
-                return;
-            _manager.KeyDown(key).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-                else
-                {
-
-                }
-            });
-        }
-
-        public void KeyUp(Key key)
-        {
-            if (!_manager.IsConnected)
-                return;
-            _manager.KeyUp(key).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-                }
-                else
-                {
-
-                }
-            });
-        }
-
-        public void ClientCheckin(string clientName, IList<VirtualScreen> screens)
-        {
-            //check in this client
-            if (!_manager.IsConnected)
-                return;
-            _manager.ClientCheckin(clientName, screens).ContinueWith(task1 =>
-            {
-                if (task1.IsFaulted)
-                {
-                    Console.WriteLine("There was an error calling send: {0}", task1.Exception.GetBaseException());
-
-                }
-                else
-                {
-
-                }
-            }).Wait();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

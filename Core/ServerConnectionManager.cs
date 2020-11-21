@@ -1,7 +1,7 @@
 ﻿using RemoteController.Bluetooth;
-using RemoteController.Win32.Hooks;
+using RemoteController.Messages;
 using System;
-using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace RemoteController.Core
@@ -9,6 +9,8 @@ namespace RemoteController.Core
     public class ServerConnectionManager : IDisposable
     {
         private readonly BluetoothEndPoint endPoint;
+        private BluetoothClient client;
+        private NetworkStream stream;
 
         public ServerConnectionManager(BluetoothEndPoint endPoint)
         {
@@ -17,64 +19,27 @@ namespace RemoteController.Core
 
         public bool IsConnected { get; private set; }
 
-        public Task MoveScreenRight()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task MoveScreenLeft()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task MouseWheel(int deltaX, int deltaY)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> MouseDown(MouseButton button)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> MouseUp(MouseButton button)
-        {
-            throw new NotImplementedException();
-        }
-
         internal void Start()
         {
-            throw new NotImplementedException();
+            IsConnected = true;
+            client = new BluetoothClient();
+            client.Connect(endPoint);
+            stream = client.GetStream();
         }
 
-        internal Task<object> MouseMove(double virtualX, double virtualY)
+        public async Task Send(IMessage message)
         {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> Clipboard(string value)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> ClientCheckin(string clientName, IList<VirtualScreen> screens)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> KeyDown(Key key)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Task<object> KeyUp(Key key)
-        {
-            throw new NotImplementedException();
+            if (stream != null)
+            {
+                var bytes = message.GetBytes();
+                await stream.WriteAsync(bytes, 0, bytes.Length);
+                await stream.FlushAsync();
+            }
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            client?.Dispose();
         }
     }
 }

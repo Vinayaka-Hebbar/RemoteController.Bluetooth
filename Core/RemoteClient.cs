@@ -1,16 +1,16 @@
 ﻿using RemoteController.Desktop;
+using RemoteController.Messages;
 using RemoteController.Win32;
 using System;
 using System.Linq;
 
 namespace RemoteController.Core
 {
-    class RemoteClient : IDisposable
+    internal class RemoteClient : IDisposable
     {
         private readonly HookManager _hook;
         private readonly ServerConnectionManager _connection;
         private readonly ServerEventDispatcher _dispatcher;
-        private readonly ServerEventReceiver _receiver;
         private readonly VirtualScreenManager _screen;
 
         private readonly ClientState state;
@@ -23,7 +23,6 @@ namespace RemoteController.Core
             _dispatcher = new ServerEventDispatcher(_connection);
             _screen = new VirtualScreenManager(state);
             _hook = new HookManager(_dispatcher, _screen);
-            _receiver = new ServerEventReceiver(_connection, _hook, _screen);
 
         }
 
@@ -38,22 +37,23 @@ namespace RemoteController.Core
             {
                 s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName, string.Empty);
             }
-            _dispatcher.ClientCheckin(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToList());
+            _dispatcher.Process(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
             _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
-
+            _dispatcher.StartDispatcher();
             return true;
         }
 
         public void MoveScreenRight()
         {
             //move the screens for the current client.
-            _dispatcher.MoveScreenRight();
+            _dispatcher.Process(MoveScreenMessage.Right);
         }
+
         public void MoveScreenLeft()
         {
             //move the screens for the current client. 
-            _dispatcher.MoveScreenLeft();
+            _dispatcher.Process(MoveScreenMessage.Left);
         }
 
         public void RunMessageLoop()
@@ -70,6 +70,7 @@ namespace RemoteController.Core
         {
             _hook.Dispose();
             _connection.Dispose();
+            _dispatcher.Dispose();
         }
 
     }

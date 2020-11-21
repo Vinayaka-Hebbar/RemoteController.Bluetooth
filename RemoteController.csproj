@@ -76,7 +76,9 @@
     <Compile Include="Bluetooth\SizeIndex.cs" />
     <Compile Include="Core\ClientState.cs" />
     <Compile Include="Core\HookManager.cs" />
+    <Compile Include="Core\MessageDispatcher.cs" />
     <Compile Include="Core\RemoteClient.cs" />
+    <Compile Include="Core\RemoteServer.cs" />
     <Compile Include="Core\ScreenConfiguration.cs" />
     <Compile Include="Core\ServerConnectionManager.cs" />
     <Compile Include="Core\ServerEventDispatcher.cs" />
@@ -93,6 +95,17 @@
     <Compile Include="Factory\SocketsBluetoothFactory.cs" />
     <Compile Include="Factory\WidcommBluetoothFactory.cs" />
     <Compile Include="Desktop\TrayIcon.cs" />
+    <Compile Include="Messages\CheckInMessage.cs" />
+    <Compile Include="Messages\ClipboardMessage.cs" />
+    <Compile Include="Messages\IMessage.cs" />
+    <Compile Include="Messages\KeyPressMessage.cs" />
+    <Compile Include="Messages\MessageInfo.cs" />
+    <Compile Include="Messages\MessageType.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\MouseButtonMessage.cs" />
+    <Compile Include="Messages\MouseMoveMessage.cs" />
+    <Compile Include="Messages\MouseWheelMessage.cs" />
+    <Compile Include="Messages\MoveScreenMessage.cs" />
     <Compile Include="Model\Device.cs" />
     <Compile Include="Services\SenderService.cs" />
     <Compile Include="Sockets\BluetoothStream.cs" />
