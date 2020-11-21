@@ -36,7 +36,7 @@ namespace RemoteController.Core
 
         public void Start()
         {
-            isRunning = true; 
+            isRunning = true;
             VirtualScreen s = null;
             foreach (Display display in _hook.GetDisplays())
             {
@@ -267,9 +267,6 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-
-            state.ScreenConfiguration.Screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
-
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
@@ -282,12 +279,14 @@ namespace RemoteController.Core
             }
 
             if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
-                null) return;
+                null)
+                return;
             //coordinates are invalid, grab a screen
             var s = state.ScreenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
-            if (s.Client != state.ClientName) return;
+            if (s.Client != state.ClientName)
+                return;
             //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
             state.LastPositionX = 0;
             state.LastPositionY = 0;

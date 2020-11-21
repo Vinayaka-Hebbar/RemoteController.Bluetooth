@@ -11,7 +11,7 @@ namespace RemoteController.Desktop
         Invalid
     }
 
-    public class CoordinateUpdateResult
+    public struct CoordinateUpdateResult
     {
         public bool MoveMouse { get; set; }
         public bool HandleEvent { get; set; }
@@ -77,7 +77,6 @@ namespace RemoteController.Desktop
 
             if (s.Client == State.ClientName)
             {
-
                 double localX = Math.Abs(State.VirtualX - s.X) + s.LocalX;
                 double localY = Math.Abs(State.VirtualY - s.Y) + s.LocalY;
 
