@@ -13,7 +13,7 @@ namespace RemoteController.Core
 {
     internal class ServerEventReceiver : IDisposable
     {
-        private static readonly Guid ServiceId = new Guid("7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B");
+        private static readonly Guid ServiceId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
 
         private readonly IGlobalHook _hook;
         private readonly VirtualScreenManager _screen;
@@ -91,7 +91,7 @@ namespace RemoteController.Core
             var token = cts.Token;
             var _listener = new BluetoothListener(ServiceId)
             {
-                ServiceName = "RemoteControllerService"
+                ServiceName = "MyService"
             };
             _listener.Start();
             while (true)

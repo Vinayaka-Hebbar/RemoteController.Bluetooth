@@ -106,7 +106,13 @@ namespace RemoteController.Bluetooth
                     servicebytes[ibyte] = socketAddress[10 + ibyte];
                 }
 
-                return new BluetoothEndPoint(address, new Guid(servicebytes));
+                byte[] portbytes = new byte[4];
+                for (ibyte = 0; ibyte < 4; ibyte++)
+                {
+                    portbytes[ibyte] = socketAddress[26 + ibyte];
+                }
+
+                return new BluetoothEndPoint(address, new Guid(servicebytes), BitConverter.ToInt32(portbytes, 0));
             }
 
             return base.Create(socketAddress);
@@ -136,6 +142,12 @@ namespace RemoteController.Bluetooth
                 {
                     btsa[servicebyte + 10] = servicebytes[servicebyte];
                 }
+            }
+            //copy port
+            byte[] portbytes = BitConverter.GetBytes(m_port);
+            for (int portbyte = 0; portbyte < 4; portbyte++)
+            {
+                btsa[portbyte + 26] = portbytes[portbyte];
             }
 
             return btsa;
