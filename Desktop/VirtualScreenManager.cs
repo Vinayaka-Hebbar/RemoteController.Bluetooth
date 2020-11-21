@@ -94,11 +94,7 @@ namespace RemoteController.Desktop
                     //mark this as handled since we manually set the cursor and don't want it to rubberband around
                 }
                 State.CurrentClientFocused = true;
-
-                if (replay)
-                {
-                    result.MoveMouse = true;
-                }
+                result.MoveMouse = replay;
 
             }
             else
