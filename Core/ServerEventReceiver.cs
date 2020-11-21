@@ -40,7 +40,7 @@ namespace RemoteController.Core
             VirtualScreen s = null;
             foreach (Display display in _hook.GetDisplays())
             {
-                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName, string.Empty);
+                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
             }
             var reciever = new Task(Receive, cts.Token, creationOptions: TaskCreationOptions.LongRunning);
             reciever.ConfigureAwait(false);
@@ -267,14 +267,17 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
+            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!state.ScreenConfiguration.Screens.ContainsKey(screen.Client))
+                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
                 {
-                    state.ScreenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
                 }
-                state.ScreenConfiguration.Screens[screen.Client].Add(screen);
+                screenConfiguration.Screens[screen.Client].Add(screen);
+                VirtualScreen last = screenConfiguration.GetFurthestRight();
+                screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
 
             }
 

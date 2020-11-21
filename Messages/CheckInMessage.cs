@@ -25,15 +25,8 @@ namespace RemoteController.Messages
             var size = 11;
             int clientIdSize = Encoding.Default.GetByteCount(ClientName);
             size += clientIdSize;
-            int count = Screens.Count;
-            int[] sizes = new int[count];
-            for (int i = 0; i < count; i++)
-            {
-                VirtualScreen item = Screens[i];
-                // except connection id size and 2 byte connect id len
-                size += 50;
-                size += sizes[i] = Encoding.Default.GetByteCount(item.ConnectionId);
-            }
+            var count = Screens.Count;
+            size += count * 48;
             var res = new byte[size];
             fixed (byte* b = res)
             {
@@ -66,11 +59,6 @@ namespace RemoteController.Messages
                     bytes += 8;
                     *(long*)bytes = (long)item.Height;
                     bytes += 8;
-                    var idSize = sizes[i];
-                    *(short*)bytes = (short)idSize;
-                    bytes += 2;
-                    fixed (char* c = item.ConnectionId)
-                        bytes += Encoding.Default.GetBytes(c, idSize, bytes, size);
                 }
             }
             return res;
@@ -105,10 +93,7 @@ namespace RemoteController.Messages
                         cu += 8;
                         double height = *(long*)cu;
                         cu += 8;
-                        int connectionIdSize = *(short*)cu;
-                        cu += 2;
-                        var connectionId = Encoding.Default.GetString(buffer, (int)(cu - b), connectionIdSize);
-                        screens[i] = new VirtualScreen(connectionId, clientId)
+                        screens[i] = new VirtualScreen(clientId)
                         {
                             LocalX = localX,
                             LocalY = localY,
@@ -117,7 +102,6 @@ namespace RemoteController.Messages
                             Width = width,
                             Height = height
                         };
-                        cu += connectionIdSize;
                     }
                     return new CheckInMessage(clientId, screens);
                 }

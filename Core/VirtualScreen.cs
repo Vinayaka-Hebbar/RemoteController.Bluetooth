@@ -1,10 +1,11 @@
-﻿namespace RemoteController.Core
+﻿using System;
+
+namespace RemoteController.Core
 {
     public class VirtualScreen
     {
-        public VirtualScreen(string connectionId, string client)
+        public VirtualScreen(string client)
         {
-            ConnectionId = connectionId;
             Client = client;
         }
 
@@ -15,6 +16,6 @@
         public double Height { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public string ConnectionId { get; }
+        public Guid ConnectionId { get; }
     }
 }

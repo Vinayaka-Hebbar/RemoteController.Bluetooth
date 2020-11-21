@@ -13,7 +13,7 @@ namespace RemoteController.Core
             Screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
         }
 
-        public VirtualScreen AddScreen(double localX, double localY, double virtualX, double virtualY, double width, double height, string client, string connectionId)
+        public VirtualScreen AddScreen(double localX, double localY, double virtualX, double virtualY, double width, double height, string client)
         {
             double newXBottomCorner = virtualX + width - 1;
             double newYBottomCorner = virtualY + height - 1;
@@ -39,7 +39,7 @@ namespace RemoteController.Core
             }
 
             //all good, add the new screen
-            VirtualScreen newScreen = new VirtualScreen(connectionId, client)
+            VirtualScreen newScreen = new VirtualScreen(client)
             {
                 LocalX = localX,
                 LocalY = localY,
@@ -60,21 +60,21 @@ namespace RemoteController.Core
             return newScreen;
         }
 
-        public VirtualScreen AddScreenRight(VirtualScreen orig, double localX, double localY, double width, double height, string client, string connectionId)
+        public VirtualScreen AddScreenRight(VirtualScreen orig, double localX, double localY, double width, double height, string client)
         {
-            return AddScreen(localX, localY, orig.X + orig.Width, orig.Y, width, height, client, connectionId);
+            return AddScreen(localX, localY, orig.X + orig.Width, orig.Y, width, height, client);
         }
-        public VirtualScreen AddScreenLeft(VirtualScreen orig, double localX, double localY, double width, double height, string client, string connectionId)
+        public VirtualScreen AddScreenLeft(VirtualScreen orig, double localX, double localY, double width, double height, string client)
         {
-            return AddScreen(localX, localY, orig.X - width, orig.Y, width, height, client, connectionId);
+            return AddScreen(localX, localY, orig.X - width, orig.Y, width, height, client);
         }
-        public VirtualScreen AddScreenAbove(VirtualScreen orig, double localX, double localY, double width, double height, string client, string connectionId)
+        public VirtualScreen AddScreenAbove(VirtualScreen orig, double localX, double localY, double width, double height, string client)
         {
-            return AddScreen(localX, localY, orig.X, orig.Y - height, width, height, client, connectionId);
+            return AddScreen(localX, localY, orig.X, orig.Y - height, width, height, client);
         }
-        public VirtualScreen AddScreenBelow(VirtualScreen orig, double localX, double localY, double width, double height, string client, string connectionId)
+        public VirtualScreen AddScreenBelow(VirtualScreen orig, double localX, double localY, double width, double height, string client)
         {
-            return AddScreen(localX, localY, orig.X, orig.Y + orig.Height, width, height, client, connectionId);
+            return AddScreen(localX, localY, orig.X, orig.Y + orig.Height, width, height, client);
         }
 
         public VirtualScreen ValidVirtualCoordinate(double x, double y)
@@ -123,14 +123,6 @@ namespace RemoteController.Core
 
             return furthestLeft;
 
-        }
-
-
-
-
-        public List<VirtualScreen> GetScreensForConnection(string connectionId)
-        {
-            return Screens.Values.SelectMany(x => x).Where(x => x.ConnectionId == connectionId).ToList();
         }
 
 

@@ -34,7 +34,7 @@ namespace RemoteController.Core
             VirtualScreen s = null;
             foreach (Win32.Hooks.Display display in _hook.GetDisplays())
             {
-                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName, string.Empty);
+                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
             }
             _connection.Start();
             _dispatcher.StartDispatcher();
