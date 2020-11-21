@@ -17,11 +17,8 @@ namespace RemoteController.Core
             this.endPoint = endPoint;
         }
 
-        public bool IsConnected { get; private set; }
-
         internal void Start()
         {
-            IsConnected = true;
             client = new BluetoothClient();
             client.Connect(endPoint);
             stream = client.GetStream();

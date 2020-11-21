@@ -170,6 +170,7 @@ namespace RemoteController.Sockets
         {
             Start(int.MaxValue);
         }
+
         /// <summary>
         /// Starts listening for incoming connection requests with a maximum number of pending connection.
         /// </summary>
@@ -393,8 +394,7 @@ namespace RemoteController.Sockets
 
         private void InitServiceRecord(Guid serviceClassUuid)
         {
-            ServiceRecord record = CreateBasicRfcommRecord(serviceClassUuid, m_serviceName);
-            m_serviceRecord = record;
+            m_serviceRecord = CreateBasicRfcommRecord(serviceClassUuid, m_serviceName);
         }
 
         private void InitServiceRecord(ServiceRecord sdpRecord)

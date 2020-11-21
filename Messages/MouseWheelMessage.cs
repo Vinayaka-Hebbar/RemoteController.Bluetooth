@@ -23,7 +23,7 @@ namespace RemoteController.Messages
                 Message.SetHeader(b, Message.MouseWheel, 8);
                 var bytes = b;
                 // skip the header
-                bytes += 3;
+                bytes += 8;
                 *(int*)bytes = DeltaX;
                 bytes += 4;
                 *(int*)bytes = DeltaY;

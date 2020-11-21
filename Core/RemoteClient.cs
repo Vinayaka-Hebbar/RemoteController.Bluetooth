@@ -28,7 +28,6 @@ namespace RemoteController.Core
 
         public bool Start()
         {
-            _connection.Start();
             _hook.Init();
 
             //there is some kind of dpi awareness bug here on windows. not sure exactly what's up.
@@ -37,10 +36,11 @@ namespace RemoteController.Core
             {
                 s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName, string.Empty);
             }
+            _connection.Start();
+            _dispatcher.StartDispatcher();
             _dispatcher.Process(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
             _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
-            _dispatcher.StartDispatcher();
             return true;
         }
 

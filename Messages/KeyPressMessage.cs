@@ -24,7 +24,7 @@ namespace RemoteController.Messages
                 Message.SetHeader(b, Message.KeyPress, 4);
                 var bytes = b;
                 // skip the header
-                bytes += 3;
+                bytes += 8;
                 *(int*)bytes = (int)Key;
                 bytes += 4;
                 *bytes = (byte)(IsDown ? 1 : 0);

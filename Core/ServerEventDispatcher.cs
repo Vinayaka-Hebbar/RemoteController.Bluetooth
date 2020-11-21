@@ -1,6 +1,7 @@
 ﻿using RemoteController.Messages;
 using System;
 using System.Collections.Concurrent;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,20 +31,27 @@ namespace RemoteController.Core
 
         async void DispatchMessages()
         {
-            while (isRunning)
+            try
             {
-                if (eventHandle.WaitOne() && isRunning)
+                while (isRunning)
                 {
-                    var count = messages.Count;
-                    while (count > 0)
+                    if (eventHandle.WaitOne() && isRunning)
                     {
-                        count--;
-                        if (messages.TryDequeue(out IMessage message))
+                        var count = messages.Count;
+                        while (count > 0)
                         {
-                            await _manager.Send(message);
+                            count--;
+                            if (messages.TryDequeue(out IMessage message))
+                            {
+                                await _manager.Send(message);
+                            }
                         }
                     }
                 }
+            }
+            catch (SocketException)
+            {
+                // socket closed
             }
         }
 

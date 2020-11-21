@@ -24,6 +24,8 @@ namespace RemoteController.Messages
             {
                 var bytes = b;
                 Message.SetHeader(b, Message.MouseButton, 0);
+                // append to header
+                bytes += 5;
                 *bytes = (byte)MouseButton;
                 bytes += 1;
                 *bytes = IsDown ? (byte)1 : (byte)0;
