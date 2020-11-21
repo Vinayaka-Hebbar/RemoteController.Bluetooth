@@ -13,7 +13,7 @@ namespace RemoteController.Core
 {
     internal class ServerEventReceiver : IDisposable
     {
-        private static readonly Guid ServiceId = new Guid("{7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B}");
+        private static readonly Guid ServiceId = new Guid("7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B");
 
         private readonly IGlobalHook _hook;
         private readonly VirtualScreenManager _screen;
