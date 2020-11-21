@@ -36,7 +36,7 @@ namespace RemoteController.Core
 
         public void Start()
         {
-            isRunning = true; 
+            isRunning = true;
             VirtualScreen s = null;
             foreach (Display display in _hook.GetDisplays())
             {
@@ -267,9 +267,6 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-
-            state.ScreenConfiguration.Screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
-
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
