@@ -10,7 +10,7 @@
             fixed (byte* b = buffer)
             {
                 Type = *b;
-                Length = *(int*)(b + 4);
+                Length = *(int*)(b + 1);
             }
         }
 

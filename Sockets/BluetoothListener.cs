@@ -391,7 +391,6 @@ namespace RemoteController.Sockets
         }
 
 
-
         private void InitServiceRecord(Guid serviceClassUuid)
         {
             ServiceRecord record = CreateBasicRfcommRecord(serviceClassUuid, m_serviceName);

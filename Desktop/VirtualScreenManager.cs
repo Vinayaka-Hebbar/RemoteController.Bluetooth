@@ -104,8 +104,6 @@ namespace RemoteController.Desktop
             }
             else
             {
-
-
                 if (State.CurrentClientFocused)
                 {
                     //we have moved off screen now - hide the mouse                    

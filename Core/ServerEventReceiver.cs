@@ -115,7 +115,7 @@ namespace RemoteController.Core
                 while (true)
                 {
                     var buffer = new byte[8];
-                    if (stream.Read(buffer, 0, 8) > 0)
+                    if (stream.Read(buffer, 0, 8) > 0 && isRunning)
                     {
                         var message = new MessageInfo(buffer);
                         switch ((MessageType)(message.Type & Message.TypeOffset))
@@ -127,7 +127,7 @@ namespace RemoteController.Core
                                 messages.Enqueue(MouseWheelMessage.Parse(message, stream));
                                 break;
                             case MessageType.MouseButton:
-                                messages.Enqueue(message);
+                                messages.Enqueue(MouseButtonMessage.Parse(message));
                                 break;
                             case MessageType.MouseMove:
                                 messages.Enqueue(MouseMoveMessage.Parse(message, stream));
@@ -148,8 +148,7 @@ namespace RemoteController.Core
             }
             catch (SocketException)
             {
-
-                throw;
+                // stoped receiving
             }
         }
 

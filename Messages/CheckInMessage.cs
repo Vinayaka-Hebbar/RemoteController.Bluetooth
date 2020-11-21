@@ -81,7 +81,7 @@ namespace RemoteController.Messages
                     var cu = b;
                     int clientIdSize = *(short*)b;
                     cu += 2;
-                    var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), info.Length);
+                    var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), clientIdSize);
                     cu += clientIdSize;
                     int screensCount = *cu;
                     cu++;
@@ -101,6 +101,7 @@ namespace RemoteController.Messages
                         double height = *(long*)cu;
                         cu += 8;
                         int connectionIdSize = *(short*)cu;
+                        cu += 2;
                         var connectionId = Encoding.Default.GetString(buffer, (int)(cu - b), connectionIdSize);
                         screens[i] = new VirtualScreen(connectionId, clientId)
                         {
