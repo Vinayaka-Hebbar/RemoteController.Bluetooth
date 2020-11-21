@@ -36,7 +36,12 @@ namespace RemoteController.Core
 
         public void Start()
         {
-            isRunning = true;
+            isRunning = true; 
+            VirtualScreen s = null;
+            foreach (Display display in _hook.GetDisplays())
+            {
+                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName, string.Empty);
+            }
             var reciever = new Task(Receive, cts.Token, creationOptions: TaskCreationOptions.LongRunning);
             reciever.ConfigureAwait(false);
             reciever.Start();
