@@ -63,8 +63,7 @@ namespace RemoteController.Sockets
 
         public bool Active
         {
-            get;
-            private set;
+            get => active;
         }
 
         #region Server

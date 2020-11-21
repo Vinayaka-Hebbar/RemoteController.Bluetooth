@@ -15,7 +15,7 @@ namespace RemoteController.Bluetooth
         /// <summary>
         /// Provides a null Bluetooth address.
         /// </summary>
-        public static readonly BluetoothAddress None = new BluetoothAddress();
+        public static readonly BluetoothAddress None = new BluetoothAddress(0UL);
 
         /// <summary>
         /// Initializes a new instance of the BluetoothAddress class with the specified address.

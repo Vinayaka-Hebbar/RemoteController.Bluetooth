@@ -60,15 +60,16 @@
                       HorizontalAlignment="Stretch" />
         <GroupBox Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}"
                   Header="Server"
+                  DataContext="{Binding Receiver}"
                   Grid.Row="2"
                   BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
             <DockPanel>
                 <StackPanel Orientation="Horizontal"
                             Margin="5"
                             DockPanel.Dock="Top">
-                    <Button Content="Start" Padding="5" />
+                    <Button Content="Start" Padding="5" Command="{Binding Start}" />
                     <Button Content="Stop"
-                            Margin="5,0" Padding="5" />
+                            Margin="5,0" Padding="5" Command="{Binding Stop}"/>
                 </StackPanel>
                 <Label Content="{Binding}" />
             </DockPanel>

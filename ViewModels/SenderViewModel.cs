@@ -145,7 +145,6 @@ namespace RemoteController.ViewModels
             {
                 selectedDevice = value;
                 OnPropertyChanged(nameof(SelectedDevice));
-                Connect.RaiseCanExecuteChanged();
             }
         }
 

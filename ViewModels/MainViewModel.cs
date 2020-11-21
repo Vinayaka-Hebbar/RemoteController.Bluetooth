@@ -8,6 +8,7 @@ namespace RemoteController.ViewModels
         public MainViewModel()
         {
             Sender = new SenderViewModel();
+            Receiver = new ReceiverViewModel();
         }
 
         public async Task InitAsync()
@@ -16,5 +17,7 @@ namespace RemoteController.ViewModels
         }
 
         public SenderViewModel Sender { get; }
+
+        public ReceiverViewModel Receiver { get; }
     }
 }

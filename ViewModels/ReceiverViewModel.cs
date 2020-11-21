@@ -4,12 +4,12 @@ using System.Windows.Input;
 
 namespace RemoteController.ViewModels
 {
-    internal sealed class ReceiverViewModel : ViewModelBase
+    public sealed class ReceiverViewModel : ViewModelBase
     {
         private BluetoothListener listener;
         private static readonly Guid Service = new Guid("{7A51FDC2-FDDF-4c9b-AFFC-98BCD91BF93B}");
 
-        private ICommand start;
+        private Command.RelayCommand start;
         public ICommand Start
         {
             get
@@ -18,6 +18,28 @@ namespace RemoteController.ViewModels
                     start = new Command.RelayCommand(OnStart, CheckListener);
                 return start;
             }
+        }
+
+        private Command.RelayCommand stop;
+        public ICommand Stop
+        {
+            get
+            {
+
+                if (stop == null)
+                    stop = new Command.RelayCommand(OnStop, CanStop);
+                return stop;
+            }
+        }
+
+        private void OnStop()
+        {
+            listener.Stop();
+        }
+
+        private bool CanStop()
+        {
+            return listener != null && listener.Active;
         }
 
         private bool CheckListener()
@@ -31,6 +53,7 @@ namespace RemoteController.ViewModels
             {
                 listener = new BluetoothListener(Service);
             }
+            listener.Start();
         }
     }
 }
