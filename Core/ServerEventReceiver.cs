@@ -118,7 +118,7 @@ namespace RemoteController.Core
                     if (stream.Read(buffer, 0, 8) > 0)
                     {
                         var message = new MessageInfo(buffer);
-                        switch ((MessageType)(message.Type & Message.TypeOffset))
+                        switch ((MessageType)(message.Type & Message.TypeMask))
                         {
                             case MessageType.MoveScreen:
                                 messages.Enqueue(message);

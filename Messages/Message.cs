@@ -10,14 +10,13 @@
                          Clipboard = (int)MessageType.Clipboard,
                          CheckIn = (int)MessageType.CheckIn;
 
-        public const int TypeOffset = 0xF;
+        public const int TypeMask = 0xF;
 
         public unsafe static void SetHeader(byte * b, int type, int len)
         {
-            *b = (byte)(type << TypeOffset);
+            *b = (byte)type;
             b++;
             *(int*)b = len;
-            b += 4;
         }
     }
 }

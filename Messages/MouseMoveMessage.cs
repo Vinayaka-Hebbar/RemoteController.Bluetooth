@@ -23,7 +23,7 @@ namespace RemoteController.Messages
                 Message.SetHeader(b, Message.MouseMove, 16);
                 var bytes = b;
                 // skip the header bytes
-                bytes += 3;
+                bytes += 8;
                 *(long*)bytes = (long)VirtualX;
                 bytes += 8;
                 *(long*)bytes = (long)VirtualY;

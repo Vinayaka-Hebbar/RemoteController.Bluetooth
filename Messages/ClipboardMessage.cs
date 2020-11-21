@@ -23,7 +23,7 @@ namespace RemoteController.Messages
                 Message.SetHeader(b, Message.Clipboard, count);
                 var bytes = b;
                 // skip the header
-                bytes += 3;
+                bytes += 8;
                 fixed (char* c = Data)
                     Encoding.Default.GetBytes(c, count, bytes, res.Length);
             }

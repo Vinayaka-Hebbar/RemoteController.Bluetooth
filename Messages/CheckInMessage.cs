@@ -21,7 +21,7 @@ namespace RemoteController.Messages
 
         public unsafe byte[] GetBytes()
         {
-            // 2 bytes for client size and 1 byte for num of screen
+            // header + 2 bytes for client size and 1 byte for num of screen
             var size = 11;
             int clientIdSize = Encoding.Default.GetByteCount(ClientName);
             size += clientIdSize;
@@ -37,17 +37,21 @@ namespace RemoteController.Messages
             var res = new byte[size];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.CheckIn, size);
+                Message.SetHeader(b, Message.CheckIn, size - 8);
                 var bytes = b;
                 // skip the header
-                bytes += 3;
+                bytes += 8;
                 *(short*)bytes = (short)clientIdSize;
                 bytes += 2;
+                fixed (char* id = ClientName)
+                {
+                    bytes += Encoding.Default.GetBytes(id, clientIdSize, bytes, size);
+                }
                 *bytes = (byte)count;
                 bytes++;
                 for (int i = 0; i < count; i++)
                 {
-                    VirtualScreen item = (VirtualScreen)Screens[i];
+                    VirtualScreen item = Screens[i];
                     *(long*)bytes = (long)item.LocalX;
                     bytes += 8;
                     *(long*)bytes = (long)item.LocalY;
@@ -64,8 +68,9 @@ namespace RemoteController.Messages
                     bytes += 8;
                     var idSize = sizes[i];
                     *(short*)bytes = (short)idSize;
+                    bytes += 2;
                     fixed (char* c = item.ConnectionId)
-                        bytes += Encoding.Default.GetBytes(c, idSize, bytes, res.Length);
+                        bytes += Encoding.Default.GetBytes(c, idSize, bytes, size);
                 }
             }
             return res;

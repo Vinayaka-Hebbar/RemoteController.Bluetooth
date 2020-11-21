@@ -20,7 +20,7 @@
             Length = length;
         }
 
-        MessageType IMessage.Type => (MessageType)(Type & Message.TypeOffset);
+        MessageType IMessage.Type => (MessageType)(Type & Message.TypeMask);
 
         public unsafe byte[] GetBytes()
         {
