@@ -49,10 +49,9 @@ namespace RemoteController.Core
                 if (!screenConfiguration.Screens.ContainsKey(screen.Client))
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    VirtualScreen last = screenConfiguration.GetFurthestRight();
-                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    VirtualScreen last = screenConfiguration.GetFurthestLeft();
+                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
-
             }
             _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();

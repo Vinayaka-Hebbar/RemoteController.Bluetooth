@@ -295,7 +295,7 @@ namespace RemoteController.Core
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
                     VirtualScreen last = screenConfiguration.GetFurthestRight();
-                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
 
             }
@@ -303,7 +303,7 @@ namespace RemoteController.Core
                 null)
                 return;
             //coordinates are invalid, grab a screen
-            var s = state.ScreenConfiguration.GetFurthestLeft();
+            var s = state.ScreenConfiguration.GetFurthestRight();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             if (s.Client != state.ClientName)
