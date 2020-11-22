@@ -58,7 +58,6 @@ namespace RemoteController.Core
             Hook.Clipboard -= OnGlobalHookClipboard;
         }
 
-
         private void OnGlobalHookClipboard(object sender, ClipboardChangedEventArgs e)
         {
             if (!ClientState.CurrentClientFocused)
@@ -99,9 +98,8 @@ namespace RemoteController.Core
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.Now;
             _dispatcher.Process(new MouseButtonMessage(e.Button, true));
-
-
         }
+
         private void OnGlobalHookMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (!ClientState.CurrentClientFocused)
@@ -113,6 +111,7 @@ namespace RemoteController.Core
             _dispatcher.Process(new MouseButtonMessage(e.Button, false));
 
         }
+
         private void OnGlobalHookMouseMove(object sender, MouseMoveEventArgs e)
         {
             //don't process a hook event within 2 seconds of a server event
@@ -152,9 +151,8 @@ namespace RemoteController.Core
                 }
             }
 
-
-
         }
+
         private void OnGlobalHookKeyDown(object sender, KeyboardKeyEventArgs e)
         {
             //TODO: remove this
@@ -201,7 +199,8 @@ namespace RemoteController.Core
 
         public void Dispose()
         {
-            Hook?.Dispose();
+            Stop();
+            Hook.Dispose();
         }
 
         public IList<Display> GetDisplays()

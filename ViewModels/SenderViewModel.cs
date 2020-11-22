@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace RemoteController.ViewModels
 {
@@ -46,40 +45,6 @@ namespace RemoteController.ViewModels
                 if (connect == null)
                     connect = new Command.RelayCommand(OnConnect, d => SelectedDevice != null && SelectedDevice.DeviceInfo != null);
                 return connect;
-            }
-        }
-
-        private Command.RelayCommand textChanged;
-        public Command.RelayCommand TextChanged
-        {
-            get
-            {
-                if (textChanged == null)
-                    textChanged = new Command.RelayCommand(OnTextInput);
-                return textChanged;
-            }
-        }
-
-        private string textIn;
-        public string TextIn
-        {
-            get => textIn;
-            set
-            {
-                textIn = value;
-                OnPropertyChanged(nameof(TextIn));
-            }
-        }
-
-        private void OnTextInput(object arg)
-        {
-            if (arg is KeyEventArgs e)
-            {
-                char keyCode = (char)KeyInterop.VirtualKeyFromKey(e.Key);
-                if (Console.CapsLock == false)
-                    keyCode = char.ToLower(keyCode);
-                TextIn = keyCode.ToString();
-                e.Handled = true;
             }
         }
 

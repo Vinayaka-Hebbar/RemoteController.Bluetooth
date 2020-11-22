@@ -2,12 +2,11 @@
 
 namespace RemoteController.Messages
 {
-    public struct MouseButtonMessage : IMessage
+    public readonly struct MouseButtonMessage : IMessage
     {
         public readonly MouseButton MouseButton;
 
         public readonly bool IsDown;
-
 
         public MouseButtonMessage(MouseButton mouseButton, bool isDown)
         {
@@ -22,12 +21,12 @@ namespace RemoteController.Messages
             var res = new byte[8];
             fixed (byte* b = res)
             {
-                var bytes = b;
                 Message.SetHeader(b, Message.MouseButton, 0);
+                var bytes = b;
                 // append to header
                 bytes += 5;
                 *bytes = (byte)MouseButton;
-                bytes += 1;
+                bytes++;
                 *bytes = IsDown ? (byte)1 : (byte)0;
 
             }

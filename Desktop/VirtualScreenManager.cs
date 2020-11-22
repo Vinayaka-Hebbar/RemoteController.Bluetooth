@@ -24,6 +24,7 @@ namespace RemoteController.Desktop
 
         public readonly ClientState State;
 
+
         public VirtualScreenManager(ClientState clientState)
         {
             State = clientState;

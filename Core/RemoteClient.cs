@@ -41,7 +41,7 @@ namespace RemoteController.Core
             _dispatcher.StartDispatcher();
             await _connection.Send(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
             var checkIn = await _connection.WaitForCheckIn();
-            this._screen.Config(checkIn.Screens);
+            _screen.Config(checkIn.Screens);
             _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
             return true;
