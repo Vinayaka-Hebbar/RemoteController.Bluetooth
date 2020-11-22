@@ -53,6 +53,10 @@ namespace RemoteController.Core
             {
                 // socket closed
             }
+            catch (System.IO.IOException)
+            {
+                // invalid write
+            }
         }
 
         public void Process(IMessage message)
