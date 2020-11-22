@@ -16,14 +16,12 @@ namespace RemoteController.Desktop
     {
         public bool MoveMouse { get; set; }
         public bool HandleEvent { get; set; }
-
     }
 
     public class VirtualScreenManager
     {
 
         public readonly ClientState State;
-
 
         public VirtualScreenManager(ClientState clientState)
         {
@@ -36,7 +34,6 @@ namespace RemoteController.Desktop
             //calculate the change from previous stored coordinates
             double deltaX = e.Mouse.X - State.LastPositionX;
             double deltaY = e.Mouse.Y - State.LastPositionY;
-
 
 
             //Console.WriteLine(deltaY+": " + e.Mouse.Y + " - " + ClientState._lastPositionY);

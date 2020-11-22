@@ -28,10 +28,10 @@ namespace RemoteController.Core
             ClientName = clientName;
         }
 
-        public DateTime LastHookEvent_Mouse { get; set; } = DateTime.Now;
-        public DateTime LastHookEvent_Keyboard { get; set; } = DateTime.Now;
-        public DateTime LastServerEvent_Mouse { get; set; } = DateTime.Now;
-        public DateTime LastServerEvent_Keyboard { get; set; } = DateTime.Now;
+        public DateTime LastHookEvent_Mouse { get; set; } = DateTime.UtcNow;
+        public DateTime LastHookEvent_Keyboard { get; set; } = DateTime.UtcNow;
+        public DateTime LastServerEvent_Mouse { get; set; } = DateTime.UtcNow;
+        public DateTime LastServerEvent_Keyboard { get; set; } = DateTime.UtcNow;
 
     }
 }

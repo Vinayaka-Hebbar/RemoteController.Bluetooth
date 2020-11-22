@@ -71,7 +71,7 @@ namespace RemoteController.Core
             if (ShouldHookBailKeyboard())
                 return;
 
-            ClientState.LastHookEvent_Keyboard = DateTime.Now;
+            ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             //Console.WriteLine("Sending clipboard to server");
 
             _dispatcher.Process(new ClipboardMessage(e.Value));
@@ -85,7 +85,7 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds of receiving network events. 
             if (ShouldHookBailMouse())
                 return;
-            ClientState.LastHookEvent_Mouse = DateTime.Now;
+            ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
 
         }
@@ -96,7 +96,7 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds 
             if (ShouldHookBailMouse())
                 return;
-            ClientState.LastHookEvent_Mouse = DateTime.Now;
+            ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, true));
         }
 
@@ -107,7 +107,7 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds 
             if (ShouldHookBailMouse())
                 return;
-            ClientState.LastHookEvent_Mouse = DateTime.Now;
+            ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, false));
 
         }
@@ -118,12 +118,11 @@ namespace RemoteController.Core
             if (ShouldHookBailMouse())
                 return;
 
-            ClientState.LastHookEvent_Mouse = DateTime.Now;
+            ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 
             CoordinateCalculationResult result = _screen.UpdateVirtualMouseCoordinates(e);
             if (result == CoordinateCalculationResult.Valid)
             {
-
                 CoordinateUpdateResult presult = _screen.ProcessVirtualCoordinatesUpdate();
                 if (presult.MoveMouse)
                 {
@@ -134,21 +133,17 @@ namespace RemoteController.Core
                 if (presult.HandleEvent) //we are receiving local input, but mouse is on a virtual monitor. We need to lock the cursor in a position.
                 {
                     e.Handled = true; //windows obeys this
-
                 }
 
                 //send over the net
                 _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
             }
-            else
+            else if (!ClientState.CurrentClientFocused)
             {
                 //if we're the current client, i'm letting this through to enable smoother scrolling along edges.
 
                 //if we're not the current client, handle it.
-                if (!ClientState.CurrentClientFocused)
-                {
-                    e.Handled = true;
-                }
+                e.Handled = true;
             }
 
         }
@@ -165,7 +160,7 @@ namespace RemoteController.Core
             if (ShouldHookBailKeyboard())
                 return;
 
-            ClientState.LastHookEvent_Keyboard = DateTime.Now;
+            ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, true));
 
         }
@@ -178,13 +173,13 @@ namespace RemoteController.Core
             if (ShouldHookBailKeyboard())
                 return;
 
-            ClientState.LastHookEvent_Keyboard = DateTime.Now;
+            ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, false));
 
         }
         private bool ShouldHookBailKeyboard()
         {
-            if ((DateTime.Now - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1)
+            if ((DateTime.UtcNow - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1)
                 return true;
 
             return false;
@@ -192,7 +187,7 @@ namespace RemoteController.Core
 
         bool ShouldHookBailMouse()
         {
-            if ((DateTime.Now - ClientState.LastServerEvent_Mouse).TotalSeconds < 1)
+            if ((DateTime.UtcNow - ClientState.LastServerEvent_Mouse).TotalSeconds < 1)
                 return true;
             return false;
         }

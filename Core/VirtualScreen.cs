@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RemoteController.Core
+﻿namespace RemoteController.Core
 {
     public class VirtualScreen
     {
@@ -16,6 +14,5 @@ namespace RemoteController.Core
         public double Height { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public Guid ConnectionId { get; }
     }
 }

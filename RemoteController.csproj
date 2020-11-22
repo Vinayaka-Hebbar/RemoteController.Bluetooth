@@ -30,7 +30,7 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;WinXP;V2;Release</DefineConstants>
+    <DefineConstants>WinXP;V2;Release;Bail</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -76,7 +76,6 @@
     <Compile Include="Bluetooth\SizeIndex.cs" />
     <Compile Include="Core\ClientState.cs" />
     <Compile Include="Core\HookManager.cs" />
-    <Compile Include="Core\MessageDispatcher.cs" />
     <Compile Include="Core\RemoteClient.cs" />
     <Compile Include="Core\RemoteServer.cs" />
     <Compile Include="Core\ScreenConfiguration.cs" />

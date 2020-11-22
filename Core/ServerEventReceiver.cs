@@ -173,7 +173,7 @@ namespace RemoteController.Core
 #if Bail
         private bool ShouldServerBailKeyboard()
         {
-            if ((DateTime.Now - state.LastHookEvent_Keyboard).TotalSeconds < 2)
+            if ((DateTime.UtcNow - state.LastHookEvent_Keyboard).TotalSeconds < 2)
             {
                 return true;
             }
@@ -182,7 +182,7 @@ namespace RemoteController.Core
 
         private bool ShouldServerBailMouse()
         {
-            if ((DateTime.Now - state.LastHookEvent_Mouse).TotalSeconds < 2)
+            if ((DateTime.UtcNow - state.LastHookEvent_Mouse).TotalSeconds < 2)
             {
                 return true;
             }
@@ -203,7 +203,7 @@ namespace RemoteController.Core
                 return;
 #endif
 
-            state.LastServerEvent_Keyboard = DateTime.Now;
+            state.LastServerEvent_Keyboard = DateTime.UtcNow;
 
             _hook.SetClipboard(value);
 
@@ -215,7 +215,7 @@ namespace RemoteController.Core
                 return;
 #endif
 
-            state.LastServerEvent_Mouse = DateTime.Now;
+            state.LastServerEvent_Mouse = DateTime.UtcNow;
 
 
             state.VirtualX = message.VirtualX;
@@ -228,11 +228,6 @@ namespace RemoteController.Core
                 _hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             }
 
-            if (result.HandleEvent)
-            {
-
-            }
-
         }
         private void OnMouseWheelFromServer(MouseWheelMessage message)
         {
@@ -240,7 +235,7 @@ namespace RemoteController.Core
             if (ShouldServerBailMouse())
                 return;
 #endif
-            state.LastServerEvent_Mouse = DateTime.Now;
+            state.LastServerEvent_Mouse = DateTime.UtcNow;
             //Console.WriteLine("Received mouse wheel from server");
             if (state.CurrentClientFocused)
                 _hook.SendMouseWheel(message.DeltaX, message.DeltaY);
@@ -252,7 +247,7 @@ namespace RemoteController.Core
             if (ShouldServerBailMouse())
                 return;
 #endif
-            state.LastServerEvent_Mouse = DateTime.Now;
+            state.LastServerEvent_Mouse = DateTime.UtcNow;
             //Console.WriteLine("Received mouse down from server: " + button.ToString());
             if (state.CurrentClientFocused)
             {
@@ -275,7 +270,7 @@ namespace RemoteController.Core
                 return;
 #endif
 
-            state.LastServerEvent_Keyboard = DateTime.Now;
+            state.LastServerEvent_Keyboard = DateTime.UtcNow;
             if (state.CurrentClientFocused)
             {
                 if (message.IsDown)
