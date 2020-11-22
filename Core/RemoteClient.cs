@@ -2,6 +2,7 @@
 using RemoteController.Messages;
 using RemoteController.Win32;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -40,14 +41,20 @@ namespace RemoteController.Core
             _dispatcher.StartDispatcher();
             await _connection.Send(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
             var checkIn = await _connection.WaitForCheckIn();
-            _screen.Config(checkIn.Screens);
-            var s = state.ScreenConfiguration.GetFurthestLeft();
-            state.VirtualX = s.X;
-            state.VirtualY = s.Y;
-            if (s.Client == state.ClientName)
+            var screens = checkIn.Screens;
+            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
+            foreach (var screen in screens)
             {
-                _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
+                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
+                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
+                {
+                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    VirtualScreen last = screenConfiguration.GetFurthestRight();
+                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                }
+
             }
+            _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
             return true;
         }

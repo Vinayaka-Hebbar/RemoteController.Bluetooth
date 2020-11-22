@@ -287,7 +287,18 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-            _screen.Config(screens);
+            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
+            foreach (var screen in screens)
+            {
+                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
+                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
+                {
+                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    VirtualScreen last = screenConfiguration.GetFurthestRight();
+                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                }
+
+            }
             if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
                 null)
                 return;

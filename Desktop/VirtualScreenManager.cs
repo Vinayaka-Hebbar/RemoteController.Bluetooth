@@ -121,21 +121,5 @@ namespace RemoteController.Desktop
 
             return result;
         }
-
-        internal void Config(IList<VirtualScreen> screens)
-        {
-            ScreenConfiguration screenConfiguration = State.ScreenConfiguration;
-            foreach (var screen in screens)
-            {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
-                {
-                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    VirtualScreen last = screenConfiguration.GetFurthestRight();
-                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
-                }
-
-            }
-        }
     }
 }
