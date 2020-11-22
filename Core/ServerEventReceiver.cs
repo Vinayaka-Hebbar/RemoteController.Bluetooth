@@ -287,9 +287,9 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-            _screen.Config(screens)
-                if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
-                    null)
+            _screen.Config(screens);
+            if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
+                null)
                 return;
             //coordinates are invalid, grab a screen
             var s = state.ScreenConfiguration.GetFurthestLeft();
