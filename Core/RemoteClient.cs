@@ -56,8 +56,11 @@ namespace RemoteController.Core
             var s = state.ScreenConfiguration.GetFurthestRight();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
-            _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
+            if (s.Client == state.ClientName)
+            {
+                _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
+            }
             return true;
         }
 
