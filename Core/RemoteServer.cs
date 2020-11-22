@@ -11,7 +11,10 @@ namespace RemoteController.Core
 
         public RemoteServer()
         {
-            state = new ClientState(Environment.MachineName);
+            state = new ClientState(Environment.MachineName)
+            {
+                CurrentClientFocused = false,
+            };
             _screen = new VirtualScreenManager(state);
             _receiver = new ServerEventReceiver(_screen);
         }
