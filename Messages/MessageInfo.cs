@@ -4,13 +4,18 @@
     {
         public readonly int Type;
         public readonly int Length;
+        public readonly short PayLoad;
 
         public unsafe MessageInfo(byte[] buffer)
         {
             fixed (byte* b = buffer)
             {
                 Type = *b;
-                Length = *(int*)(b + 1);
+                var res = b;
+                res++;
+                Length = *(int*)(res);
+                res += 4;
+                PayLoad = *(short*)res;
             }
         }
 
@@ -18,6 +23,7 @@
         {
             Type = type;
             Length = length;
+            PayLoad = 0;
         }
 
         public MessageType MessageType => (MessageType)(Type & Message.TypeMask);
@@ -30,6 +36,9 @@
             fixed (byte* b = bytes)
             {
                 Message.SetHeader(b, Type, Length);
+                var res = b;
+                res += 5;
+                *(short*)res = PayLoad;
             }
             return bytes;
         }
