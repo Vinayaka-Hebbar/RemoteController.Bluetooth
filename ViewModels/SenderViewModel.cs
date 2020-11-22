@@ -83,7 +83,7 @@ namespace RemoteController.ViewModels
             }
         }
 
-        private void OnConnect(object arg)
+        async void OnConnect(object arg)
         {
             if (client != null)
             {
@@ -94,7 +94,7 @@ namespace RemoteController.ViewModels
             else
             {
                 client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
-                if (client.Start())
+                if (await client.Start())
                 {
                     State = DisconnectState;
                     client.RunMessageLoop();
