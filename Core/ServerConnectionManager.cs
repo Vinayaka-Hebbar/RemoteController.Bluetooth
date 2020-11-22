@@ -12,7 +12,6 @@ namespace RemoteController.Core
         private BluetoothClient client;
         private NetworkStream stream;
 
-
         public ServerConnectionManager(BluetoothEndPoint endPoint)
         {
             this.endPoint = endPoint;

@@ -122,7 +122,7 @@ namespace RemoteController.Desktop
             return result;
         }
 
-        internal bool Config(IList<VirtualScreen> screens)
+        internal void Config(IList<VirtualScreen> screens)
         {
             ScreenConfiguration screenConfiguration = State.ScreenConfiguration;
             foreach (var screen in screens)
@@ -136,20 +136,6 @@ namespace RemoteController.Desktop
                 }
 
             }
-
-            if (State.ScreenConfiguration.ValidVirtualCoordinate(State.VirtualX, State.VirtualY) !=
-                null)
-                return false;
-            //coordinates are invalid, grab a screen
-            var s = State.ScreenConfiguration.GetFurthestLeft();
-            State.VirtualX = s.X;
-            State.VirtualY = s.Y;
-            if (s.Client != State.ClientName)
-                return false;
-            //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
-            State.LastPositionX = 0;
-            State.LastPositionY = 0;
-            return true;
         }
     }
 }

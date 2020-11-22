@@ -287,10 +287,20 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-            if (_screen.Config(screens))
-            {
-                _hook.SetMousePos(0, 0);
-            }
+            _screen.Config(screens)
+                if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
+                    null)
+                return;
+            //coordinates are invalid, grab a screen
+            var s = state.ScreenConfiguration.GetFurthestLeft();
+            state.VirtualX = s.X;
+            state.VirtualY = s.Y;
+            if (s.Client != state.ClientName)
+                return;
+            //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
+            state.LastPositionX = 0;
+            state.LastPositionY = 0;
+            _hook.SetMousePos(0, 0);
         }
 
         private bool disposed;
