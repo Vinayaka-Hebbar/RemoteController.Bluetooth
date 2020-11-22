@@ -51,10 +51,12 @@ namespace RemoteController.Core
             }
             catch (SocketException)
             {
+                System.Diagnostics.Debug.WriteLine("Client Closed");
                 // socket closed
             }
             catch (System.IO.IOException)
             {
+                System.Diagnostics.Debug.WriteLine("Unable to send data");
                 // invalid write
             }
         }

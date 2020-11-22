@@ -170,6 +170,7 @@ namespace RemoteController.Core
             stream.Flush();
         }
 
+#if Bail
         private bool ShouldServerBailKeyboard()
         {
             if ((DateTime.Now - state.LastHookEvent_Keyboard).TotalSeconds < 2)
@@ -178,6 +179,7 @@ namespace RemoteController.Core
             }
             return false;
         }
+
         private bool ShouldServerBailMouse()
         {
             if ((DateTime.Now - state.LastHookEvent_Mouse).TotalSeconds < 2)
@@ -186,7 +188,8 @@ namespace RemoteController.Core
             }
 
             return false;
-        }
+        } 
+#endif
 
         private void OnClipboardFromServer(string value)
         {
@@ -195,8 +198,10 @@ namespace RemoteController.Core
             //clipboard. 
             //historically this has been happening by a global hook reading my event taps and replaying back over the network
             //in a feedback loop. This should be solved, but i'm leaving this code here as an extra check.
+#if Bail
             if (ShouldServerBailKeyboard())
                 return;
+#endif
 
             state.LastServerEvent_Keyboard = DateTime.Now;
 
@@ -205,8 +210,10 @@ namespace RemoteController.Core
         }
         private void OnMouseMoveFromServer(MouseMoveMessage message)
         {
+#if Bail
             if (ShouldServerBailMouse())
                 return;
+#endif
 
             state.LastServerEvent_Mouse = DateTime.Now;
 
@@ -229,9 +236,10 @@ namespace RemoteController.Core
         }
         private void OnMouseWheelFromServer(MouseWheelMessage message)
         {
+#if Bail
             if (ShouldServerBailMouse())
                 return;
-
+#endif
             state.LastServerEvent_Mouse = DateTime.Now;
             //Console.WriteLine("Received mouse wheel from server");
             if (state.CurrentClientFocused)
@@ -240,9 +248,10 @@ namespace RemoteController.Core
         }
         private void OnMouseButtonFromServer(MouseButtonMessage message)
         {
+#if Bail
             if (ShouldServerBailMouse())
                 return;
-
+#endif
             state.LastServerEvent_Mouse = DateTime.Now;
             //Console.WriteLine("Received mouse down from server: " + button.ToString());
             if (state.CurrentClientFocused)
@@ -261,8 +270,10 @@ namespace RemoteController.Core
 
         private void OnKeyPressFromServer(KeyPressMessage message)
         {
-            if (ShouldServerBailKeyboard())
+#if Bail
+            if (ShouldServerBailMouse())
                 return;
+#endif
 
             state.LastServerEvent_Keyboard = DateTime.Now;
             if (state.CurrentClientFocused)
