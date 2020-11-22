@@ -4,7 +4,7 @@ namespace RemoteController.Core
 {
     public class ClientState
     {
-        public bool CurrentClientFocused { get; set; } = true;
+        public bool CurrentClientFocused { get; set; } = false;
         public string ClientName { get; }
 
         public ScreenConfiguration ScreenConfiguration { get; } = new ScreenConfiguration();
