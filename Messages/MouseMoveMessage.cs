@@ -2,7 +2,7 @@
 
 namespace RemoteController.Messages
 {
-    public struct MouseMoveMessage : IMessage
+    public readonly struct MouseMoveMessage : IMessage
     {
         public readonly double VirtualX;
         public readonly double VirtualY;
@@ -31,15 +31,14 @@ namespace RemoteController.Messages
             return res;
         }
 
-        public unsafe static MouseMoveMessage Parse(MessageInfo message, NetworkStream stream)
+        public unsafe static MouseMoveMessage Parse(MessageInfo info, NetworkStream stream)
         {
-            var buffer = new byte[message.Length];
-            if (stream.Read(buffer, 0, message.Length) > 0)
+            var buffer = new byte[info.Length];
+            if (stream.Read(buffer, 0, info.Length) > 0)
             {
                 fixed (byte* b = buffer)
                 {
-                    var res = b;
-                    return new MouseMoveMessage(*(long*)res, *(long*)(res + 8));
+                    return new MouseMoveMessage(*(long*)b, *(long*)(b + 8));
                 }
             }
             return default;

@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace RemoteController.Messages
 {
-    public struct KeyPressMessage : IMessage
+    public readonly struct KeyPressMessage : IMessage
     {
         public readonly Key Key;
         public readonly bool IsDown;

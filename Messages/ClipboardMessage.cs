@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RemoteController.Messages
 {
-    public struct ClipboardMessage : IMessage
+    public readonly struct ClipboardMessage : IMessage
     {
         public readonly string Data;
 

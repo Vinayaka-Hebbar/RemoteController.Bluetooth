@@ -2,7 +2,7 @@
 
 namespace RemoteController.Messages
 {
-    public struct MouseWheelMessage : IMessage
+    public readonly struct MouseWheelMessage : IMessage
     {
         public readonly int DeltaX;
         public readonly int DeltaY;
