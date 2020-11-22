@@ -53,7 +53,7 @@ namespace RemoteController.Core
                     screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
             }
-            var s = state.ScreenConfiguration.GetFurthestRight();
+            var s = state.ScreenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             _hook.Start();
