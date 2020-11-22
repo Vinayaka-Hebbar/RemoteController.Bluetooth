@@ -295,7 +295,7 @@ namespace RemoteController.Core
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
                     VirtualScreen last = screenConfiguration.GetFurthestRight();
-                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
 
             }

@@ -50,7 +50,7 @@ namespace RemoteController.Core
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
                     VirtualScreen last = screenConfiguration.GetFurthestLeft();
-                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
             }
             var s = state.ScreenConfiguration.GetFurthestLeft();
