@@ -153,8 +153,9 @@ namespace RemoteController.Core
                             messages.Enqueue(ClipboardMessage.Parse(message, stream));
                             break;
                         case MessageType.CheckIn:
-                            messages.Enqueue(CheckInMessage.Parse(message, stream));
+                            CheckInMessage checkIn = CheckInMessage.Parse(message, stream);
                             ScreenConfig(stream);
+                            messages.Enqueue(checkIn);
                             break;
                     }
                     messageHandle.Set();

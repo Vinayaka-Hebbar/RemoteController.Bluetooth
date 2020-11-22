@@ -131,10 +131,9 @@ namespace RemoteController.Desktop
                 if (!screenConfiguration.Screens.ContainsKey(screen.Client))
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    VirtualScreen last = screenConfiguration.GetFurthestRight();
+                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
-                screenConfiguration.Screens[screen.Client].Add(screen);
-                VirtualScreen last = screenConfiguration.GetFurthestRight();
-                screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
 
             }
 
