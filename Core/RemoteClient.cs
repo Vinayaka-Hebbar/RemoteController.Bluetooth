@@ -3,6 +3,7 @@ using RemoteController.Messages;
 using RemoteController.Win32;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RemoteController.Core
 {
@@ -26,7 +27,7 @@ namespace RemoteController.Core
 
         }
 
-        public bool Start()
+        public async Task<bool> Start()
         {
             _hook.Init();
 
@@ -38,7 +39,9 @@ namespace RemoteController.Core
             }
             _connection.Start();
             _dispatcher.StartDispatcher();
-            _dispatcher.Process(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
+            await _connection.Send(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
+            var checkIn = await _connection.WaitForCheckIn();
+            this._screen.Config(checkIn.Screens);
             _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             _hook.Start();
             return true;

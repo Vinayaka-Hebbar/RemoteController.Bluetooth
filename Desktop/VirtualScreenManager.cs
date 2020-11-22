@@ -1,6 +1,7 @@
 ﻿using RemoteController.Core;
 using RemoteController.Win32.Hooks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RemoteController.Desktop
@@ -123,5 +124,35 @@ namespace RemoteController.Desktop
             return result;
         }
 
+        internal bool Config(IList<VirtualScreen> screens)
+        {
+            ScreenConfiguration screenConfiguration = State.ScreenConfiguration;
+            foreach (var screen in screens)
+            {
+                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
+                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
+                {
+                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                }
+                screenConfiguration.Screens[screen.Client].Add(screen);
+                VirtualScreen last = screenConfiguration.GetFurthestRight();
+                screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+
+            }
+
+            if (State.ScreenConfiguration.ValidVirtualCoordinate(State.VirtualX, State.VirtualY) !=
+                null)
+                return false;
+            //coordinates are invalid, grab a screen
+            var s = State.ScreenConfiguration.GetFurthestLeft();
+            State.VirtualX = s.X;
+            State.VirtualY = s.Y;
+            if (s.Client != State.ClientName)
+                return false;
+            //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
+            State.LastPositionX = 0;
+            State.LastPositionY = 0;
+            return true;
+        }
     }
 }

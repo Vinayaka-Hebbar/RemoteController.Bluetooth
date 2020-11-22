@@ -1,5 +1,4 @@
 ﻿using RemoteController.Core;
-using System.Threading;
 using System.Windows.Input;
 
 namespace RemoteController.ViewModels
@@ -50,7 +49,7 @@ namespace RemoteController.ViewModels
 
         private void OnStart()
         {
-            if(server != null)
+            if (server != null)
             {
                 StopServer();
             }

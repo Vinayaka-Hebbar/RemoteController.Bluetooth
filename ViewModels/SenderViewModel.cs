@@ -94,8 +94,11 @@ namespace RemoteController.ViewModels
             else
             {
                 client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
-                client.Start();
-                State = DisconnectState;
+                if (client.Start())
+                {
+                    State = DisconnectState;
+                    client.RunMessageLoop();
+                }
             }
         }
 

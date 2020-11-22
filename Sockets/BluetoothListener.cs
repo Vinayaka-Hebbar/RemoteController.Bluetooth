@@ -41,7 +41,7 @@ namespace RemoteController.Sockets
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
             serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
             option = new SocketOption(serverSocket);
-        } 
+        }
         #endregion
 
         public SocketOption Option
@@ -203,7 +203,7 @@ namespace RemoteController.Sockets
         private void SetService(byte channelNumber)
         {
             byte[] rawRecord = GetServiceRecordBytes(channelNumber);
-            MicrosoftSdpService.SetService(rawRecord, codService);
+            serviceHandle = MicrosoftSdpService.SetService(rawRecord, codService);
         }
         #endregion
 

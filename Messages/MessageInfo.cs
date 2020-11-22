@@ -1,6 +1,6 @@
 ﻿namespace RemoteController.Messages
 {
-    public struct MessageInfo : IMessage
+    public readonly struct MessageInfo : IMessage
     {
         public readonly int Type;
         public readonly int Length;
@@ -16,11 +16,13 @@
 
         public MessageInfo(int type, int length)
         {
-            this.Type = type;
+            Type = type;
             Length = length;
         }
 
-        MessageType IMessage.Type => (MessageType)(Type & Message.TypeMask);
+        public MessageType MessageType => (MessageType)(Type & Message.TypeMask);
+
+        MessageType IMessage.Type => MessageType;
 
         public unsafe byte[] GetBytes()
         {

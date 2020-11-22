@@ -94,67 +94,80 @@ namespace RemoteController.Core
         void Receive()
         {
             var token = cts.Token;
-            var _listener = new BluetoothListener(ServiceId)
+            try
             {
-                ServiceName = "MyService"
-            };
-            _listener.Start();
-            while (true)
-            {
-                using (var client = _listener.AcceptBluetoothClient())
+                var _listener = new BluetoothListener(ServiceId)
                 {
-                    if (token.IsCancellationRequested)
+                    ServiceName = "MyService"
+                };
+                _listener.Start();
+                using (token.Register(_listener.Stop))
+                {
+                    while (true)
                     {
-                        return;
+                        using (var client = _listener.AcceptBluetoothClient())
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                return;
+                            }
+                            ProcessClient(client);
+                        }
                     }
-                    ProcessClient(client);
                 }
+
+            }
+            catch (SocketException)
+            {
+                // stoped receiving
             }
         }
 
         void ProcessClient(Bluetooth.BluetoothClient client)
         {
             var stream = client.GetStream();
-            try
+            while (true)
             {
-                while (true)
+                var buffer = new byte[8];
+                if (stream.Read(buffer, 0, 8) > 0 && isRunning)
                 {
-                    var buffer = new byte[8];
-                    if (stream.Read(buffer, 0, 8) > 0 && isRunning)
+                    var message = new MessageInfo(buffer);
+                    switch ((MessageType)(message.Type & Message.TypeMask))
                     {
-                        var message = new MessageInfo(buffer);
-                        switch ((MessageType)(message.Type & Message.TypeMask))
-                        {
-                            case MessageType.MoveScreen:
-                                messages.Enqueue(message);
-                                break;
-                            case MessageType.MouseWheel:
-                                messages.Enqueue(MouseWheelMessage.Parse(message, stream));
-                                break;
-                            case MessageType.MouseButton:
-                                messages.Enqueue(MouseButtonMessage.Parse(message));
-                                break;
-                            case MessageType.MouseMove:
-                                messages.Enqueue(MouseMoveMessage.Parse(message, stream));
-                                break;
-                            case MessageType.KeyPress:
-                                messages.Enqueue(KeyPressMessage.Parse(message, stream));
-                                break;
-                            case MessageType.Clipboard:
-                                messages.Enqueue(ClipboardMessage.Parse(message, stream));
-                                break;
-                            case MessageType.CheckIn:
-                                messages.Enqueue(CheckInMessage.Parse(message, stream));
-                                break;
-                        }
-                        messageHandle.Set();
+                        case MessageType.MoveScreen:
+                            messages.Enqueue(message);
+                            break;
+                        case MessageType.MouseWheel:
+                            messages.Enqueue(MouseWheelMessage.Parse(message, stream));
+                            break;
+                        case MessageType.MouseButton:
+                            messages.Enqueue(MouseButtonMessage.Parse(message));
+                            break;
+                        case MessageType.MouseMove:
+                            messages.Enqueue(MouseMoveMessage.Parse(message, stream));
+                            break;
+                        case MessageType.KeyPress:
+                            messages.Enqueue(KeyPressMessage.Parse(message, stream));
+                            break;
+                        case MessageType.Clipboard:
+                            messages.Enqueue(ClipboardMessage.Parse(message, stream));
+                            break;
+                        case MessageType.CheckIn:
+                            messages.Enqueue(CheckInMessage.Parse(message, stream));
+                            ScreenConfig(stream);
+                            break;
                     }
+                    messageHandle.Set();
                 }
             }
-            catch (SocketException)
-            {
-                // stoped receiving
-            }
+        }
+
+        void ScreenConfig(NetworkStream stream)
+        {
+            var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
+            var buffer = config.GetBytes();
+            stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
         }
 
         private bool ShouldServerBailKeyboard()
@@ -267,34 +280,10 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
-            foreach (var screen in screens)
+            if (_screen.Config(screens))
             {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
-                {
-                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                }
-                screenConfiguration.Screens[screen.Client].Add(screen);
-                VirtualScreen last = screenConfiguration.GetFurthestRight();
-                screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
-
+                _hook.SetMousePos(0, 0);
             }
-
-            if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
-                null)
-                return;
-            //coordinates are invalid, grab a screen
-            var s = state.ScreenConfiguration.GetFurthestLeft();
-            state.VirtualX = s.X;
-            state.VirtualY = s.Y;
-            if (s.Client != state.ClientName)
-                return;
-            //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
-            state.LastPositionX = 0;
-            state.LastPositionY = 0;
-            _hook.SetMousePos(0, 0);
-
         }
 
         private bool disposed;
