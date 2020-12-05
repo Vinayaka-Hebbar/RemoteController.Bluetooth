@@ -83,7 +83,6 @@ namespace RemoteController.Core
         {
             if (ClientState.CurrentClientFocused)
             {
-                e.Handled = true;
                 return;
             }
 
@@ -94,13 +93,13 @@ namespace RemoteController.Core
 #endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
+            e.Handled = true;
 
         }
         private void OnGlobalHookMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (ClientState.CurrentClientFocused)
             {
-                e.Handled = true;
                 return;
             }
             //don't process a hook event within 2 seconds 
@@ -110,13 +109,13 @@ namespace RemoteController.Core
 #endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, true));
+            e.Handled = true;
         }
 
         private void OnGlobalHookMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (ClientState.CurrentClientFocused)
             {
-                e.Handled = true;
                 return;
             }
             //don't process a hook event within 2 seconds 
@@ -126,6 +125,7 @@ namespace RemoteController.Core
 #endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, false));
+            e.Handled = true;
 
         }
 
@@ -175,7 +175,6 @@ namespace RemoteController.Core
                 Environment.Exit(-1);
             if (ClientState.CurrentClientFocused)
             {
-                e.Handled = true;
                 return;
             }
 
@@ -186,13 +185,16 @@ namespace RemoteController.Core
 #endif
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, true));
+            e.Handled = true;
 
         }
 
         private void OnGlobalHookKeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            if (!ClientState.CurrentClientFocused)
-                e.Handled = true;
+            if (ClientState.CurrentClientFocused)
+            {
+                return;
+            }
 
 #if Bail
             if (ShouldHookBailKeyboard())
@@ -201,6 +203,7 @@ namespace RemoteController.Core
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, false));
+            e.Handled = true;
 
         }
 
