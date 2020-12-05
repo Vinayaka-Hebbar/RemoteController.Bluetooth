@@ -7,41 +7,46 @@ namespace RemoteController.Win32
 {
     public static partial class NativeMethods
     {
+        private const string User32Lib = "user32.dll";
+
+        private const string Kernal32Lib = "kernel32.dll";
+
         public delegate IntPtr HookProc(int nCode, IntPtr wParam, IntPtr lParam);
         public delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor,
             ref Rect lprcMonitor, IntPtr dwData);
         public delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll")]
+
+        [DllImport(User32Lib)]
         public static extern uint GetMessagePos();
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern int GetMessage(out Msg lpMsg, IntPtr hWnd, uint wMsgFilterMin,
             uint wMsgFilterMax);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern bool TranslateMessage([In] ref Msg lpMsg);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern IntPtr DispatchMessage([In] ref Msg lpmsg);
 
-        [DllImport("kernel32.dll")]
+        [DllImport(Kernal32Lib)]
         public static extern IntPtr LoadLibrary(string lpFileName);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport(Kernal32Lib, CharSet = CharSet.Auto)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport(Kernal32Lib, CharSet = CharSet.Auto)]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern bool SetProcessDPIAware();
 
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip,
             MonitorEnumDelegate lpfnEnum, IntPtr dwData);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern bool GetMonitorInfo(IntPtr hmon, ref MONITORINFO mi);
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace RemoteController.Win32
         /// <param name="hMod">handle to application instance</param>
         /// <param name="dwThreadId">thread identifier</param>
         /// <returns>If the function succeeds, the return value is the handle to the hook procedure.</returns>
-        [DllImport("USER32", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, int dwThreadId);
 
 
@@ -64,7 +69,7 @@ namespace RemoteController.Win32
         /// </summary>
         /// <param name="hhk">handle to hook procedure</param>
         /// <returns>If the function succeeds, the return value is true.</returns>
-        [DllImport("USER32", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern bool UnhookWindowsHookEx(IntPtr hHook);
 
         /// <summary>
@@ -76,15 +81,15 @@ namespace RemoteController.Win32
         /// <param name="wParam">value passed to hook procedure</param>
         /// <param name="lParam">value passed to hook procedure</param>
         /// <returns>If the function succeeds, the return value is true.</returns>
-        [DllImport("USER32", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern IntPtr CallNextHookEx(IntPtr hHook, int code, IntPtr wParam, IntPtr lParam);
 
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetCursorPos(int x, int y);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetCursorPos(out Point lpPoint);
 
@@ -92,7 +97,7 @@ namespace RemoteController.Win32
 
 
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern IntPtr CreateWindowEx(
             uint dwExStyle,
             [MarshalAs(UnmanagedType.LPStr)] string lpClassName,
@@ -107,44 +112,44 @@ namespace RemoteController.Win32
             IntPtr hInstance,
             IntPtr lpParam);
 
-        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport(User32Lib, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DestroyWindow(IntPtr hwnd);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         [return: MarshalAs(UnmanagedType.U2)]
         public static extern short RegisterClassEx([In] ref WNDCLASSEX lpwcx);
 
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern bool UnregisterClass(string lpClassName, IntPtr hInstance);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern IntPtr DefWindowProc(IntPtr hWnd, WindowsMessages uMsg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        [DllImport(User32Lib, CharSet = CharSet.Auto)]
         public static extern IntPtr SetClipboardViewer(IntPtr hWndNewViewer);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AddClipboardFormatListener(IntPtr hwnd);
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern IntPtr GetClipboardData(uint uFormat);
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern bool IsClipboardFormatAvailable(uint format);
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern bool OpenClipboard(IntPtr hWndNewOwner);
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern bool CloseClipboard();
-        [DllImport("kernel32.dll")]
+        [DllImport(Kernal32Lib)]
         public static extern IntPtr GlobalLock(IntPtr hMem);
-        [DllImport("kernel32.dll")]
+        [DllImport(Kernal32Lib)]
         public static extern bool GlobalUnlock(IntPtr hMem);
-        [DllImport("kernel32.dll")]
+        [DllImport(Kernal32Lib)]
         private static extern UIntPtr GlobalSize(IntPtr hMem);
         private const uint CF_UNICODETEXT = 13;
         /// <summary>
@@ -234,10 +239,10 @@ namespace RemoteController.Win32
             public ushort wParamH;
         }
 
-        [DllImport("user32.dll")]
+        [DllImport(User32Lib)]
         public static extern IntPtr GetMessageExtraInfo();
 
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport(User32Lib, SetLastError = true)]
         public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
     }
 }

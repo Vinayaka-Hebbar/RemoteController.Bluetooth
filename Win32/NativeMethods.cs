@@ -17,7 +17,7 @@ namespace RemoteController.Win32
         private const string irpropsDll = "Irprops.cpl";
         private const string wsDll = "ws2_32.dll";
 
-        [DllImport("User32")]
+        [DllImport(User32Lib)]
         internal static extern IntPtr GetActiveWindow();
 
         // Requires Vista SP2 or later
@@ -127,7 +127,7 @@ namespace RemoteController.Win32
         [DllImport(irpropsDll, SetLastError = true)]
         internal static extern int BluetoothSetServiceState(IntPtr hRadio, ref BLUETOOTH_DEVICE_INFO pbtdi, ref Guid pGuidService, uint dwServiceFlags);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport(Kernal32Lib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CloseHandle(IntPtr handle);
 
