@@ -17,48 +17,6 @@ namespace RemoteController.Messages
             Screens = screens;
         }
 
-        public unsafe CheckInMessage(IMessage packet)
-        {
-            byte[] buffer = packet.GetBytes();
-            fixed (byte* b = buffer)
-            {
-                var cu = b;
-                int clientIdSize = *(short*)b;
-                cu += 2;
-                var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), clientIdSize);
-                cu += clientIdSize;
-                int screensCount = *cu;
-                cu++;
-                var screens = new VirtualScreen[screensCount];
-                for (int i = 0; i < screensCount; i++)
-                {
-                    double localX = *(long*)cu;
-                    cu += 8;
-                    double localY = *(long*)cu;
-                    cu += 8;
-                    double x = *(long*)cu;
-                    cu += 8;
-                    double y = *(long*)cu;
-                    cu += 8;
-                    double width = *(long*)cu;
-                    cu += 8;
-                    double height = *(long*)cu;
-                    cu += 8;
-                    screens[i] = new VirtualScreen(clientId)
-                    {
-                        LocalX = localX,
-                        LocalY = localY,
-                        X = x,
-                        Y = y,
-                        Width = width,
-                        Height = height
-                    };
-                }
-                ClientName = clientId;
-                Screens = screens;
-            }
-        }
-
         public MessageType Type => MessageType.CheckIn;
 
         public unsafe byte[] GetBytes()

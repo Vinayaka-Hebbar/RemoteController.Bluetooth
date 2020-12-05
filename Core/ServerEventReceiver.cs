@@ -98,7 +98,7 @@ namespace RemoteController.Core
                                     OnClipboardFromServer(new ClipboardMessage(message));
                                     break;
                                 case MessageType.CheckIn:
-                                    OnScreenConfig(new CheckInMessage(message).Screens);
+                                    OnScreenConfig(((CheckInMessage)message).Screens);
                                     break;
                             }
                         }
