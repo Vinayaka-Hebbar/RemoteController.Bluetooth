@@ -68,8 +68,10 @@ namespace RemoteController.Core
 
             //if our application has received a clipboard push from the server, this event still fires, so bail out if we are currently syncing the clipboard.
             //don't process a hook event within 2 seconds 
+#if Bail
             if (ShouldHookBailKeyboard())
-                return;
+                return; 
+#endif
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             //Console.WriteLine("Sending clipboard to server");
@@ -79,34 +81,49 @@ namespace RemoteController.Core
 
         private void OnGlobalHookMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!ClientState.CurrentClientFocused)
+            if (ClientState.CurrentClientFocused)
+            {
                 e.Handled = true;
+                return;
+            }
 
             //don't process a hook event within 2 seconds of receiving network events. 
+#if Bail
             if (ShouldHookBailMouse())
-                return;
+                return; 
+#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
 
         }
         private void OnGlobalHookMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!ClientState.CurrentClientFocused)
+            if (ClientState.CurrentClientFocused)
+            {
                 e.Handled = true;
-            //don't process a hook event within 2 seconds 
-            if (ShouldHookBailMouse())
                 return;
+            }
+            //don't process a hook event within 2 seconds 
+#if Bail
+            if (ShouldHookBailMouse())
+                return; 
+#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, true));
         }
 
         private void OnGlobalHookMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!ClientState.CurrentClientFocused)
+            if (ClientState.CurrentClientFocused)
+            {
                 e.Handled = true;
-            //don't process a hook event within 2 seconds 
-            if (ShouldHookBailMouse())
                 return;
+            }
+            //don't process a hook event within 2 seconds 
+#if Bail
+            if (ShouldHookBailMouse())
+                return; 
+#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
             _dispatcher.Process(new MouseButtonMessage(e.Button, false));
 
@@ -115,8 +132,10 @@ namespace RemoteController.Core
         private void OnGlobalHookMouseMove(object sender, MouseMoveEventArgs e)
         {
             //don't process a hook event within 2 seconds of a server event
+#if Bail
             if (ShouldHookBailMouse())
-                return;
+                return; 
+#endif
 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 
@@ -154,12 +173,17 @@ namespace RemoteController.Core
             //I put this here for when I wanted a fail-safe bailout :)
             if (e.Key == Key.Tilde)
                 Environment.Exit(-1);
-            if (!ClientState.CurrentClientFocused)
+            if (ClientState.CurrentClientFocused)
+            {
                 e.Handled = true;
+                return;
+            }
 
+#if Bail
             if (ShouldHookBailKeyboard())
                 return;
 
+#endif
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, true));
 
@@ -170,13 +194,17 @@ namespace RemoteController.Core
             if (!ClientState.CurrentClientFocused)
                 e.Handled = true;
 
+#if Bail
             if (ShouldHookBailKeyboard())
-                return;
+                return; 
+#endif
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
             _dispatcher.Process(new KeyPressMessage(e.Key, false));
 
         }
+
+#if Bail
         private bool ShouldHookBailKeyboard()
         {
             if ((DateTime.UtcNow - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1)
@@ -190,7 +218,8 @@ namespace RemoteController.Core
             if ((DateTime.UtcNow - ClientState.LastServerEvent_Mouse).TotalSeconds < 1)
                 return true;
             return false;
-        }
+        } 
+#endif
 
         public void Dispose()
         {

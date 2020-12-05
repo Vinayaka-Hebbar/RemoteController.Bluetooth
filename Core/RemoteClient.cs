@@ -51,6 +51,7 @@ namespace RemoteController.Core
             if (s.Client == state.ClientName)
             {
                 _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
+                state.CurrentClientFocused = true;
             }
             return true;
         }
