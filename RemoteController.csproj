@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>net45</TargetFrameworks>
     <UseWPF>true</UseWPF>
-    <DefineConstants>WinXP;V2;Release;QUEUE_SERVER;QUEUE_CLIENT</DefineConstants>
+    <DefineConstants>WinXP;V2;Release</DefineConstants>
     <RootNamespace>RemoteController</RootNamespace>
     <IsPackable>false</IsPackable>
     <PublisherName>Vinayaka Hebbarc</PublisherName>
@@ -14,6 +14,9 @@
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Win32\Win32BluetoothAuthentication.cs" />

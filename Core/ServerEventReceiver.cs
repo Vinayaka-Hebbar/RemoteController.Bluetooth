@@ -223,7 +223,7 @@ namespace RemoteController.Core
                 if (await stream.ReadAsync(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
                     var message = new MessageInfo(buffer);
-                    switch ((MessageType)(message.Type & Message.TypeMask))
+                    switch (message.Type)
                     {
                         case MessageType.MoveScreen:
                             break;
