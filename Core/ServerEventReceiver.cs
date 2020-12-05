@@ -106,7 +106,6 @@ namespace RemoteController.Core
                 }
             }
         } 
-#endif
 
         void Receive()
         {
@@ -128,11 +127,7 @@ namespace RemoteController.Core
                             {
                                 return;
                             }
-#if QUEUE_SERVER
                             ProcessClient(client); 
-#else
-                            ProcessClientAsync(client);
-#endif
                         }
                     }
                 }
@@ -144,8 +139,6 @@ namespace RemoteController.Core
             }
         }
 
-
-#if QUEUE_SERVER
         void ProcessClient(Bluetooth.BluetoothClient client)
         {
             var stream = client.GetStream();
@@ -187,7 +180,39 @@ namespace RemoteController.Core
         }
 #else
 
-        async void ProcessClientAsync(BluetoothClient client)
+        async void Receive()
+        {
+            var token = cts.Token;
+            try
+            {
+                var _listener = new BluetoothListener(ServiceId)
+                {
+                    ServiceName = "BluetoothRemoteController"
+                };
+                _listener.Start();
+                using (token.Register(_listener.Stop))
+                {
+                    while (true)
+                    {
+                        using (var client = _listener.AcceptBluetoothClient())
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                return;
+                            }
+                            await ProcessClientAsync(client);
+                        }
+                    }
+                }
+
+            }
+            catch (SocketException)
+            {
+                // stoped receiving
+            }
+        }
+
+        async Task ProcessClientAsync(BluetoothClient client)
         {
             var stream = client.GetStream();
             while (true)
