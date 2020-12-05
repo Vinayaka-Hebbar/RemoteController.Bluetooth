@@ -302,7 +302,7 @@ namespace RemoteController.Core
                 null)
                 return;
             //coordinates are invalid, grab a screen
-            var s = state.ScreenConfiguration.GetFurthestRight();
+            var s = state.ScreenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             if (s.Client != state.ClientName)
