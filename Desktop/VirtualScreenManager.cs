@@ -25,8 +25,8 @@ namespace RemoteController.Desktop
         {
 
             //calculate the change from previous stored coordinates
-            double deltaX = e.Mouse.X - State.LastPositionX;
-            double deltaY = e.Mouse.Y - State.LastPositionY;
+            int deltaX = e.Mouse.X - State.LastPositionX;
+            int deltaY = e.Mouse.Y - State.LastPositionY;
 
 
             //Console.WriteLine(deltaY+": " + e.Mouse.Y + " - " + ClientState._lastPositionY);

@@ -17,8 +17,8 @@ namespace RemoteController.Messages
         {
             fixed (byte* b = packet.GetBytes())
             {
-                DeltaX = *(int*)b;
-                DeltaY = *(int*)(b + 4);
+                DeltaX = *(int*)(b + 1);
+                DeltaY = *(int*)(b + 5);
             }
         }
 
@@ -32,13 +32,13 @@ namespace RemoteController.Messages
 
         public static unsafe byte[] GetBytes(int deltaX, int deltaY)
         {
-            var res = new byte[16];
+            var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.MouseWheel, 8);
                 var bytes = b;
+                *bytes = Message.MouseWheel;
                 // skip the header
-                bytes += 8;
+                bytes++;
                 *(int*)bytes = deltaX;
                 bytes += 4;
                 *(int*)bytes = deltaY;

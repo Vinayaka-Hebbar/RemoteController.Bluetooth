@@ -18,8 +18,8 @@ namespace RemoteController.Messages
         {
             fixed (byte* b = packet.GetBytes())
             {
-                Key = (Key)(*(int*)b);
-                IsDown = *(int*)(b + 4) == 1;
+                Key = (Key)(*(int*)(b + 1));
+                IsDown = *(int*)(b + 5) == 1;
             }
         }
 
@@ -33,13 +33,13 @@ namespace RemoteController.Messages
 
         public static unsafe byte[] GetBytes(Key key, bool isDown)
         {
-            var res = new byte[13];
+            var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.KeyPress, 5);
                 var bytes = b;
+                *bytes = Message.KeyPress;
                 // skip the header
-                bytes += 8;
+                bytes++;
                 *(int*)bytes = (int)key;
                 bytes += 4;
                 *bytes = (byte)(isDown ? 1 : 0);

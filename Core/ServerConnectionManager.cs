@@ -47,8 +47,8 @@ namespace RemoteController.Core
         {
             if (stream != null)
             {
-                var bytes = new byte[8];
-                if(stream.Read(bytes, 0 , 8) > 0)
+                var bytes = new byte[Message.HeaderSize];
+                if(stream.Read(bytes, 0 , Message.HeaderSize) > 0)
                 {
                     var message = new MessageInfo(bytes);
                     if(message.MessageType == MessageType.CheckIn)

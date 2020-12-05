@@ -52,7 +52,7 @@ namespace RemoteController.Core
             }
         }
 
-        public VirtualScreen AddScreen(double localX, double localY, double virtualX, double virtualY, double width, double height, string client)
+        public VirtualScreen AddScreen(int localX, int localY, int virtualX, int virtualY, int width, int height, string client)
         {
             double newXBottomCorner = virtualX + width - 1;
             double newYBottomCorner = virtualY + height - 1;
@@ -99,24 +99,24 @@ namespace RemoteController.Core
             return newScreen;
         }
 
-        public VirtualScreen AddScreenRight(VirtualScreen orig, double localX, double localY, double width, double height, string client)
+        public VirtualScreen AddScreenRight(VirtualScreen orig, int localX, int localY, int width, int height, string client)
         {
             return AddScreen(localX, localY, orig.X + orig.Width, orig.Y, width, height, client);
         }
-        public VirtualScreen AddScreenLeft(VirtualScreen orig, double localX, double localY, double width, double height, string client)
+        public VirtualScreen AddScreenLeft(VirtualScreen orig, int localX, int localY, int width, int height, string client)
         {
             return AddScreen(localX, localY, orig.X - width, orig.Y, width, height, client);
         }
-        public VirtualScreen AddScreenAbove(VirtualScreen orig, double localX, double localY, double width, double height, string client)
+        public VirtualScreen AddScreenAbove(VirtualScreen orig, int localX, int localY, int width, int height, string client)
         {
             return AddScreen(localX, localY, orig.X, orig.Y - height, width, height, client);
         }
-        public VirtualScreen AddScreenBelow(VirtualScreen orig, double localX, double localY, double width, double height, string client)
+        public VirtualScreen AddScreenBelow(VirtualScreen orig, int localX, int localY, int width, int height, string client)
         {
             return AddScreen(localX, localY, orig.X, orig.Y + orig.Height, width, height, client);
         }
 
-        public VirtualScreen ValidVirtualCoordinate(double x, double y)
+        public VirtualScreen ValidVirtualCoordinate(int x, int y)
         {
             //Console.WriteLine("checking:"+x+","+y);
             foreach (VirtualScreen s in Screens.Values.SelectMany(s => s))

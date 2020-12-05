@@ -22,18 +22,18 @@ namespace RemoteController.Messages
         public unsafe byte[] GetBytes()
         {
             // header + 2 bytes for client size and 1 byte for num of screen
-            var size = 11;
+            var size = 13;
             int clientIdSize = Encoding.Default.GetByteCount(ClientName);
             size += clientIdSize;
             var count = Screens.Count;
-            size += count * 48;
+            size += count * 24;
             var res = new byte[size];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.CheckIn, size - 8);
+                Message.SetHeader(b, Message.CheckIn, size - Message.HeaderSize);
                 var bytes = b;
                 // skip the header
-                bytes += 8;
+                bytes += Message.HeaderSize;
                 *(short*)bytes = (short)clientIdSize;
                 bytes += 2;
                 fixed (char* id = ClientName)
@@ -45,20 +45,20 @@ namespace RemoteController.Messages
                 for (int i = 0; i < count; i++)
                 {
                     VirtualScreen item = Screens[i];
-                    *(long*)bytes = (long)item.LocalX;
-                    bytes += 8;
-                    *(long*)bytes = (long)item.LocalY;
-                    bytes += 8;
+                    *(int*)bytes = item.LocalX;
+                    bytes += 4;
+                    *(int*)bytes = item.LocalY;
+                    bytes += 4;
 
-                    *(long*)bytes = (long)item.X;
-                    bytes += 8;
-                    *(long*)bytes = (long)item.Y;
-                    bytes += 8;
+                    *(int*)bytes = item.X;
+                    bytes += 4;
+                    *(int*)bytes = item.Y;
+                    bytes += 4;
 
-                    *(long*)bytes = (long)item.Width;
-                    bytes += 8;
-                    *(long*)bytes = (long)item.Height;
-                    bytes += 8;
+                    *(int*)bytes = item.Width;
+                    bytes += 4;
+                    *(int*)bytes = item.Height;
+                    bytes += 4;
                 }
             }
             return res;
@@ -81,18 +81,18 @@ namespace RemoteController.Messages
                     var screens = new VirtualScreen[screensCount];
                     for (int i = 0; i < screensCount; i++)
                     {
-                        double localX = *(long*)cu;
-                        cu += 8;
-                        double localY = *(long*)cu;
-                        cu += 8;
-                        double x = *(long*)cu;
-                        cu += 8;
-                        double y = *(long*)cu;
-                        cu += 8;
-                        double width = *(long*)cu;
-                        cu += 8;
-                        double height = *(long*)cu;
-                        cu += 8;
+                        int localX = *(int*)cu;
+                        cu += 4;
+                        int localY = *(int*)cu;
+                        cu += 4;
+                        int x = *(int*)cu;
+                        cu += 4;
+                        int y = *(int*)cu;
+                        cu += 4;
+                        int width = *(int*)cu;
+                        cu += 4;
+                        int height = *(int*)cu;
+                        cu += 4;
                         screens[i] = new VirtualScreen(clientId)
                         {
                             LocalX = localX,

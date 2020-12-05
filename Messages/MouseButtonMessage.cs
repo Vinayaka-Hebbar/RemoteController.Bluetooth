@@ -1,4 +1,5 @@
 ﻿using RemoteController.Win32.Hooks;
+using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
 {
@@ -18,42 +19,28 @@ namespace RemoteController.Messages
         {
             fixed (byte* b = message.GetBytes())
             {
-                var res = b;
-                // Skip type and len
-                res += 5;
-                MouseButton = (MouseButton)(*res);
-                IsDown = (*(res + 1)) == 1;
+                MouseButton = (MouseButton)(*(b + 1));
+                IsDown = (*(b + 2)) == 1;
             }
         }
 
         public MessageType Type => MessageType.MouseButton;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
         {
-            var res = new byte[8];
-            fixed (byte* b = res)
-            {
-                Message.SetHeader(b, Message.MouseButton, 0);
-                var bytes = b;
-                // append to header
-                bytes += 5;
-                *bytes = (byte)MouseButton;
-                bytes++;
-                *bytes = IsDown ? (byte)1 : (byte)0;
-
-            }
-            return res;
+            return GetBytes(MouseButton, IsDown);
         }
 
         public static unsafe byte[] GetBytes(MouseButton button, bool isDown)
         {
-            var res = new byte[8];
+            var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.MouseButton, 0);
                 var bytes = b;
+                *bytes = Message.MouseButton;
                 // append to header
-                bytes += 5;
+                bytes++;
                 *bytes = (byte)button;
                 bytes++;
                 *bytes = isDown ? (byte)1 : (byte)0;

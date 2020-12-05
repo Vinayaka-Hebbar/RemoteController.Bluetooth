@@ -11,17 +11,17 @@ namespace RemoteController.Core
         /// <summary>
         /// computed position
         /// </summary>
-        public double VirtualX = double.MaxValue;
+        public int VirtualX = int.MaxValue;
         /// <summary>
         /// computed position
         /// </summary>
-        public double VirtualY = double.MaxValue;
+        public int VirtualY = int.MaxValue;
         /// <summary>
         /// stored value of our last position before going off-screen
         /// </summary>
-        public double LastPositionX;
+        public int LastPositionX;
         // stored value of our last position before going off-screen
-        public double LastPositionY;
+        public int LastPositionY;
 
         public ClientState(string clientName)
         {

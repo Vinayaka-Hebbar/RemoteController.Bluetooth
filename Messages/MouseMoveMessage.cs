@@ -1,11 +1,13 @@
-﻿namespace RemoteController.Messages
+﻿using System.Runtime.CompilerServices;
+
+namespace RemoteController.Messages
 {
     public readonly struct MouseMoveMessage : IMessage
     {
-        public readonly double VirtualX;
-        public readonly double VirtualY;
+        public readonly int VirtualX;
+        public readonly int VirtualY;
 
-        public MouseMoveMessage(double virtualX, double virtualY)
+        public MouseMoveMessage(int virtualX, int virtualY)
         {
             VirtualX = virtualX;
             VirtualY = virtualY;
@@ -15,41 +17,31 @@
         {
             fixed (byte* b = packet.GetBytes())
             {
-                VirtualX = *(long*)b;
-                VirtualY = *(long*)(b + 8);
+                VirtualX = *(int*)(b + 1);
+                VirtualY = *(int*)(b + 5);
             }
         }
 
         public MessageType Type => MessageType.MouseMove;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
         {
-            var res = new byte[24];
-            fixed (byte* b = res)
-            {
-                Message.SetHeader(b, Message.MouseMove, 16);
-                var bytes = b;
-                // skip the header bytes
-                bytes += 8;
-                *(long*)bytes = (long)VirtualX;
-                bytes += 8;
-                *(long*)bytes = (long)VirtualY;
-            }
-            return res;
+            return GetBytes(VirtualX, VirtualY);
         }
 
-        public unsafe static byte[] GetBytes(double virtualX, double virtualY)
+        public unsafe static byte[] GetBytes(int virtualX, int virtualY)
         {
-            var res = new byte[24];
+            var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
             {
-                Message.SetHeader(b, Message.MouseMove, 16);
                 var bytes = b;
+                *bytes = Message.MouseMove;
                 // skip the header bytes
-                bytes += 8;
-                *(long*)bytes = (long)virtualX;
-                bytes += 8;
-                *(long*)bytes = (long)virtualY;
+                bytes++;
+                *(int*)bytes = virtualX;
+                bytes += 4;
+                *(int*)bytes = virtualY;
             }
             return res;
         }

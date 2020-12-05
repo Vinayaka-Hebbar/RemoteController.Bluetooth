@@ -28,13 +28,13 @@ namespace RemoteController.Messages
         public static unsafe byte[] GetBytes(string data)
         {
             var count = Encoding.Default.GetByteCount(data);
-            var res = new byte[count + 8];
+            var res = new byte[count + Message.HeaderSize];
             fixed (byte* b = res)
             {
                 Message.SetHeader(b, Message.Clipboard, count);
                 var bytes = b;
                 // skip the header
-                bytes += 8;
+                bytes += Message.HeaderSize;
                 fixed (char* c = data)
                     Encoding.Default.GetBytes(c, count, bytes, res.Length);
             }

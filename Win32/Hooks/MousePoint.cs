@@ -2,14 +2,8 @@
 {
     public class MousePoint
     {
-        public double X { get; set; }
-        public double Y { get; set; }
-
-        public MousePoint(double x, double y)
-        {
-            X = x;
-            Y = y;
-        }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public MousePoint(int x, int y)
         {

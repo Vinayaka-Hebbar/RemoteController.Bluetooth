@@ -146,19 +146,19 @@ namespace RemoteController.Core
             var stream = client.GetStream();
             while (true)
             {
-                var buffer = new byte[8];
-                if (stream.Read(buffer, 0, 8) > 0 && isRunning)
+                var buffer = new byte[Message.HeaderSize];
+                if (stream.Read(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
                     var message = new MessageInfo(buffer);
                     switch ((MessageType)(message.Type & Message.TypeMask))
                     {
                         case MessageType.MoveScreen:
                         case MessageType.MouseButton:
-                            messages.Enqueue(message);
-                            break;
                         case MessageType.MouseWheel:
                         case MessageType.MouseMove:
                         case MessageType.KeyPress:
+                            messages.Enqueue(message);
+                            break;
                         case MessageType.Clipboard:
                             messages.Enqueue(MessagePacket.Parse(message, stream));
                             break;
@@ -219,8 +219,8 @@ namespace RemoteController.Core
             var stream = client.GetStream();
             while (true)
             {
-                var buffer = new byte[8];
-                if (await stream.ReadAsync(buffer, 0, 8) > 0 && isRunning)
+                var buffer = new byte[Message.HeaderSize];
+                if (await stream.ReadAsync(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
                     var message = new MessageInfo(buffer);
                     switch ((MessageType)(message.Type & Message.TypeMask))
@@ -228,16 +228,16 @@ namespace RemoteController.Core
                         case MessageType.MoveScreen:
                             break;
                         case MessageType.MouseWheel:
-                            OnMouseWheelFromServer(new MouseWheelMessage(await MessagePacket.ParseAsync(message, stream)));
+                            OnMouseWheelFromServer(new MouseWheelMessage(message));
                             break;
                         case MessageType.MouseButton:
                             OnMouseButtonFromServer(new MouseButtonMessage(message));
                             break;
                         case MessageType.MouseMove:
-                            OnMouseMoveFromServer(new MouseMoveMessage(await MessagePacket.ParseAsync(message, stream)));
+                            OnMouseMoveFromServer(new MouseMoveMessage(message));
                             break;
                         case MessageType.KeyPress:
-                            OnKeyPressFromServer(new KeyPressMessage(await MessagePacket.ParseAsync(message, stream)));
+                            OnKeyPressFromServer(new KeyPressMessage(message));
                             break;
                         case MessageType.Clipboard:
                             OnClipboardFromServer(new ClipboardMessage(await MessagePacket.ParseAsync(message, stream)));

@@ -81,7 +81,7 @@
         /// </summary>
         public int X
         {
-            get { return (int)System.Math.Round(position.X); }
+            get { return position.X; }
             internal set { position.X = value; }
         }
 
@@ -90,7 +90,7 @@
         /// </summary>
         public int Y
         {
-            get { return (int)System.Math.Round(position.Y); }
+            get { return position.Y; }
             internal set { position.Y = value; }
         }
 

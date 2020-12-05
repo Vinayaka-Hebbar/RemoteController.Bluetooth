@@ -9,12 +9,12 @@
             Client = client;
         }
 
-        public double LocalX { get; set; }
-        public double LocalY { get; set; }
+        public int LocalX { get; set; }
+        public int LocalY { get; set; }
         public string Client { get; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }
