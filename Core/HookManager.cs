@@ -158,7 +158,7 @@ namespace RemoteController.Core
             CoordinateCalculationResult result = _screen.UpdateVirtualMouseCoordinates(e);
             if (result == CoordinateCalculationResult.Valid)
             {
-                CoordinateUpdateResult presult = _screen.ProcessVirtualCoordinatesUpdate();
+                CoordinateUpdateResult presult = _screen.ProcessVirtualCoordinatesUpdate(false);
                 if (presult.MoveMouse)
                 {
                     //Console.WriteLine("Moving mouse to a position");

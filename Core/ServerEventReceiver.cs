@@ -313,7 +313,7 @@ namespace RemoteController.Core
             state.VirtualY = message.VirtualY;
 
             //send this movement to our virtual screen manager for processing
-            var result = _screen.ProcessVirtualCoordinatesUpdate();
+            var result = _screen.ProcessVirtualCoordinatesUpdate(true);
             if (result.MoveMouse)
             {
                 _hook.SetMousePos(state.LastPositionX, state.LastPositionY);

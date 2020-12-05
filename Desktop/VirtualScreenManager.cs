@@ -62,7 +62,7 @@ namespace RemoteController.Desktop
 
         //based on the current position of the virtual coordinates
         //decide whether to hide the mouse, pass the coords to the hook, or handle the event, or some combo.
-        public CoordinateUpdateResult ProcessVirtualCoordinatesUpdate()
+        public CoordinateUpdateResult ProcessVirtualCoordinatesUpdate(bool replay)
         {
 
             CoordinateUpdateResult result = new CoordinateUpdateResult();
@@ -89,6 +89,7 @@ namespace RemoteController.Desktop
                     //mark this as handled since we manually set the cursor and don't want it to rubberband around
                 }
                 State.CurrentClientFocused = true;
+                result.MoveMouse = replay;
 
             }
             else
