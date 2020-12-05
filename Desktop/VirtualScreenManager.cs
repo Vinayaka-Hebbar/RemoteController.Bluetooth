@@ -1,7 +1,6 @@
 ﻿using RemoteController.Core;
 using RemoteController.Win32.Hooks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RemoteController.Desktop

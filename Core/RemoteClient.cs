@@ -25,7 +25,6 @@ namespace RemoteController.Core
             _dispatcher = new ServerEventDispatcher(_connection);
             _screen = new VirtualScreenManager(state);
             _hook = new HookManager(_dispatcher, _screen);
-
         }
 
         public async Task<bool> Start()
@@ -50,13 +49,13 @@ namespace RemoteController.Core
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
                     VirtualScreen last = screenConfiguration.GetFurthestLeft();
-                    screenConfiguration.AddScreenLeft(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
                 }
             }
-            var s = state.ScreenConfiguration.GetFurthestLeft();
+            _hook.Start();
+            var s = state.ScreenConfiguration.GetFurthestRight();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
-            _hook.Start();
             if (s.Client == state.ClientName)
             {
                 _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
