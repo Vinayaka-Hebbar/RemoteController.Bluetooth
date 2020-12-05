@@ -83,6 +83,7 @@ namespace RemoteController.Win32.Hooks
             e.Value = value;
             Clipboard(this, e);
         }
+
         /// \internal
         /// <summary>
         /// Call this method to simulate KeyDown/KeyUp events
@@ -186,16 +187,11 @@ namespace RemoteController.Win32.Hooks
             e.Mouse = MouseState;
             e.Handled = false;
 
-
-
             MouseMove(this, e);
-
         }
 
         protected void OnMouseWheel(int dx, int dy)
         {
-
-
             MouseWheelEventArgs e = MouseWheelArgs;
             e.Mouse = MouseState;
             e.DeltaX = dx;

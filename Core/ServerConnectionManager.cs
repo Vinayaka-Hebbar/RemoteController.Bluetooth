@@ -24,13 +24,13 @@ namespace RemoteController.Core
             stream = client.GetStream();
         }
 
-        public async Task Send(IMessage message)
+        public void Send(IMessage message)
         {
             if (stream != null)
             {
                 var bytes = message.GetBytes();
-                await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken: System.Threading.CancellationToken.None);
-                await stream.FlushAsync(System.Threading.CancellationToken.None);
+                stream.Write(bytes, 0, bytes.Length);
+                stream.Flush();
             }
         }
 

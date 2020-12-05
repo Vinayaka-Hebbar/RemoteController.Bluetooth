@@ -43,7 +43,7 @@ namespace RemoteController.Core
             task.Start();
         } 
 
-        async void DispatchMessages()
+        void DispatchMessages()
         {
             try
             {
@@ -57,7 +57,7 @@ namespace RemoteController.Core
                             count--;
                             if (messages.TryDequeue(out IMessage message))
                             {
-                                await _manager.Send(message);
+                                _manager.Send(message);
                             }
                         }
                     }
