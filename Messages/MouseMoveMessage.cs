@@ -1,6 +1,4 @@
-﻿using System.Net.Sockets;
-
-namespace RemoteController.Messages
+﻿namespace RemoteController.Messages
 {
     public readonly struct MouseMoveMessage : IMessage
     {
@@ -11,6 +9,15 @@ namespace RemoteController.Messages
         {
             VirtualX = virtualX;
             VirtualY = virtualY;
+        }
+
+        public unsafe MouseMoveMessage(IMessage packet)
+        {
+            fixed (byte* b = packet.GetBytes())
+            {
+                VirtualX = *(long*)b;
+                VirtualY = *(long*)(b + 8);
+            }
         }
 
         public MessageType Type => MessageType.MouseMove;
@@ -45,19 +52,6 @@ namespace RemoteController.Messages
                 *(long*)bytes = (long)virtualY;
             }
             return res;
-        }
-
-        public unsafe static MouseMoveMessage Parse(MessageInfo info, NetworkStream stream)
-        {
-            var buffer = new byte[info.Length];
-            if (stream.Read(buffer, 0, info.Length) > 0)
-            {
-                fixed (byte* b = buffer)
-                {
-                    return new MouseMoveMessage(*(long*)b, *(long*)(b + 8));
-                }
-            }
-            return default;
         }
     }
 }

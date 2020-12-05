@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
 {
@@ -12,6 +11,15 @@ namespace RemoteController.Messages
         {
             DeltaX = deltaX;
             DeltaY = deltaY;
+        }
+
+        public unsafe MouseWheelMessage(IMessage packet)
+        {
+            fixed (byte* b = packet.GetBytes())
+            {
+                DeltaX = *(int*)b;
+                DeltaY = *(int*)(b + 4);
+            }
         }
 
         public MessageType Type => MessageType.MouseWheel;
@@ -36,19 +44,6 @@ namespace RemoteController.Messages
                 *(int*)bytes = deltaY;
             }
             return res;
-        }
-
-        public static unsafe MouseWheelMessage Parse(MessageInfo info, NetworkStream stream)
-        {
-            var buffer = new byte[info.Length];
-            if(stream.Read(buffer, 0, info.Length) > 0)
-            {
-                fixed(byte * b = buffer)
-                {
-                    return new MouseWheelMessage(*(int*)b, *(int*)(b + 4));
-                }
-            }
-            return default;
         }
     }
 }

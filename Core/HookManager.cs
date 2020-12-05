@@ -76,7 +76,7 @@ namespace RemoteController.Core
 #endif
             //Console.WriteLine("Sending clipboard to server");
 
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new ClipboardMessage(e.Value)); 
 #else
             _dispatcher.Send(ClipboardMessage.GetBytes(e.Value));
@@ -96,7 +96,7 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY)); 
 #else
             _dispatcher.Send(MouseWheelMessage.GetBytes(e.DeltaX, e.DeltaY));
@@ -116,7 +116,7 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new MouseButtonMessage(e.Button, true)); 
 #else
             _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, true));
@@ -136,7 +136,7 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new MouseButtonMessage(e.Button, false)); 
 #else
             _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, false));
@@ -170,7 +170,7 @@ namespace RemoteController.Core
                     e.Handled = true; //windows obeys this
                 }
 
-#if QUEUE
+#if QUEUE_CLIENT
                 //send over the net
                 _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
 #else
@@ -204,7 +204,7 @@ namespace RemoteController.Core
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new KeyPressMessage(e.Key, true)); 
 #else
             _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, true));
@@ -225,7 +225,7 @@ namespace RemoteController.Core
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(new KeyPressMessage(e.Key, false)); 
 #else
             _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, false));

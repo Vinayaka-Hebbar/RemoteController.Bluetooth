@@ -1,5 +1,4 @@
 ﻿using RemoteController.Win32.Hooks;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
@@ -13,6 +12,15 @@ namespace RemoteController.Messages
         {
             Key = key;
             IsDown = isDown;
+        }
+
+        public unsafe KeyPressMessage(IMessage packet)
+        {
+            fixed (byte* b = packet.GetBytes())
+            {
+                Key = (Key)(*(int*)b);
+                IsDown = *(int*)(b + 4) == 1;
+            }
         }
 
         public MessageType Type => MessageType.KeyPress;
@@ -37,19 +45,6 @@ namespace RemoteController.Messages
                 *bytes = (byte)(isDown ? 1 : 0);
             }
             return res;
-        }
-
-        public unsafe static KeyPressMessage Parse(MessageInfo message, NetworkStream stream)
-        {
-            var buffer = new byte[message.Length];
-            if (stream.Read(buffer, 0, message.Length) > 0)
-            {
-                fixed (byte* b = buffer)
-                {
-                    return new KeyPressMessage((Key)(*(int*)b), *(int*)(b + 4) == 1);
-                }
-            }
-            return default;
         }
     }
 }

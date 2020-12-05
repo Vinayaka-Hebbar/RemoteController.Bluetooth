@@ -29,8 +29,8 @@ namespace RemoteController.Core
             if (stream != null)
             {
                 var bytes = message.GetBytes();
-                await stream.WriteAsync(bytes, 0, bytes.Length);
-                await stream.FlushAsync();
+                await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken: System.Threading.CancellationToken.None);
+                await stream.FlushAsync(System.Threading.CancellationToken.None);
             }
         }
 
@@ -38,8 +38,8 @@ namespace RemoteController.Core
         {
             if (stream != null)
             {
-                await stream.WriteAsync(message, 0, message.Length);
-                await stream.FlushAsync();
+                await stream.WriteAsync(message, 0, message.Length, cancellationToken: System.Threading.CancellationToken.None);
+                await stream.FlushAsync(System.Threading.CancellationToken.None);
             }
         }
 

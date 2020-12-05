@@ -1,4 +1,4 @@
-﻿#if QUEUE
+﻿#if QUEUE_CLIENT
 using RemoteController.Messages;
 using System;
 using System.Collections.Concurrent;
@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace RemoteController.Core
 {
     public class ServerEventDispatcher
-#if QUEUE
+#if QUEUE_CLIENT
         : IDisposable
 #endif
     {
         private readonly ServerConnectionManager _manager;
 
-#if QUEUE
+#if QUEUE_CLIENT
         private readonly EventWaitHandle eventHandle;
         private readonly ConcurrentQueue<IMessage> messages = new ConcurrentQueue<IMessage>();
         bool isRunning;
@@ -34,7 +34,7 @@ namespace RemoteController.Core
         }
 #endif
 
-#if QUEUE
+#if QUEUE_CLIENT
         public void StartDispatcher()
         {
             isRunning = true;
@@ -76,10 +76,10 @@ namespace RemoteController.Core
         }
 #endif
 
-#if QUEUE
+#if QUEUE_CLIENT
         public void Process(IMessage message)
         {
-            messages.Enqueue(message);
+            messages.EnQUEUE_CLIENT(message);
             eventHandle.Set();
         } 
 #endif
@@ -89,7 +89,7 @@ namespace RemoteController.Core
             await _manager.Send(message);
         }
 
-#if QUEUE
+#if QUEUE_CLIENT
         private bool disposed;
 
         protected virtual void Dispose(bool disposing)

@@ -14,6 +14,18 @@ namespace RemoteController.Messages
             IsDown = isDown;
         }
 
+        public unsafe MouseButtonMessage(IMessage message)
+        {
+            fixed (byte* b = message.GetBytes())
+            {
+                var res = b;
+                // Skip type and len
+                res += 5;
+                MouseButton = (MouseButton)(*res);
+                IsDown = (*(res + 1)) == 1;
+            }
+        }
+
         public MessageType Type => MessageType.MouseButton;
 
         public unsafe byte[] GetBytes()
@@ -48,18 +60,6 @@ namespace RemoteController.Messages
 
             }
             return res;
-        }
-
-        public unsafe static MouseButtonMessage Parse(IMessage message)
-        {
-            var bytes = message.GetBytes();
-            fixed (byte* b = bytes)
-            {
-                var res = b;
-                // Skip type and len
-                res += 5;
-                return new MouseButtonMessage((MouseButton)(*res), (*(res + 1)) == 1);
-            }
         }
     }
 }

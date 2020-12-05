@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace RemoteController.Messages
@@ -11,6 +10,11 @@ namespace RemoteController.Messages
         public ClipboardMessage(string data)
         {
             Data = data;
+        }
+
+        public ClipboardMessage(IMessage packet)
+        {
+            Data = Encoding.Default.GetString(packet.GetBytes());
         }
 
         public MessageType Type => MessageType.Clipboard;
@@ -35,16 +39,6 @@ namespace RemoteController.Messages
                     Encoding.Default.GetBytes(c, count, bytes, res.Length);
             }
             return res;
-        }
-
-        public static unsafe ClipboardMessage Parse(MessageInfo info, NetworkStream stream)
-        {
-            var buffer = new byte[info.Length];
-            if (stream.Read(buffer, 0, info.Length) > 0)
-            {
-                return new ClipboardMessage(Encoding.Default.GetString(buffer));
-            }
-            return default;
         }
     }
 }

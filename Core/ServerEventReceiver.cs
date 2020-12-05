@@ -1,4 +1,5 @@
-﻿using RemoteController.Desktop;
+﻿using RemoteController.Bluetooth;
+using RemoteController.Desktop;
 using RemoteController.Messages;
 using RemoteController.Sockets;
 using RemoteController.Win32.Hooks;
@@ -17,13 +18,16 @@ namespace RemoteController.Core
 
         private readonly IGlobalHook _hook;
         private readonly VirtualScreenManager _screen;
-        private readonly EventWaitHandle messageHandle;
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
 
+#if QUEUE_SERVER
         private readonly ConcurrentQueue<IMessage> messages;
+        private readonly EventWaitHandle messageHandle;
+#endif
 
         bool isRunning;
+#if QUEUE_SERVER
         public ServerEventReceiver(VirtualScreenManager screen)
         {
             _hook = new WindowsGlobalHook();
@@ -33,6 +37,15 @@ namespace RemoteController.Core
             cts = new CancellationTokenSource();
             state = screen.State;
         }
+#else
+        public ServerEventReceiver(VirtualScreenManager screen)
+        {
+            _hook = new WindowsGlobalHook();
+            _screen = screen;
+            cts = new CancellationTokenSource();
+            state = screen.State;
+        }
+#endif
 
         public void Start()
         {
@@ -45,11 +58,14 @@ namespace RemoteController.Core
             var reciever = new Task(Receive, cts.Token, creationOptions: TaskCreationOptions.LongRunning);
             reciever.ConfigureAwait(false);
             reciever.Start();
+#if QUEUE_SERVER
             var dispatcher = new Task(Dispatch, cts.Token, TaskCreationOptions.LongRunning);
             dispatcher.ConfigureAwait(false);
-            dispatcher.Start();
+            dispatcher.Start(); 
+#endif
         }
 
+#if QUEUE_SERVER
         void Dispatch()
         {
             while (isRunning)
@@ -67,29 +83,30 @@ namespace RemoteController.Core
                                 case MessageType.MoveScreen:
                                     break;
                                 case MessageType.MouseWheel:
-                                    OnMouseWheelFromServer((MouseWheelMessage)message);
+                                    OnMouseWheelFromServer(new MouseWheelMessage(message));
                                     break;
                                 case MessageType.MouseButton:
-                                    OnMouseButtonFromServer((MouseButtonMessage)message);
+                                    OnMouseButtonFromServer(new MouseButtonMessage(message));
                                     break;
                                 case MessageType.MouseMove:
-                                    OnMouseMoveFromServer((MouseMoveMessage)message);
+                                    OnMouseMoveFromServer(new MouseMoveMessage(message));
                                     break;
                                 case MessageType.KeyPress:
-                                    OnKeyPressFromServer((KeyPressMessage)message);
+                                    OnKeyPressFromServer(new KeyPressMessage(message));
                                     break;
                                 case MessageType.Clipboard:
-                                    OnClipboardFromServer(((ClipboardMessage)message).Data);
+                                    OnClipboardFromServer(new ClipboardMessage(message));
                                     break;
                                 case MessageType.CheckIn:
-                                    OnScreenConfig(((CheckInMessage)message).Screens);
+                                    OnScreenConfig(new CheckInMessage(message).Screens);
                                     break;
                             }
                         }
                     }
                 }
             }
-        }
+        } 
+#endif
 
         void Receive()
         {
@@ -111,7 +128,11 @@ namespace RemoteController.Core
                             {
                                 return;
                             }
-                            ProcessClient(client);
+#if QUEUE_SERVER
+                            ProcessClient(client); 
+#else
+                            ProcessClientAsync(client);
+#endif
                         }
                     }
                 }
@@ -123,6 +144,8 @@ namespace RemoteController.Core
             }
         }
 
+
+#if QUEUE_SERVER
         void ProcessClient(Bluetooth.BluetoothClient client)
         {
             var stream = client.GetStream();
@@ -138,19 +161,11 @@ namespace RemoteController.Core
                             messages.Enqueue(message);
                             break;
                         case MessageType.MouseWheel:
-                            messages.Enqueue(MouseWheelMessage.Parse(message, stream));
-                            break;
                         case MessageType.MouseButton:
-                            messages.Enqueue(MouseButtonMessage.Parse(message));
-                            break;
                         case MessageType.MouseMove:
-                            messages.Enqueue(MouseMoveMessage.Parse(message, stream));
-                            break;
                         case MessageType.KeyPress:
-                            messages.Enqueue(KeyPressMessage.Parse(message, stream));
-                            break;
                         case MessageType.Clipboard:
-                            messages.Enqueue(ClipboardMessage.Parse(message, stream));
+                            messages.Enqueue(MessagePacket.Parse(message, stream));
                             break;
                         case MessageType.CheckIn:
                             CheckInMessage checkIn = CheckInMessage.Parse(message, stream);
@@ -170,6 +185,54 @@ namespace RemoteController.Core
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
         }
+#else
+
+        async void ProcessClientAsync(BluetoothClient client)
+        {
+            var stream = client.GetStream();
+            while (true)
+            {
+                var buffer = new byte[8];
+                if (await stream.ReadAsync(buffer, 0, 8) > 0 && isRunning)
+                {
+                    var message = new MessageInfo(buffer);
+                    switch ((MessageType)(message.Type & Message.TypeMask))
+                    {
+                        case MessageType.MoveScreen:
+                            break;
+                        case MessageType.MouseWheel:
+                            OnMouseWheelFromServer(new MouseWheelMessage(await MessagePacket.ParseAsync(message, stream)));
+                            break;
+                        case MessageType.MouseButton:
+                            OnMouseButtonFromServer(new MouseButtonMessage(message));
+                            break;
+                        case MessageType.MouseMove:
+                            OnMouseMoveFromServer(new MouseMoveMessage(await MessagePacket.ParseAsync(message, stream)));
+                            break;
+                        case MessageType.KeyPress:
+                            OnKeyPressFromServer(new KeyPressMessage(await MessagePacket.ParseAsync(message, stream)));
+                            break;
+                        case MessageType.Clipboard:
+                            OnClipboardFromServer(new ClipboardMessage(await MessagePacket.ParseAsync(message, stream)));
+                            break;
+                        case MessageType.CheckIn:
+                            CheckInMessage checkIn = new CheckInMessage(await MessagePacket.ParseAsync(message, stream));
+                            await ScreenConfigASync(stream);
+                            OnScreenConfig(checkIn.Screens);
+                            break;
+                    }
+                }
+            }
+        }
+
+        async Task ScreenConfigASync(NetworkStream stream)
+        {
+            var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
+            var buffer = config.GetBytes();
+            await stream.WriteAsync(buffer, 0, buffer.Length);
+            await stream.FlushAsync();
+        }
+#endif
 
 #if Bail
         private bool ShouldServerBailKeyboard()
@@ -192,7 +255,7 @@ namespace RemoteController.Core
         } 
 #endif
 
-        private void OnClipboardFromServer(string value)
+        private void OnClipboardFromServer(ClipboardMessage message)
         {
             //Console.WriteLine("Received clipboard from server");
             //i received a hook event for a copy from another client within 2 seconds of pressing my own
@@ -206,7 +269,7 @@ namespace RemoteController.Core
             state.LastServerEvent_Keyboard = DateTime.UtcNow;
 #endif
 
-            _hook.SetClipboard(value);
+            _hook.SetClipboard(message.Data);
 
         }
         private void OnMouseMoveFromServer(MouseMoveMessage message)
@@ -322,8 +385,10 @@ namespace RemoteController.Core
                 if (disposing)
                 {
                     isRunning = false;
+#if QUEUE_SERVER
                     messageHandle.Set();
-                    messageHandle.Dispose();
+                    messageHandle.Dispose(); 
+#endif
                     cts.Cancel();
                     cts.Dispose();
                 }

@@ -35,7 +35,7 @@ namespace RemoteController.Core
                 configuration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
             }
             _connection.Start();
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.StartDispatcher(); 
 #endif
             await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen));
@@ -59,7 +59,7 @@ namespace RemoteController.Core
         public void MoveScreenRight()
         {
             //move the screens for the current client.
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(MoveScreenMessage.Right); 
 #else
             _dispatcher.Send(MoveScreenMessage.Right.GetBytes());
@@ -69,7 +69,7 @@ namespace RemoteController.Core
         public void MoveScreenLeft()
         {
             //move the screens for the current client. 
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Process(MoveScreenMessage.Left); 
 #else
             _dispatcher.Send(MoveScreenMessage.Left.GetBytes());
@@ -90,7 +90,7 @@ namespace RemoteController.Core
         {
             _hook.Dispose();
             _connection.Dispose();
-#if QUEUE
+#if QUEUE_CLIENT
             _dispatcher.Dispose(); 
 #endif
         }
