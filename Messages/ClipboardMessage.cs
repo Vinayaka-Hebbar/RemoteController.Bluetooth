@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace RemoteController.Messages
@@ -14,9 +15,15 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.Clipboard;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
         {
-            var count = Encoding.Default.GetByteCount(Data);
+            return GetBytes(Data);
+        }
+
+        public static unsafe byte[] GetBytes(string data)
+        {
+            var count = Encoding.Default.GetByteCount(data);
             var res = new byte[count + 8];
             fixed (byte* b = res)
             {
@@ -24,7 +31,7 @@ namespace RemoteController.Messages
                 var bytes = b;
                 // skip the header
                 bytes += 8;
-                fixed (char* c = Data)
+                fixed (char* c = data)
                     Encoding.Default.GetBytes(c, count, bytes, res.Length);
             }
             return res;

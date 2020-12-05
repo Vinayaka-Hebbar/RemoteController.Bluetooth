@@ -76,7 +76,11 @@ namespace RemoteController.Core
 #endif
             //Console.WriteLine("Sending clipboard to server");
 
-            _dispatcher.Process(new ClipboardMessage(e.Value));
+#if QUEUE
+            _dispatcher.Process(new ClipboardMessage(e.Value)); 
+#else
+            _dispatcher.Send(ClipboardMessage.GetBytes(e.Value));
+#endif
         }
 
         private void OnGlobalHookMouseWheel(object sender, MouseWheelEventArgs e)
@@ -92,7 +96,11 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-            _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
+#if QUEUE
+            _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY)); 
+#else
+            _dispatcher.Send(MouseWheelMessage.GetBytes(e.DeltaX, e.DeltaY));
+#endif
             e.Handled = true;
 
         }
@@ -108,7 +116,11 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-            _dispatcher.Process(new MouseButtonMessage(e.Button, true));
+#if QUEUE
+            _dispatcher.Process(new MouseButtonMessage(e.Button, true)); 
+#else
+            _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, true));
+#endif
             e.Handled = true;
         }
 
@@ -124,7 +136,11 @@ namespace RemoteController.Core
                 return; 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
-            _dispatcher.Process(new MouseButtonMessage(e.Button, false));
+#if QUEUE
+            _dispatcher.Process(new MouseButtonMessage(e.Button, false)); 
+#else
+            _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, false));
+#endif
             e.Handled = true;
 
         }
@@ -154,8 +170,12 @@ namespace RemoteController.Core
                     e.Handled = true; //windows obeys this
                 }
 
+#if QUEUE
                 //send over the net
                 _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
+#else
+                _dispatcher.Send(MouseMoveMessage.GetBytes(ClientState.VirtualX, ClientState.VirtualY));
+#endif
             }
             else if (!ClientState.CurrentClientFocused)
             {
@@ -184,7 +204,11 @@ namespace RemoteController.Core
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
-            _dispatcher.Process(new KeyPressMessage(e.Key, true));
+#if QUEUE
+            _dispatcher.Process(new KeyPressMessage(e.Key, true)); 
+#else
+            _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, true));
+#endif
             e.Handled = true;
         }
 
@@ -201,7 +225,11 @@ namespace RemoteController.Core
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
-            _dispatcher.Process(new KeyPressMessage(e.Key, false));
+#if QUEUE
+            _dispatcher.Process(new KeyPressMessage(e.Key, false)); 
+#else
+            _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, false));
+#endif
             e.Handled = true;
 
         }

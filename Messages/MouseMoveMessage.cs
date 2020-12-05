@@ -31,6 +31,22 @@ namespace RemoteController.Messages
             return res;
         }
 
+        public unsafe static byte[] GetBytes(double virtualX, double virtualY)
+        {
+            var res = new byte[24];
+            fixed (byte* b = res)
+            {
+                Message.SetHeader(b, Message.MouseMove, 16);
+                var bytes = b;
+                // skip the header bytes
+                bytes += 8;
+                *(long*)bytes = (long)virtualX;
+                bytes += 8;
+                *(long*)bytes = (long)virtualY;
+            }
+            return res;
+        }
+
         public unsafe static MouseMoveMessage Parse(MessageInfo info, NetworkStream stream)
         {
             var buffer = new byte[info.Length];

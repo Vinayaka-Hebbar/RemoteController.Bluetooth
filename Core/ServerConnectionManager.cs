@@ -34,6 +34,15 @@ namespace RemoteController.Core
             }
         }
 
+        public async Task Send(byte[] message)
+        {
+            if (stream != null)
+            {
+                await stream.WriteAsync(message, 0, message.Length);
+                await stream.FlushAsync();
+            }
+        }
+
         public Task<CheckInMessage> WaitForCheckIn()
         {
             if (stream != null)

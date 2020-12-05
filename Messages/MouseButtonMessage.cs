@@ -33,6 +33,23 @@ namespace RemoteController.Messages
             return res;
         }
 
+        public static unsafe byte[] GetBytes(MouseButton button, bool isDown)
+        {
+            var res = new byte[8];
+            fixed (byte* b = res)
+            {
+                Message.SetHeader(b, Message.MouseButton, 0);
+                var bytes = b;
+                // append to header
+                bytes += 5;
+                *bytes = (byte)button;
+                bytes++;
+                *bytes = isDown ? (byte)1 : (byte)0;
+
+            }
+            return res;
+        }
+
         public unsafe static MouseButtonMessage Parse(IMessage message)
         {
             var bytes = message.GetBytes();

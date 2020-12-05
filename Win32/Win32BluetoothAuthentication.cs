@@ -1,6 +1,8 @@
 ﻿using RemoteController.Bluetooth.Core;
+using RemoteController.Win32;
 using System;
 using System.Runtime.InteropServices;
+using Win32Native = RemoteController.Win32.NativeMethods;
 
 namespace RemoteController.Bluetooth.Win32
 {
@@ -18,10 +20,10 @@ namespace RemoteController.Bluetooth.Win32
             _pin = pin;
             BLUETOOTH_DEVICE_INFO device = BLUETOOTH_DEVICE_INFO.Create();
             device.Address = address;
-            NativeMethods.BluetoothGetDeviceInfo(IntPtr.Zero, ref device);
+            Win32Native.BluetoothGetDeviceInfo(IntPtr.Zero, ref device);
             _callback = new BluetoothAuthenticationCallbackEx(Callback);
 
-            int result = NativeMethods.BluetoothRegisterForAuthenticationEx(ref device, out _handle, _callback, IntPtr.Zero);
+            int result = Win32Native.BluetoothRegisterForAuthenticationEx(ref device, out _handle, _callback, IntPtr.Zero);
         }
 
         private bool Callback(IntPtr pvParam, ref BLUETOOTH_AUTHENTICATION_CALLBACK_PARAMS pAuthCallbackParams)
@@ -36,7 +38,7 @@ namespace RemoteController.Bluetooth.Win32
                         bthAddressRemote = pAuthCallbackParams.deviceInfo.Address,
                         numericComp_passkey = pAuthCallbackParams.Numeric_Value_Passkey
                     };
-                    return NativeMethods.BluetoothSendAuthenticationResponseEx(IntPtr.Zero, ref nresponse) == 0;
+                    return Win32Native.BluetoothSendAuthenticationResponseEx(IntPtr.Zero, ref nresponse) == 0;
 
                 case BluetoothAuthenticationMethod.Legacy:
                     BLUETOOTH_AUTHENTICATE_RESPONSE__PIN_INFO response = new BLUETOOTH_AUTHENTICATE_RESPONSE__PIN_INFO();
@@ -46,7 +48,7 @@ namespace RemoteController.Bluetooth.Win32
                     System.Text.Encoding.ASCII.GetBytes(_pin).CopyTo(response.pinInfo.pin, 0);
                     response.pinInfo.pinLength = _pin.Length;
 
-                    return NativeMethods.BluetoothSendAuthenticationResponseEx(IntPtr.Zero, ref response) == 0;
+                    return Win32Native.BluetoothSendAuthenticationResponseEx(IntPtr.Zero, ref response) == 0;
             }
 
             return false;
@@ -64,7 +66,7 @@ namespace RemoteController.Bluetooth.Win32
                     // TODO: dispose managed state (managed objects).
                 }
 
-                NativeMethods.BluetoothUnregisterAuthentication(_handle);
+                Win32Native.BluetoothUnregisterAuthentication(_handle);
 
                 disposedValue = true;
             }

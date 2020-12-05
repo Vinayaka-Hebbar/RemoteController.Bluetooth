@@ -571,7 +571,7 @@ namespace RemoteController
             //
             if (ret != NativeErrorSuccess)
             {
-                System.Diagnostics.Trace.WriteLine(string.Format(
+                Trace.WriteLine(string.Format(
                     System.Globalization.CultureInfo.InvariantCulture,
                     "BluetoothSendAuthenticationResponse failed: {0}=0x{0:X}", ret));
             }

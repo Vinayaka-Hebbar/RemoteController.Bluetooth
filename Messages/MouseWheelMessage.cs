@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
 {
@@ -15,18 +16,24 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.MouseWheel;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
         {
+            return GetBytes(DeltaX, DeltaY);
+        }
+
+        public static unsafe byte[] GetBytes(int deltaX, int deltaY)
+        {
             var res = new byte[16];
-            fixed(byte *b = res)
+            fixed (byte* b = res)
             {
                 Message.SetHeader(b, Message.MouseWheel, 8);
                 var bytes = b;
                 // skip the header
                 bytes += 8;
-                *(int*)bytes = DeltaX;
+                *(int*)bytes = deltaX;
                 bytes += 4;
-                *(int*)bytes = DeltaY;
+                *(int*)bytes = deltaY;
             }
             return res;
         }

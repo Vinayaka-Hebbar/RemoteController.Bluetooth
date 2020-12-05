@@ -1,5 +1,6 @@
 ﻿using RemoteController.Win32.Hooks;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
 {
@@ -16,7 +17,13 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.KeyPress;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
+        {
+            return GetBytes(Key, IsDown);
+        }
+
+        public static unsafe byte[] GetBytes(Key key, bool isDown)
         {
             var res = new byte[13];
             fixed (byte* b = res)
@@ -25,9 +32,9 @@ namespace RemoteController.Messages
                 var bytes = b;
                 // skip the header
                 bytes += 8;
-                *(int*)bytes = (int)Key;
+                *(int*)bytes = (int)key;
                 bytes += 4;
-                *bytes = (byte)(IsDown ? 1 : 0);
+                *bytes = (byte)(isDown ? 1 : 0);
             }
             return res;
         }

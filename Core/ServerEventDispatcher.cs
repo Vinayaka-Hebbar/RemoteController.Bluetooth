@@ -1,15 +1,22 @@
-﻿using RemoteController.Messages;
+﻿#if QUEUE
+using RemoteController.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
+#endif
 
 namespace RemoteController.Core
 {
-    public class ServerEventDispatcher : IDisposable
+    public class ServerEventDispatcher
+#if QUEUE
+        : IDisposable
+#endif
     {
         private readonly ServerConnectionManager _manager;
+
+#if QUEUE
         private readonly EventWaitHandle eventHandle;
         private readonly ConcurrentQueue<IMessage> messages = new ConcurrentQueue<IMessage>();
         bool isRunning;
@@ -19,15 +26,22 @@ namespace RemoteController.Core
             _manager = manager;
             eventHandle = new AutoResetEvent(false);
             messages = new ConcurrentQueue<IMessage>();
+        } 
+#else
+        public ServerEventDispatcher(ServerConnectionManager manager)
+        {
+            _manager = manager;
         }
+#endif
 
+#if QUEUE
         public void StartDispatcher()
         {
             isRunning = true;
             var task = new Task(DispatchMessages, creationOptions: TaskCreationOptions.LongRunning);
             task.ConfigureAwait(false);
             task.Start();
-        }
+        } 
 
         async void DispatchMessages()
         {
@@ -60,13 +74,22 @@ namespace RemoteController.Core
                 // invalid write
             }
         }
+#endif
 
+#if QUEUE
         public void Process(IMessage message)
         {
             messages.Enqueue(message);
             eventHandle.Set();
+        } 
+#endif
+
+        public async void Send(byte[] message)
+        {
+            await _manager.Send(message);
         }
 
+#if QUEUE
         private bool disposed;
 
         protected virtual void Dispose(bool disposing)
@@ -87,6 +110,7 @@ namespace RemoteController.Core
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        }
+        } 
+#endif
     }
 }

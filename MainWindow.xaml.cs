@@ -9,6 +9,7 @@ namespace RemoteController
     public partial class MainWindow : Window
     {
         private readonly ViewModels.MainViewModel vm;
+
         public MainWindow()
         {
             DataContext = vm = new ViewModels.MainViewModel();
