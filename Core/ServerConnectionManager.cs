@@ -53,7 +53,7 @@ namespace RemoteController.Core
                     var message = new MessageInfo(bytes);
                     if(message.MessageType == MessageType.CheckIn)
                     {
-                        return Task.FromResult(CheckInMessage.Parse(message, stream));
+                        return Task.FromResult(new CheckInMessage(MessagePacket.Parse(message, stream)));
                     }
                 }
             }
