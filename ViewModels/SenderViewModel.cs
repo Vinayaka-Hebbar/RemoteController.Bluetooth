@@ -50,20 +50,26 @@ namespace RemoteController.ViewModels
 
         async void OnConnect(object arg)
         {
-            if (client != null)
+            try
             {
-                client.Dispose();
-                client = null;
-                State = ConnectState;
-            }
-            else
-            {
-                client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
-                if (await client.Start())
+                if (client != null)
                 {
-                    State = DisconnectState;
-                    client.RunMessageLoop();
+                    client.Dispose();
+                    client = null;
+                    State = ConnectState;
                 }
+                else
+                {
+                    client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
+                    if (await client.Start())
+                    {
+                        State = DisconnectState;
+                        client.RunMessageLoop();
+                    }
+                }
+            }
+            catch (System.IO.IOException)
+            {
             }
         }
 
