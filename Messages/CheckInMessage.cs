@@ -17,6 +17,50 @@ namespace RemoteController.Messages
             Screens = screens;
         }
 
+        public unsafe CheckInMessage(IMessage message)
+        {
+            var buffer = message.GetBytes();
+            fixed (byte* b = buffer)
+            {
+                var cu = b;
+                int clientIdSize = *(short*)b;
+                cu += 2;
+                var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), clientIdSize);
+                cu += clientIdSize;
+                int screensCount = *cu;
+                cu++;
+                var screens = new VirtualScreen[screensCount];
+                for (int i = 0; i < screensCount; i++)
+                {
+                    int localX = *(int*)cu;
+                    cu += 4;
+                    int localY = *(int*)cu;
+                    cu += 4;
+                    int x = *(int*)cu;
+                    cu += 4;
+                    int y = *(int*)cu;
+                    cu += 4;
+                    int width = *(int*)cu;
+                    cu += 4;
+                    int height = *(int*)cu;
+                    cu += 4;
+                    screens[i] = new VirtualScreen(clientId)
+                    {
+                        LocalX = localX,
+                        LocalY = localY,
+                        X = x,
+                        Y = y,
+                        Width = width,
+                        Height = height
+                    };
+                }
+
+
+                ClientName = clientId;
+                Screens = screens;
+            }
+        }
+
         public MessageType Type => MessageType.CheckIn;
 
         public unsafe byte[] GetBytes()
@@ -62,51 +106,6 @@ namespace RemoteController.Messages
                 }
             }
             return res;
-        }
-
-        public unsafe static CheckInMessage Parse(MessageInfo info, NetworkStream stream)
-        {
-            var buffer = new byte[info.Length];
-            if (stream.Read(buffer, 0, info.Length) > 0)
-            {
-                fixed (byte* b = buffer)
-                {
-                    var cu = b;
-                    int clientIdSize = *(short*)b;
-                    cu += 2;
-                    var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), clientIdSize);
-                    cu += clientIdSize;
-                    int screensCount = *cu;
-                    cu++;
-                    var screens = new VirtualScreen[screensCount];
-                    for (int i = 0; i < screensCount; i++)
-                    {
-                        int localX = *(int*)cu;
-                        cu += 4;
-                        int localY = *(int*)cu;
-                        cu += 4;
-                        int x = *(int*)cu;
-                        cu += 4;
-                        int y = *(int*)cu;
-                        cu += 4;
-                        int width = *(int*)cu;
-                        cu += 4;
-                        int height = *(int*)cu;
-                        cu += 4;
-                        screens[i] = new VirtualScreen(clientId)
-                        {
-                            LocalX = localX,
-                            LocalY = localY,
-                            X = x,
-                            Y = y,
-                            Width = width,
-                            Height = height
-                        };
-                    }
-                    return new CheckInMessage(clientId, screens);
-                }
-            }
-            return default;
         }
     }
 }

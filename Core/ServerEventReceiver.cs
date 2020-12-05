@@ -163,7 +163,7 @@ namespace RemoteController.Core
                             messages.Enqueue(MessagePacket.Parse(message, stream));
                             break;
                         case MessageType.CheckIn:
-                            CheckInMessage checkIn = CheckInMessage.Parse(message, stream);
+                            CheckInMessage checkIn = new CheckInMessage(MessagePacket.Parse(message, stream));
                             ScreenConfig(stream);
                             messages.Enqueue(checkIn);
                             break;
