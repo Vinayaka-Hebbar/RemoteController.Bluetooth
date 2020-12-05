@@ -78,17 +78,17 @@ namespace RemoteController.Desktop
                 State.LastPositionX = Math.Abs(State.VirtualX - s.X) + s.LocalX;
                 State.LastPositionY = Math.Abs(State.VirtualY - s.Y) + s.LocalY;
 
+                State.CurrentClientFocused = true;
                 //we previous weren't focused, but now we are
                 if (!State.CurrentClientFocused)
                 {
-                    //_hook.Hook.SetMousePos((int)localX, (int)localY);
                     result.MoveMouse = true;
                     result.HandleEvent = true;
+                    return result;
                     //Console.WriteLine("regaining focus: " + localX + ","+ localY);
 
                     //mark this as handled since we manually set the cursor and don't want it to rubberband around
                 }
-                State.CurrentClientFocused = true;
                 result.MoveMouse = replay;
 
             }
