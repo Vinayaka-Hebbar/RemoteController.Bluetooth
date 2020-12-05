@@ -51,7 +51,7 @@ namespace RemoteController.Core
                 if(await stream.ReadAsync(bytes, 0 , Message.HeaderSize) > 0)
                 {
                     var message = new MessageInfo(bytes);
-                    if(message.MessageType == MessageType.CheckIn)
+                    if(message.Type == MessageType.CheckIn)
                     {
                         return new CheckInMessage(MessagePacket.Parse(message, stream));
                     }

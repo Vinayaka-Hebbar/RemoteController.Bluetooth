@@ -2,45 +2,32 @@
 {
     public readonly struct MessageInfo : IMessage
     {
-        public readonly int Type;
-        public readonly int Length;
-        public readonly short PayLoad;
+        public readonly byte[] Header;
 
-        public unsafe MessageInfo(byte[] buffer)
+        public int Length
         {
-            fixed (byte* b = buffer)
+            get
             {
-                Type = *b;
-                var res = b;
-                res++;
-                Length = *(int*)(res);
-                res += 4;
-                PayLoad = *(short*)res;
+                unsafe
+                {
+                    fixed (byte* b = Header)
+                    {
+                        return *(int*)(b + 1);
+                    }
+                }
             }
         }
 
-        public MessageInfo(int type, int length)
+        public MessageInfo(byte[] buffer)
         {
-            Type = type;
-            Length = length;
-            PayLoad = 0;
+            Header = buffer;
         }
 
-        public MessageType MessageType => (MessageType)(Type & Message.TypeMask);
+        public MessageType Type => (MessageType)(Header[0] & Message.TypeMask);
 
-        MessageType IMessage.Type => MessageType;
-
-        public unsafe byte[] GetBytes()
+        public byte[] GetBytes()
         {
-            var bytes = new byte[8];
-            fixed (byte* b = bytes)
-            {
-                Message.SetHeader(b, Type, Length);
-                var res = b;
-                res += 5;
-                *(short*)res = PayLoad;
-            }
-            return bytes;
+            return Header;
         }
     }
 }

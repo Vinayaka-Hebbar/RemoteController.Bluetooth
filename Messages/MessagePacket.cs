@@ -14,7 +14,7 @@ namespace RemoteController.Messages
             Data = data;
         }
 
-        public MessageType Type => Info.MessageType;
+        public MessageType Type => Info.Type;
 
         public static MessagePacket Parse(MessageInfo info, NetworkStream stream)
         {
