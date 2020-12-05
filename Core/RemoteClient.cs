@@ -38,7 +38,7 @@ namespace RemoteController.Core
 #if QUEUE_CLIENT
             _dispatcher.StartDispatcher(); 
 #endif
-            await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen));
+            await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen).GetBytes());
             var checkIn = await _connection.WaitForCheckIn();
             var screens = checkIn.Screens;
             ScreenConfiguration screenConfiguration = state.ScreenConfiguration;

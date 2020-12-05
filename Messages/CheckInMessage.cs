@@ -1,6 +1,5 @@
 ﻿using RemoteController.Core;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Text;
 
 namespace RemoteController.Messages

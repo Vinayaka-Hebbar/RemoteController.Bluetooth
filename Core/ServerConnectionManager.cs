@@ -43,21 +43,21 @@ namespace RemoteController.Core
             }
         }
 
-        public Task<CheckInMessage> WaitForCheckIn()
+        public async Task<CheckInMessage> WaitForCheckIn()
         {
             if (stream != null)
             {
                 var bytes = new byte[Message.HeaderSize];
-                if(stream.Read(bytes, 0 , Message.HeaderSize) > 0)
+                if(await stream.ReadAsync(bytes, 0 , Message.HeaderSize) > 0)
                 {
                     var message = new MessageInfo(bytes);
                     if(message.MessageType == MessageType.CheckIn)
                     {
-                        return Task.FromResult(new CheckInMessage(MessagePacket.Parse(message, stream)));
+                        return new CheckInMessage(MessagePacket.Parse(message, stream));
                     }
                 }
             }
-            return Task.FromResult(default(CheckInMessage));
+            return default;
         }
 
         public void Dispose()
