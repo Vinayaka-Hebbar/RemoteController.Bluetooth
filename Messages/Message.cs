@@ -12,7 +12,7 @@
 
         public const int TypeMask = 0xF;
 
-        public const int HeaderSize = 10;
+        public const int HeaderSize = 9;
 
         public unsafe static void SetHeader(byte* b, int type, int len)
         {
