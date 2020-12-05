@@ -30,30 +30,22 @@ namespace RemoteController.Core
         public async Task<bool> Start()
         {
             _hook.Init();
-
+            ScreenConfiguration configuration = new ScreenConfiguration();
             //there is some kind of dpi awareness bug here on windows. not sure exactly what's up.
             foreach (Win32.Hooks.Display display in _hook.GetDisplays())
             {
-                state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
+                configuration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
             }
             _connection.Start();
             _dispatcher.StartDispatcher();
-            await _connection.Send(new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens.Values.SelectMany(x => x).ToArray()));
+            await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen));
             var checkIn = await _connection.WaitForCheckIn();
             var screens = checkIn.Screens;
             ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
-            foreach (var screen in screens)
-            {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
-                {
-                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    VirtualScreen last = screenConfiguration.GetFurthestLeft();
-                    screenConfiguration.AddScreenRight(last, screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
-                }
-            }
+            screenConfiguration.AddScreensRight(screens);
+            screenConfiguration.AddScreensLeft(configuration.AllScreen);
             _hook.Start();
-            var s = state.ScreenConfiguration.GetFurthestRight();
+            var s = state.ScreenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             if (s.Client == state.ClientName)

@@ -2,6 +2,8 @@
 {
     public class VirtualScreen
     {
+        public static readonly VirtualScreen Empty = new VirtualScreen(string.Empty);
+
         public VirtualScreen(string client)
         {
             Client = client;

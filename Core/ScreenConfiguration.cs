@@ -6,11 +6,50 @@ namespace RemoteController.Core
 {
     public class ScreenConfiguration
     {
-        public ConcurrentDictionary<string, List<VirtualScreen>> Screens { get; set; }
+        public ConcurrentDictionary<string, List<VirtualScreen>> Screens { get; }
+
+        public IList<VirtualScreen> AllScreen
+        {
+            get
+            {
+                List<VirtualScreen> res = new List<VirtualScreen>();
+                foreach (var item in Screens)
+                {
+                    res.AddRange(item.Value);
+                }
+                return res;
+            }
+        }
 
         public ScreenConfiguration()
         {
             Screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
+        }
+
+        public void AddScreensRight(IList<VirtualScreen> screens)
+        {
+            foreach (var screen in screens)
+            {
+                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
+                if (!Screens.ContainsKey(screen.Client))
+                {
+                    Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    AddScreenRight(GetFurthestLeft(), screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                }
+            }
+        }
+
+        public void AddScreensLeft(IList<VirtualScreen> screens)
+        {
+            foreach (var screen in screens)
+            {
+                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
+                if (!Screens.ContainsKey(screen.Client))
+                {
+                    Screens.TryAdd(screen.Client, new List<VirtualScreen>());
+                    AddScreenRight(GetFurthestLeft(), screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                }
+            }
         }
 
         public VirtualScreen AddScreen(double localX, double localY, double virtualX, double virtualY, double width, double height, string client)
@@ -109,7 +148,7 @@ namespace RemoteController.Core
 
         public VirtualScreen GetFurthestLeft()
         {
-            VirtualScreen furthestLeft = null;
+            VirtualScreen furthestLeft = VirtualScreen.Empty;
             double minX = double.MaxValue;
             foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
             {
