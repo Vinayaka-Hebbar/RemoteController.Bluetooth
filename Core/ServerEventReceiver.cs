@@ -297,8 +297,8 @@ namespace RemoteController.Core
 #endif
 
             _hook.SetClipboard(message.Data);
-
         }
+
         private void OnMouseMoveFromServer(MouseMoveMessage message)
         {
 #if Bail
@@ -313,7 +313,7 @@ namespace RemoteController.Core
             state.VirtualY = message.VirtualY;
 
             //send this movement to our virtual screen manager for processing
-            var result = _screen.ProcessVirtualCoordinatesUpdate(true);
+            var result = _screen.ProcessVirtualCoordinatesUpdate();
             if (result.MoveMouse)
             {
                 _hook.SetMousePos(state.LastPositionX, state.LastPositionY);
