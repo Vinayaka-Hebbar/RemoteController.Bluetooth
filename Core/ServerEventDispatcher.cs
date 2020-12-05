@@ -4,7 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 #endif
 
 namespace RemoteController.Core
@@ -24,9 +24,9 @@ namespace RemoteController.Core
         public ServerEventDispatcher(ServerConnectionManager manager)
         {
             _manager = manager;
-            eventHandle = new AutoResetEvent(false);
+            eventHandle = new EventWaitHandle(false, EventResetMode.ManualReset, null);
             messages = new ConcurrentQueue<IMessage>();
-        } 
+        }
 #else
         public ServerEventDispatcher(ServerConnectionManager manager)
         {
@@ -41,7 +41,7 @@ namespace RemoteController.Core
             var task = new Task(DispatchMessages, creationOptions: TaskCreationOptions.LongRunning);
             task.ConfigureAwait(false);
             task.Start();
-        } 
+        }
 
         void DispatchMessages()
         {
@@ -49,7 +49,7 @@ namespace RemoteController.Core
             {
                 while (isRunning)
                 {
-                    if (eventHandle.WaitOne() && isRunning)
+                    if (eventHandle.WaitOne(-1, false) && isRunning)
                     {
                         var count = messages.Count;
                         while (count > 0)
@@ -81,7 +81,7 @@ namespace RemoteController.Core
         {
             messages.Enqueue(message);
             eventHandle.Set();
-        } 
+        }
 #endif
 
         public async void Send(byte[] message)
@@ -110,7 +110,7 @@ namespace RemoteController.Core
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        } 
+        }
 #endif
     }
 }

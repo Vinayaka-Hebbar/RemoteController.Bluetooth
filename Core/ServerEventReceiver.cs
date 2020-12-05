@@ -32,7 +32,7 @@ namespace RemoteController.Core
         {
             _hook = new WindowsGlobalHook();
             _screen = screen;
-            messageHandle = new AutoResetEvent(false);
+            messageHandle = new EventWaitHandle(false, EventResetMode.ManualReset, null);
             messages = new ConcurrentQueue<IMessage>();
             cts = new CancellationTokenSource();
             state = screen.State;
@@ -72,7 +72,7 @@ namespace RemoteController.Core
         {
             while (isRunning)
             {
-                if (messageHandle.WaitOne() && isRunning)
+                if (messageHandle.WaitOne(-1, false) && isRunning)
                 {
                     var count = messages.Count;
                     while (count > 0)
