@@ -9,8 +9,8 @@
         xmlns:model="clr-namespace:RemoteController.Model"
         Title="MainWindow"
         Height="450"
+        Icon="{StaticResource AppIcon}"
         Width="800">
-
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition MinHeight="150" />
