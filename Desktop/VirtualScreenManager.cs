@@ -75,11 +75,8 @@ namespace RemoteController.Desktop
 
             if (s.Client == State.ClientName)
             {
-                double localX = Math.Abs(State.VirtualX - s.X) + s.LocalX;
-                double localY = Math.Abs(State.VirtualY - s.Y) + s.LocalY;
-
-                State.LastPositionX = localX;
-                State.LastPositionY = localY;
+                State.LastPositionX = Math.Abs(State.VirtualX - s.X) + s.LocalX;
+                State.LastPositionY = Math.Abs(State.VirtualY - s.Y) + s.LocalY;
 
                 //we previous weren't focused, but now we are
                 if (!State.CurrentClientFocused)
@@ -102,14 +99,12 @@ namespace RemoteController.Desktop
                     //we have moved off screen now - hide the mouse                    
                     VirtualScreen screen = State.ScreenConfiguration.Screens[State.ClientName].First();
 
-                    double localMaxX = 0 + screen.Width - 1;
-                    double localMaxY = 0 + screen.Height - 1;
                     //hide mouse
                     //Console.WriteLine("detected coordinates outside of our current screen - hiding mouse at " + localMaxX + "," + localMaxY);
                     //_hook.Hook.SetMousePos((int)localMaxX, (int)localMaxY);
                     result.MoveMouse = true;
-                    State.LastPositionX = (int)localMaxX;
-                    State.LastPositionY = (int)localMaxY;
+                    State.LastPositionX = (int)(0 + screen.Width - 1);
+                    State.LastPositionY = (int)(0 + screen.Height - 1);
                     //Console.WriteLine("Setting last known position of mouse to " + localMaxX + "," + localMaxY);
                 }
 

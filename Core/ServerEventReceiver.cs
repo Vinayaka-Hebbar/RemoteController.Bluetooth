@@ -55,6 +55,8 @@ namespace RemoteController.Core
             {
                 s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
             }
+            state.LastPositionX = 0;
+            state.LastPositionY = 0;
             var reciever = new Task(Receive, cts.Token, creationOptions: TaskCreationOptions.LongRunning);
             reciever.ConfigureAwait(false);
             reciever.Start();
