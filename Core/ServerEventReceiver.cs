@@ -139,7 +139,7 @@ namespace RemoteController.Core
             }
         }
 
-        void ProcessClient(Bluetooth.BluetoothClient client)
+        void ProcessClient(BluetoothClient client)
         {
             var stream = client.GetStream();
             while (true)
@@ -151,10 +151,10 @@ namespace RemoteController.Core
                     switch ((MessageType)(message.Type & Message.TypeMask))
                     {
                         case MessageType.MoveScreen:
+                        case MessageType.MouseButton:
                             messages.Enqueue(message);
                             break;
                         case MessageType.MouseWheel:
-                        case MessageType.MouseButton:
                         case MessageType.MouseMove:
                         case MessageType.KeyPress:
                         case MessageType.Clipboard:
