@@ -25,8 +25,8 @@ namespace RemoteController.Core
         public void Init()
         {
             Hook.Init();
-
         }
+
         public void Start()
         {
             Hook.Start();
@@ -71,9 +71,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailKeyboard())
                 return; 
-#endif
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
+#endif
             //Console.WriteLine("Sending clipboard to server");
 
             _dispatcher.Process(new ClipboardMessage(e.Value));
@@ -90,8 +90,8 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailMouse())
                 return; 
-#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
+#endif
             _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
             e.Handled = true;
 
@@ -106,8 +106,8 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailMouse())
                 return; 
-#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
+#endif
             _dispatcher.Process(new MouseButtonMessage(e.Button, true));
             e.Handled = true;
         }
@@ -122,8 +122,8 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailMouse())
                 return; 
-#endif
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
+#endif
             _dispatcher.Process(new MouseButtonMessage(e.Button, false));
             e.Handled = true;
 
@@ -135,9 +135,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailMouse())
                 return; 
-#endif
 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
+#endif
 
             CoordinateCalculationResult result = _screen.UpdateVirtualMouseCoordinates(e);
             if (result == CoordinateCalculationResult.Valid)
@@ -182,11 +182,10 @@ namespace RemoteController.Core
             if (ShouldHookBailKeyboard())
                 return;
 
-#endif
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
+#endif
             _dispatcher.Process(new KeyPressMessage(e.Key, true));
             e.Handled = true;
-
         }
 
         private void OnGlobalHookKeyUp(object sender, KeyboardKeyEventArgs e)
@@ -199,9 +198,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldHookBailKeyboard())
                 return; 
-#endif
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
+#endif
             _dispatcher.Process(new KeyPressMessage(e.Key, false));
             e.Handled = true;
 

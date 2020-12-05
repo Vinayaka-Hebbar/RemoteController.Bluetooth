@@ -202,9 +202,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldServerBailKeyboard())
                 return;
-#endif
 
             state.LastServerEvent_Keyboard = DateTime.UtcNow;
+#endif
 
             _hook.SetClipboard(value);
 
@@ -214,9 +214,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldServerBailMouse())
                 return;
-#endif
 
             state.LastServerEvent_Mouse = DateTime.UtcNow;
+#endif
 
 
             state.VirtualX = message.VirtualX;
@@ -235,8 +235,8 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldServerBailMouse())
                 return;
-#endif
             state.LastServerEvent_Mouse = DateTime.UtcNow;
+#endif
             //Console.WriteLine("Received mouse wheel from server");
             if (state.CurrentClientFocused)
                 _hook.SendMouseWheel(message.DeltaX, message.DeltaY);
@@ -247,8 +247,8 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldServerBailMouse())
                 return;
-#endif
             state.LastServerEvent_Mouse = DateTime.UtcNow;
+#endif
             //Console.WriteLine("Received mouse down from server: " + button.ToString());
             if (state.CurrentClientFocused)
             {
@@ -269,9 +269,9 @@ namespace RemoteController.Core
 #if Bail
             if (ShouldServerBailMouse())
                 return;
-#endif
 
             state.LastServerEvent_Keyboard = DateTime.UtcNow;
+#endif
             if (state.CurrentClientFocused)
             {
                 if (message.IsDown)
