@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RemoteController.Core
+﻿namespace RemoteController.Core
 {
     public class ClientState
     {

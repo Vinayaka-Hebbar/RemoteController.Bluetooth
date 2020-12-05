@@ -54,9 +54,7 @@ namespace RemoteController.ViewModels
             {
                 if (client != null)
                 {
-                    client.Dispose();
-                    client = null;
-                    State = ConnectState;
+                    Stop();
                 }
                 else
                 {
@@ -70,7 +68,15 @@ namespace RemoteController.ViewModels
             }
             catch (System.IO.IOException)
             {
+                Stop();
             }
+        }
+
+        void Stop()
+        {
+            client.Dispose();
+            client = null;
+            State = ConnectState;
         }
 
         public async Task InitAsync()

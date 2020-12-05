@@ -4,7 +4,6 @@ using RemoteController.Messages;
 using RemoteController.Sockets;
 using RemoteController.Win32.Hooks;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;

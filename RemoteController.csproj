@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>net45</TargetFrameworks>
     <UseWPF>true</UseWPF>
-    <DefineConstants>WinXP;V2;Release</DefineConstants>
+    <DefineConstants>WinXP;V2;Release;QUEUE_CLIENT</DefineConstants>
     <RootNamespace>RemoteController</RootNamespace>
     <IsPackable>false</IsPackable>
     <PublisherName>Vinayaka Hebbarc</PublisherName>
