@@ -155,8 +155,7 @@ namespace RemoteController.Core
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
 
-            CoordinateCalculationResult result = _screen.UpdateVirtualMouseCoordinates(e);
-            if (result == CoordinateCalculationResult.Valid)
+            if (_screen.UpdateVirtualMouseCoordinates(e))
             {
                 CoordinateUpdateResult presult = _screen.ProcessVirtualCoordinatesUpdate(false);
                 if (presult.MoveMouse)

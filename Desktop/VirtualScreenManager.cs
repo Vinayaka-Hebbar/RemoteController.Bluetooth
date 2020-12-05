@@ -5,12 +5,6 @@ using System.Linq;
 
 namespace RemoteController.Desktop
 {
-    public enum CoordinateCalculationResult
-    {
-        Valid,
-        Invalid
-    }
-
     public struct CoordinateUpdateResult
     {
         public bool MoveMouse { get; set; }
@@ -27,7 +21,7 @@ namespace RemoteController.Desktop
             State = clientState;
         }
 
-        public CoordinateCalculationResult UpdateVirtualMouseCoordinates(MouseMoveEventArgs e)
+        public bool UpdateVirtualMouseCoordinates(MouseMoveEventArgs e)
         {
 
             //calculate the change from previous stored coordinates
@@ -44,13 +38,13 @@ namespace RemoteController.Desktop
             //Console.WriteLine("hook " + e.Mouse.X + "," + e.Mouse.Y + " : delta " + deltaX + "," + deltaY + " : virtual " + ClientState._virtualX + ", " + ClientState._virtualY + ", lastpos:"+ClientState._lastPositionX+","+ClientState._lastPositionY);
             if (s != null)
             {
-                return CoordinateCalculationResult.Valid;
+                return true;
             }
 
             State.VirtualX -= deltaX;
             State.VirtualY -= deltaY;
 
-            return CoordinateCalculationResult.Invalid;
+            return false;
 
         }
 
