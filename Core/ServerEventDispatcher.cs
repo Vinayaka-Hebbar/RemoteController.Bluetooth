@@ -79,7 +79,7 @@ namespace RemoteController.Core
 #if QUEUE_CLIENT
         public void Process(IMessage message)
         {
-            messages.EnQUEUE_CLIENT(message);
+            messages.Enqueue(message);
             eventHandle.Set();
         } 
 #endif
