@@ -4,8 +4,8 @@ namespace RemoteController.Win32.Native
 {
     public class MouseHookEventArgs : HandledEventArgs
     {
-        public MouseState MouseState { get; private set; }
-        public LowLevelMouseInputEvent MouseData { get; private set; }
+        public MouseState MouseState { get; }
+        public LowLevelMouseInputEvent MouseData { get; }
 
         public MouseHookEventArgs(
             LowLevelMouseInputEvent mouseData,

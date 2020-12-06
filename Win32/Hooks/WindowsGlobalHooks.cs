@@ -136,107 +136,100 @@ namespace RemoteController.Win32.Hooks
             MouseState.Position = new MousePoint(p.X, p.Y);
 
         }
+
         public IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
             bool fEatMouse = false;
+            var p = (LowLevelMouseInputEvent)Marshal.PtrToStructure(lParam, typeof(LowLevelMouseInputEvent));
+            MouseHookEventArgs eventArguments = new MouseHookEventArgs(p, (Native.MouseState)wParam.ToInt32());
 
-            int wparamTyped = wParam.ToInt32();
-            if (Enum.IsDefined(typeof(Native.MouseState), wparamTyped))
+            if (eventArguments.MouseState == Native.MouseState.MouseMove)
             {
-                object o = Marshal.PtrToStructure(lParam, typeof(LowLevelMouseInputEvent));
-                LowLevelMouseInputEvent p = (LowLevelMouseInputEvent)o;
+                OnMouseMove(eventArguments.MouseData.Point.X, eventArguments.MouseData.Point.Y);
+                fEatMouse = MouseMoveArgs.Handled;
+            }
 
-                MouseHookEventArgs eventArguments = new MouseHookEventArgs(p, (Native.MouseState)wparamTyped);
-                if (eventArguments.MouseState == Native.MouseState.MouseMove)
+            if (eventArguments.MouseState == Native.MouseState.LeftButtonDown)
+            {
+                OnMouseDown(MouseButton.Left);
+                fEatMouse = MouseDownArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.LeftButtonUp)
+            {
+                OnMouseUp(MouseButton.Left);
+                fEatMouse = MouseUpArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.RightButtonDown)
+            {
+                OnMouseDown(MouseButton.Right);
+                fEatMouse = MouseDownArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.RightButtonUp)
+            {
+                OnMouseUp(MouseButton.Right);
+                fEatMouse = MouseUpArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.MBUTTONDOWN)
+            {
+                OnMouseDown(MouseButton.Middle);
+                fEatMouse = MouseDownArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.MBUTTONUP)
+            {
+                OnMouseUp(MouseButton.Middle);
+                fEatMouse = MouseUpArgs.Handled;
+            }
+
+            if (eventArguments.MouseState == Native.MouseState.XBUTTONDOWN)
+            {
+                uint whichXButton = p.Mousedata >> 16;
+                if (whichXButton == 1)
                 {
-                    OnMouseMove(eventArguments.MouseData.Point.X, eventArguments.MouseData.Point.Y);
-                    fEatMouse = MouseMoveArgs.Handled;
+                    OnMouseDown(MouseButton.Button1);
+                    fEatMouse = MouseDownArgs.Handled;
                 }
-
-                if (eventArguments.MouseState == Native.MouseState.LeftButtonDown)
+                if (whichXButton == 2)
                 {
-                    OnMouseDown(MouseButton.Left);
+                    OnMouseDown(MouseButton.Button2);
                     fEatMouse = MouseDownArgs.Handled;
                 }
 
-                if (eventArguments.MouseState == Native.MouseState.LeftButtonUp)
+            }
+            if (eventArguments.MouseState == Native.MouseState.XBUTTONUP)
+            {
+                uint whichXButton = p.Mousedata >> 16;
+                if (whichXButton == 1)
                 {
-                    OnMouseUp(MouseButton.Left);
+                    OnMouseUp(MouseButton.Button1);
                     fEatMouse = MouseUpArgs.Handled;
                 }
-
-                if (eventArguments.MouseState == Native.MouseState.RightButtonDown)
+                if (whichXButton == 2)
                 {
-                    OnMouseDown(MouseButton.Right);
-                    fEatMouse = MouseDownArgs.Handled;
-                }
-
-                if (eventArguments.MouseState == Native.MouseState.RightButtonUp)
-                {
-                    OnMouseUp(MouseButton.Right);
+                    OnMouseUp(MouseButton.Button2);
                     fEatMouse = MouseUpArgs.Handled;
                 }
+            }
 
-                if (eventArguments.MouseState == Native.MouseState.MBUTTONDOWN)
-                {
-                    OnMouseDown(MouseButton.Middle);
-                    fEatMouse = MouseDownArgs.Handled;
-                }
-
-                if (eventArguments.MouseState == Native.MouseState.MBUTTONUP)
-                {
-                    OnMouseUp(MouseButton.Middle);
-                    fEatMouse = MouseUpArgs.Handled;
-                }
-
-                if (eventArguments.MouseState == Native.MouseState.XBUTTONDOWN)
-                {
-                    uint whichXButton = p.Mousedata >> 16;
-                    if (whichXButton == 1)
-                    {
-                        OnMouseDown(MouseButton.Button1);
-                        fEatMouse = MouseDownArgs.Handled;
-                    }
-                    if (whichXButton == 2)
-                    {
-                        OnMouseDown(MouseButton.Button2);
-                        fEatMouse = MouseDownArgs.Handled;
-                    }
-
-                }
-                if (eventArguments.MouseState == Native.MouseState.XBUTTONUP)
-                {
-                    uint whichXButton = p.Mousedata >> 16;
-                    if (whichXButton == 1)
-                    {
-                        OnMouseUp(MouseButton.Button1);
-                        fEatMouse = MouseUpArgs.Handled;
-                    }
-                    if (whichXButton == 2)
-                    {
-                        OnMouseUp(MouseButton.Button2);
-                        fEatMouse = MouseUpArgs.Handled;
-                    }
-
-                }
-
-                if (eventArguments.MouseState == Native.MouseState.MouseWheel)
-                {
-                    int delta = (int)p.Mousedata >> 16;
-                    OnMouseWheel(0, delta);
-                    fEatMouse = MouseDownArgs.Handled;
-                }
-                if (eventArguments.MouseState == Native.MouseState.MouseHWheel)
-                {
-                    int delta = (int)p.Mousedata >> 16;
-                    OnMouseWheel(delta, 0);
-                    fEatMouse = MouseDownArgs.Handled;
-                }
+            if (eventArguments.MouseState == Native.MouseState.MouseWheel)
+            {
+                int delta = (int)p.Mousedata >> 16;
+                OnMouseWheel(0, delta);
+                fEatMouse = MouseDownArgs.Handled;
+            }
+            if (eventArguments.MouseState == Native.MouseState.MouseHWheel)
+            {
+                int delta = (int)p.Mousedata >> 16;
+                OnMouseWheel(delta, 0);
+                fEatMouse = MouseDownArgs.Handled;
             }
 
             return fEatMouse ? (IntPtr)1 : NativeMethods.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
         }
-
 
 
         public override void SetMousePos(double x, double y)
