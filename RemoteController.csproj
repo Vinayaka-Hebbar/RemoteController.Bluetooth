@@ -4,10 +4,10 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>net45</TargetFrameworks>
     <UseWPF>true</UseWPF>
-    <DefineConstants>WinXP;V2;Release;QUEUE_CLIENT;QUEUE_SERVER</DefineConstants>
+    <DefineConstants>WinXP;V2;Release;Bail;QUEUE_CLIENT;SYNC_SERVER</DefineConstants>
     <RootNamespace>RemoteController</RootNamespace>
     <IsPackable>false</IsPackable>
-    <PublisherName>Vinayaka Hebbarc</PublisherName>
+    <PublisherName>Vinayaka Hebbar</PublisherName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StartupObject>RemoteController.App</StartupObject>
   </PropertyGroup>

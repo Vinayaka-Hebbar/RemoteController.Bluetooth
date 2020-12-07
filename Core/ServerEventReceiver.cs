@@ -1,5 +1,4 @@
-﻿using RemoteController.Bluetooth;
-using RemoteController.Desktop;
+﻿using RemoteController.Desktop;
 using RemoteController.Messages;
 using RemoteController.Sockets;
 using RemoteController.Win32.Hooks;
@@ -108,39 +107,8 @@ namespace RemoteController.Core
             }
         } 
 
-        void Receive()
-        {
-            var token = cts.Token;
-            try
-            {
-                var _listener = new BluetoothListener(ServiceId)
-                {
-                    ServiceName = "MyService"
-                };
-                _listener.Start();
-                using (token.Register(_listener.Stop))
-                {
-                    while (true)
-                    {
-                        using (var client = _listener.AcceptBluetoothClient())
-                        {
-                            if (token.IsCancellationRequested)
-                            {
-                                return;
-                            }
-                            ProcessClient(client); 
-                        }
-                    }
-                }
-
-            }
-            catch (SocketException)
-            {
-                // stoped receiving
-            }
-        }
-
-        void ProcessClient(BluetoothClient client)
+        
+        void ProcessClient(Bluetooth.BluetoothClient client)
         {
             var stream = client.GetStream();
             while (true)
@@ -172,6 +140,9 @@ namespace RemoteController.Core
             }
         }
 
+#endif
+
+#if SYNC_SERVER || QUEUE_SERVER
         void ScreenConfig(NetworkStream stream)
         {
             var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
@@ -179,8 +150,84 @@ namespace RemoteController.Core
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
         }
-#else
+#endif
 
+#if SYNC_SERVER || !QUEUE_SERVER
+        void Receive()
+        {
+            var token = cts.Token;
+            try
+            {
+                var _listener = new BluetoothListener(ServiceId)
+                {
+                    ServiceName = "MyService"
+                };
+                _listener.Start();
+                using (token.Register(_listener.Stop))
+                {
+                    while (true)
+                    {
+                        using (var client = _listener.AcceptBluetoothClient())
+                        {
+                            if (token.IsCancellationRequested)
+                            {
+                                return;
+                            }
+                            ProcessClient(client);
+                        }
+                    }
+                }
+
+            }
+            catch (SocketException)
+            {
+                // stoped receiving
+            }
+        }
+#endif
+
+#if SYNC_SERVER
+        void ProcessClient(Bluetooth.BluetoothClient client)
+        {
+            var stream = client.GetStream();
+            while (true)
+            {
+                var buffer = new byte[Message.HeaderSize];
+                if (stream.Read(buffer, 0, Message.HeaderSize) > 0 && isRunning)
+                {
+                    var message = new MessageInfo(buffer);
+                    switch (message.Type)
+                    {
+                        case MessageType.MoveScreen:
+                            break;
+                        case MessageType.MouseWheel:
+                            OnMouseWheelFromServer(new MouseWheelMessage(message));
+                            break;
+                        case MessageType.MouseButton:
+                            OnMouseButtonFromServer(new MouseButtonMessage(message));
+                            break;
+                        case MessageType.MouseMove:
+                            OnMouseMoveFromServer(new MouseMoveMessage(message));
+                            break;
+                        case MessageType.KeyPress:
+                            OnKeyPressFromServer(new KeyPressMessage(message));
+                            break;
+                        case MessageType.Clipboard:
+                            OnClipboardFromServer(new ClipboardMessage(MessagePacket.Parse(message, stream)));
+                            break;
+                        case MessageType.CheckIn:
+                            CheckInMessage checkIn = new CheckInMessage(MessagePacket.Parse(message, stream));
+                            ScreenConfig(stream);
+                            OnScreenConfig(checkIn.Screens);
+                            break;
+                    }
+                }
+            }
+        }
+#endif
+
+
+#if !QUEUE_SERVER && !SYNC_SERVER
         async void Receive()
         {
             var token = cts.Token;
@@ -201,7 +248,7 @@ namespace RemoteController.Core
                             {
                                 return;
                             }
-                            await ProcessClientAsync(client);
+                            await ProcessClientAsync(client); 
                         }
                     }
                 }
@@ -213,7 +260,7 @@ namespace RemoteController.Core
             }
         }
 
-        async Task ProcessClientAsync(BluetoothClient client)
+        async Task ProcessClientAsync(Bluetooth.BluetoothClient client)
         {
             var stream = client.GetStream();
             while (true)
@@ -263,22 +310,13 @@ namespace RemoteController.Core
 #if Bail
         private bool ShouldServerBailKeyboard()
         {
-            if ((DateTime.UtcNow - state.LastHookEvent_Keyboard).TotalSeconds < 2)
-            {
-                return true;
-            }
-            return false;
+            return (DateTime.UtcNow - state.LastHookEvent_Keyboard).TotalSeconds < 2;
         }
 
         private bool ShouldServerBailMouse()
         {
-            if ((DateTime.UtcNow - state.LastHookEvent_Mouse).TotalSeconds < 2)
-            {
-                return true;
-            }
-
-            return false;
-        } 
+            return (DateTime.UtcNow - state.LastHookEvent_Mouse).TotalSeconds < 2;
+        }
 #endif
 
         private void OnClipboardFromServer(ClipboardMessage message)

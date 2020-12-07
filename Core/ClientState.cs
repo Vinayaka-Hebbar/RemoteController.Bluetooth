@@ -27,10 +27,10 @@
         }
 
 #if Bail
-        public DateTime LastHookEvent_Mouse { get; set; } = DateTime.UtcNow;
-        public DateTime LastHookEvent_Keyboard { get; set; } = DateTime.UtcNow;
-        public DateTime LastServerEvent_Mouse { get; set; } = DateTime.UtcNow;
-        public DateTime LastServerEvent_Keyboard { get; set; } = DateTime.UtcNow; 
+        public System.DateTime LastHookEvent_Mouse = System.DateTime.UtcNow;
+        public System.DateTime LastHookEvent_Keyboard = System.DateTime.UtcNow;
+        public System.DateTime LastServerEvent_Mouse = System.DateTime.UtcNow;
+        public System.DateTime LastServerEvent_Keyboard = System.DateTime.UtcNow; 
 #endif
 
     }

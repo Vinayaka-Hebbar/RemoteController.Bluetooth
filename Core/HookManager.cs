@@ -236,18 +236,13 @@ namespace RemoteController.Core
 #if Bail
         private bool ShouldHookBailKeyboard()
         {
-            if ((DateTime.UtcNow - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1)
-                return true;
-
-            return false;
+            return (DateTime.UtcNow - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1;
         }
 
         bool ShouldHookBailMouse()
         {
-            if ((DateTime.UtcNow - ClientState.LastServerEvent_Mouse).TotalSeconds < 1)
-                return true;
-            return false;
-        } 
+            return (DateTime.UtcNow - ClientState.LastServerEvent_Mouse).TotalSeconds < 1;
+        }
 #endif
 
         public void Dispose()
