@@ -63,7 +63,6 @@ namespace RemoteController.Win32
         public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hMod, int dwThreadId);
 
 
-
         /// <summary>
         /// The UnhookWindowsHookEx function removes a hook procedure installed in a hook chain by the SetWindowsHookEx function.
         /// </summary>
@@ -92,10 +91,6 @@ namespace RemoteController.Win32
         [DllImport(User32Lib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetCursorPos(out Point lpPoint);
-
-
-
-
 
         [DllImport(User32Lib, SetLastError = true)]
         public static extern IntPtr CreateWindowEx(
