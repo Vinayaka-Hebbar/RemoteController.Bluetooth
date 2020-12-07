@@ -14,7 +14,7 @@ namespace RemoteController.Win32.Hooks
         event EventHandler<MouseWheelEventArgs> MouseWheel;
         event EventHandler<ClipboardChangedEventArgs> Clipboard;
 
-        void SetMousePos(double x, double y);
+        void SetMousePos(int x, int y);
         MousePoint GetMousePos();
 
         void SendMouseDown(MouseButton button);

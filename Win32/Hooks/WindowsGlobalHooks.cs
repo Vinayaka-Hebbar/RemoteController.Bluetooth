@@ -232,9 +232,9 @@ namespace RemoteController.Win32.Hooks
         }
 
 
-        public override void SetMousePos(double x, double y)
+        public override void SetMousePos(int x, int y)
         {
-            NativeMethods.SetCursorPos((int)Math.Round(x), (int)Math.Round(y));
+            NativeMethods.SetCursorPos(x, y);
         }
 
         public override MousePoint GetMousePos()
@@ -342,6 +342,7 @@ namespace RemoteController.Win32.Hooks
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
 
         }
+
         public override void SendMouseUp(MouseButton button)
         {
 
@@ -474,6 +475,7 @@ namespace RemoteController.Win32.Hooks
 
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
         }
+
         public override void SendKeyUp(Key key)
         {
             bool keyup = true;

@@ -15,7 +15,7 @@ namespace RemoteController.Win32.Hooks
         public event EventHandler<ClipboardChangedEventArgs> Clipboard = delegate { };
 
 
-        public abstract void SetMousePos(double x, double y);
+        public abstract void SetMousePos(int x, int y);
         public abstract MousePoint GetMousePos();
         public abstract void SendMouseDown(MouseButton button);
         public abstract void SendMouseUp(MouseButton button);

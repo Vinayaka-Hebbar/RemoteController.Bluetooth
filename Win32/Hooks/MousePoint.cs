@@ -1,9 +1,9 @@
 ﻿namespace RemoteController.Win32.Hooks
 {
-    public class MousePoint
+    public readonly struct MousePoint
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public int X { get; }
+        public int Y { get; }
 
         public MousePoint(int x, int y)
         {
