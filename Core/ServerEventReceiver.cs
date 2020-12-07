@@ -31,7 +31,7 @@ namespace RemoteController.Core
         {
             _hook = new WindowsGlobalHook();
             _screen = screen;
-            messageHandle = new EventWaitHandle(false, EventResetMode.ManualReset, null);
+            messageHandle = new EventWaitHandle(false, EventResetMode.AutoReset, null);
             messages = new System.Collections.Concurrent.ConcurrentQueue<IMessage>();
             cts = new CancellationTokenSource();
             state = screen.State;

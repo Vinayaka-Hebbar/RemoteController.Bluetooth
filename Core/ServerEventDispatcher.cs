@@ -24,7 +24,7 @@ namespace RemoteController.Core
         public ServerEventDispatcher(ServerConnectionManager manager)
         {
             _manager = manager;
-            eventHandle = new EventWaitHandle(false, EventResetMode.ManualReset, null);
+            eventHandle = new EventWaitHandle(false, EventResetMode.AutoReset, null);
             messages = new ConcurrentQueue<IMessage>();
         }
 #else
