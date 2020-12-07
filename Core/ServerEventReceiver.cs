@@ -21,7 +21,7 @@ namespace RemoteController.Core
         private readonly ClientState state;
 
 #if QUEUE_SERVER
-        private readonly ConcurrentQueue<IMessage> messages;
+        private readonly System.Collections.Concurrent.ConcurrentQueue<IMessage> messages;
         private readonly EventWaitHandle messageHandle;
 #endif
 
@@ -32,7 +32,7 @@ namespace RemoteController.Core
             _hook = new WindowsGlobalHook();
             _screen = screen;
             messageHandle = new EventWaitHandle(false, EventResetMode.ManualReset, null);
-            messages = new ConcurrentQueue<IMessage>();
+            messages = new System.Collections.Concurrent.ConcurrentQueue<IMessage>();
             cts = new CancellationTokenSource();
             state = screen.State;
         }
