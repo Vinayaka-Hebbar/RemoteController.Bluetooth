@@ -8,7 +8,7 @@ namespace RemoteController.Win32
     {
         object m_objectToKeepAlive, m_objectToKeepAlive2;
 #if DEBUG
-        WeakReference m_weakRef, m_weakRef2;
+        System.WeakReference m_weakRef, m_weakRef2;
 #endif
 
         public BluetoothAuthenticationRegistrationHandle()
@@ -30,8 +30,8 @@ namespace RemoteController.Win32
             m_objectToKeepAlive = objectToKeepAlive;
             m_objectToKeepAlive2 = objectToKeepAlive2;
 #if DEBUG
-            m_weakRef = new WeakReference(m_objectToKeepAlive);
-            m_weakRef2 = new WeakReference(m_objectToKeepAlive);
+            m_weakRef = new System.WeakReference(m_objectToKeepAlive);
+            m_weakRef2 = new System.WeakReference(m_objectToKeepAlive);
 #endif
         }
 

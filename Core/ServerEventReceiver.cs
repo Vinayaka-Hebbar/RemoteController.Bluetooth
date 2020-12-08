@@ -19,6 +19,10 @@ namespace RemoteController.Core
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
 
+#if Bail
+        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(2);
+#endif
+
 #if QUEUE_SERVER
         private readonly System.Collections.Concurrent.ConcurrentQueue<IMessage> messages;
         private readonly EventWaitHandle messageHandle;
@@ -310,12 +314,12 @@ namespace RemoteController.Core
 #if Bail
         private bool ShouldServerBailKeyboard()
         {
-            return (DateTime.UtcNow - state.LastHookEvent_Keyboard).TotalSeconds < 2;
+            return (DateTime.UtcNow - state.LastHookEvent_Keyboard) < BailSec;
         }
 
         private bool ShouldServerBailMouse()
         {
-            return (DateTime.UtcNow - state.LastHookEvent_Mouse).TotalSeconds < 2;
+            return (DateTime.UtcNow - state.LastHookEvent_Mouse) < BailSec;
         }
 #endif
 

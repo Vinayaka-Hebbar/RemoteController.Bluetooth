@@ -12,6 +12,10 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
         public readonly IGlobalHook Hook;
 
+#if Bail
+        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);  
+#endif
+
         private readonly ClientState ClientState;
 
         public HookManager(ServerEventDispatcher dispatcher, VirtualScreenManager screen)
@@ -236,12 +240,12 @@ namespace RemoteController.Core
 #if Bail
         private bool ShouldHookBailKeyboard()
         {
-            return (DateTime.UtcNow - ClientState.LastServerEvent_Keyboard).TotalSeconds < 1;
+            return (DateTime.UtcNow - ClientState.LastServerEvent_Keyboard) < BailSec;
         }
 
         bool ShouldHookBailMouse()
         {
-            return (DateTime.UtcNow - ClientState.LastServerEvent_Mouse).TotalSeconds < 1;
+            return (DateTime.UtcNow - ClientState.LastServerEvent_Mouse) < BailSec;
         }
 #endif
 
