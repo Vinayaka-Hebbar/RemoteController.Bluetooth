@@ -17,13 +17,13 @@ namespace RemoteController.Sockets
     {
         private int _socket = 0;
 
-        public NativeBluetoothSocket() : base(SocketFamily.Bluetooth, SocketType.Stream, ProtocolType.Unspecified)
+        public NativeBluetoothSocket() : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified)
         {
             // AF_BT, Type_Stream, Protocol_Rfcomm
             _socket = NativeMethods.socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
         }
 
-        internal NativeBluetoothSocket(int socket) : base(SocketFamily.Bluetooth, SocketType.Stream, ProtocolType.Unspecified)
+        internal NativeBluetoothSocket(int socket) : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified)
         {
             _socket = socket;
         }
