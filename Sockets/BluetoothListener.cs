@@ -23,7 +23,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(service);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new NativeBluetoothSocket();
+            serverSocket = new BluetoothSocket();
             option = new SocketOption(serverSocket);
         }
 
@@ -31,7 +31,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(sdpRecord);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new NativeBluetoothSocket();
+            serverSocket = new BluetoothSocket();
             option = new SocketOption(serverSocket);
         }
 
@@ -39,7 +39,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(sdpRecord, channelOffset);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new NativeBluetoothSocket();
+            serverSocket = new BluetoothSocket();
             option = new SocketOption(serverSocket);
         }
         #endregion
@@ -231,7 +231,7 @@ namespace RemoteController.Sockets
             }
 
             active = false;
-            serverSocket = new NativeBluetoothSocket();
+            serverSocket = new BluetoothSocket();
         }
         #endregion
 

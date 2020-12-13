@@ -14,7 +14,7 @@ namespace RemoteController.Bluetooth
 
         public BluetoothClient()
         {
-            _socket = new NativeBluetoothSocket();
+            _socket = new BluetoothSocket();
             option = new SocketOption(Socket);
         }
 

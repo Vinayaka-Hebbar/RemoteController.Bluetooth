@@ -16,6 +16,7 @@ namespace RemoteController.Sockets
     public sealed class NativeBluetoothSocket : Socket
     {
         private int _socket = 0;
+        private Socket _listener;
 
         public NativeBluetoothSocket() : base(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified)
         {
@@ -126,11 +127,18 @@ namespace RemoteController.Sockets
             if (remoteEP == null)
                 throw new ArgumentNullException(nameof(remoteEP));
 
-            SocketAddress sockAddr = remoteEP.Serialize();
 
-            int result = NativeMethods.connect(_socket, SocketAddressToArray(sockAddr), 30);
+            int result = NativeMethods.connect(_socket, SocketAddressToArray(remoteEP.Serialize()), 30);
 
             ThrowOnSocketError(result, true);
+            using (Socket lstnr = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Unspecified))
+            {
+                lstnr.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                lstnr.Listen(1);
+                EndPoint svrEp = lstnr.LocalEndPoint;
+                base.Connect(svrEp);
+                _listener = lstnr.Accept();
+            }
         }
 
         public new int Receive(byte[] buffer)
