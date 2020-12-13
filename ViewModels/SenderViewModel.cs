@@ -115,7 +115,7 @@ namespace RemoteController.ViewModels
             }
         }
 
-        public bool IsConnected => client != null && client.Connection.IsConnected;
+        public bool IsConnected => client != null;
 
         /// <summary>
         /// Gets the devices.
