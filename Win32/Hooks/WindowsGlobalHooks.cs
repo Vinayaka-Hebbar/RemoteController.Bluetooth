@@ -31,17 +31,13 @@ namespace RemoteController.Win32.Hooks
         [AllowReversePInvokeCalls]
         private IntPtr WndProc(IntPtr hWnd, uint m, IntPtr wParam, IntPtr lParam)
         {
-            WindowsMessages msg = (WindowsMessages)m;
-
-            switch (msg)
+            if ((WindowsMessages)m == WindowsMessages.CLIPBOARDUPDATE)
             {
-                case WindowsMessages.CLIPBOARDUPDATE:
-                    string text = GetClipboard();
-                    if (text != null)
-                        OnClipboardChanged(text);
-                    break;
+                string text = GetClipboard();
+                if (text != null)
+                    OnClipboardChanged(text);
             }
-            return NativeMethods.DefWindowProc(hWnd, msg, wParam, lParam);
+            return NativeMethods.DefWindowProc(hWnd, m, wParam, lParam);
 
         }
 
@@ -72,14 +68,11 @@ namespace RemoteController.Win32.Hooks
         }
         public override void SetClipboard(string value)
         {
-
             if (value == null)
                 return;
-
             _ = Clippy.PushStringToClipboard(value);
 
         }
-
 
         public override void Start()
         {
@@ -132,62 +125,62 @@ namespace RemoteController.Win32.Hooks
 
 
             //init initial cursor position
-            bool c = NativeMethods.GetCursorPos(out Point p);
-            MouseState.Position = new MousePoint(p.X, p.Y);
-
+            if (NativeMethods.GetCursorPos(out Point p))
+            {
+                MouseState.Position = new MousePoint(p.X, p.Y);
+            }
         }
 
         public IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam)
         {
             bool fEatMouse = false;
-            var p = (LowLevelMouseInputEvent)Marshal.PtrToStructure(lParam, typeof(LowLevelMouseInputEvent));
-            MouseHookEventArgs eventArguments = new MouseHookEventArgs(p, (Native.MouseState)wParam.ToInt32());
-
-            if (eventArguments.MouseState == Native.MouseState.MouseMove)
+            var state = (Native.MouseState)wParam.ToInt32();
+            var data = (LowLevelMouseInputEvent)Marshal.PtrToStructure(lParam, typeof(LowLevelMouseInputEvent));
+            if (state == Native.MouseState.MouseMove)
             {
-                OnMouseMove(eventArguments.MouseData.Point.X, eventArguments.MouseData.Point.Y);
+                OnMouseMove(data.Point.X, data.Point.Y);
                 fEatMouse = MouseMoveArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.LeftButtonDown)
+            if (state == Native.MouseState.LeftButtonDown)
             {
                 OnMouseDown(MouseButton.Left);
                 fEatMouse = MouseDownArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.LeftButtonUp)
+            if (state == Native.MouseState.LeftButtonUp)
             {
                 OnMouseUp(MouseButton.Left);
                 fEatMouse = MouseUpArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.RightButtonDown)
+            if (state == Native.MouseState.RightButtonDown)
             {
                 OnMouseDown(MouseButton.Right);
                 fEatMouse = MouseDownArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.RightButtonUp)
+            if (state == Native.MouseState.RightButtonUp)
             {
                 OnMouseUp(MouseButton.Right);
                 fEatMouse = MouseUpArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.MBUTTONDOWN)
+            if (state == Native.MouseState.MBUTTONDOWN)
             {
                 OnMouseDown(MouseButton.Middle);
                 fEatMouse = MouseDownArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.MBUTTONUP)
+            if (state == Native.MouseState.MBUTTONUP)
             {
                 OnMouseUp(MouseButton.Middle);
                 fEatMouse = MouseUpArgs.Handled;
             }
 
-            if (eventArguments.MouseState == Native.MouseState.XBUTTONDOWN)
+            if (state == Native.MouseState.XBUTTONDOWN)
             {
-                uint whichXButton = p.Mousedata >> 16;
+                uint whichXButton = data.Mousedata >> 16;
                 if (whichXButton == 1)
                 {
                     OnMouseDown(MouseButton.Button1);
@@ -200,9 +193,9 @@ namespace RemoteController.Win32.Hooks
                 }
 
             }
-            if (eventArguments.MouseState == Native.MouseState.XBUTTONUP)
+            if (state == Native.MouseState.XBUTTONUP)
             {
-                uint whichXButton = p.Mousedata >> 16;
+                uint whichXButton = data.Mousedata >> 16;
                 if (whichXButton == 1)
                 {
                     OnMouseUp(MouseButton.Button1);
@@ -215,16 +208,14 @@ namespace RemoteController.Win32.Hooks
                 }
             }
 
-            if (eventArguments.MouseState == Native.MouseState.MouseWheel)
+            if (state == Native.MouseState.MouseWheel)
             {
-                int delta = (int)p.Mousedata >> 16;
-                OnMouseWheel(0, delta);
+                OnMouseWheel(0, (int)data.Mousedata >> 16);
                 fEatMouse = MouseDownArgs.Handled;
             }
-            if (eventArguments.MouseState == Native.MouseState.MouseHWheel)
+            if (state == Native.MouseState.MouseHWheel)
             {
-                int delta = (int)p.Mousedata >> 16;
-                OnMouseWheel(delta, 0);
+                OnMouseWheel((int)data.Mousedata >> 16, 0);
                 fEatMouse = MouseDownArgs.Handled;
             }
 
@@ -596,16 +587,10 @@ namespace RemoteController.Win32.Hooks
             int wparamTyped = wParam.ToInt32();
             if (Enum.IsDefined(typeof(Native.KeyboardState), wparamTyped))
             {
-                object o = Marshal.PtrToStructure(lParam, typeof(LowLevelKeyboardInputEvent));
-                LowLevelKeyboardInputEvent p = (LowLevelKeyboardInputEvent)o;
+                var data = (LowLevelKeyboardInputEvent)Marshal.PtrToStructure(lParam, typeof(LowLevelKeyboardInputEvent));
+                var state = (Native.KeyboardState)wparamTyped;
 
-                KeyboardHookEventArgs eventArguments = new KeyboardHookEventArgs(p, (Native.KeyboardState)wparamTyped);
-
-                int scancode = eventArguments.KeyboardData.HardwareScanCode;
-                VirtualKeys vkey = (VirtualKeys)eventArguments.KeyboardData.VirtualCode;
-
-                int flags = eventArguments.KeyboardData.Flags;
-                bool extended = ((flags) & ((int)KeyFlags.KF_EXTENDED >> 8)) > 0;
+                bool extended = ((data.Flags) & ((int)KeyFlags.KF_EXTENDED >> 8)) > 0;
 
                 //var altdown = ((flags) & ((int)KeyFlags.KF_ALTDOWN >> 8)) > 0;
                 //var dlgmode = ((flags) & ((int)KeyFlags.KF_DLGMODE >> 8)) > 0;
@@ -616,19 +601,19 @@ namespace RemoteController.Win32.Hooks
 
                 //TODO: why is this code ignoring virtual keys and mapping it custom?
                 //TODO: figure out what extended 2 is supposed to do from the raw input opentk code....
-                Key key = WinKeyMap.TranslateKey(scancode, vkey, extended, false, out bool is_valid);
+                Key key = WinKeyMap.TranslateKey(data.HardwareScanCode, (VirtualKeys)data.VirtualCode, extended, false, out bool is_valid);
 
 
 
                 if (is_valid)
                 {
 
-                    if (eventArguments.KeyboardState == Native.KeyboardState.KeyDown || eventArguments.KeyboardState == Native.KeyboardState.SysKeyDown)
+                    if (state == Native.KeyboardState.KeyDown || state == Native.KeyboardState.SysKeyDown)
                     {
                         OnKeyDown(key);
                         fEatKeyStroke = KeyDownArgs.Handled;
                     }
-                    if (eventArguments.KeyboardState == Native.KeyboardState.KeyUp || eventArguments.KeyboardState == Native.KeyboardState.SysKeyUp)
+                    if (state == Native.KeyboardState.KeyUp || state == Native.KeyboardState.SysKeyUp)
                     {
                         OnKeyUp(key);
                         fEatKeyStroke = KeyUpArgs.Handled;

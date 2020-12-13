@@ -268,15 +268,6 @@
             buttons &= unchecked((ushort)(~(1 << offset)));
         }
 
-        internal void MergeBits(MouseState other)
-        {
-            buttons |= other.buttons;
-            SetScrollRelative(other.scroll.X, other.scroll.Y);
-            X += other.X;
-            Y += other.Y;
-            IsConnected |= other.IsConnected;
-        }
-
         internal void SetIsConnected(bool value)
         {
             IsConnected = value;

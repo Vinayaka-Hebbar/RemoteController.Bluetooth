@@ -120,7 +120,7 @@ namespace RemoteController.Win32
         public static extern bool UnregisterClass(string lpClassName, IntPtr hInstance);
 
         [DllImport(User32Lib)]
-        public static extern IntPtr DefWindowProc(IntPtr hWnd, WindowsMessages uMsg, IntPtr wParam, IntPtr lParam);
+        public static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
 
         [DllImport(User32Lib, CharSet = CharSet.Auto)]
         public static extern IntPtr SetClipboardViewer(IntPtr hWndNewViewer);
