@@ -4,7 +4,6 @@ namespace RemoteController.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-
         public MainViewModel()
         {
             Sender = new SenderViewModel();

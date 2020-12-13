@@ -102,7 +102,7 @@ namespace RemoteController.ViewModels
         /// </value>
         public ObservableCollection<Device> Devices
         {
-            get; set;
+            get; 
         }
 
         public Device SelectedDevice
@@ -115,18 +115,7 @@ namespace RemoteController.ViewModels
             }
         }
 
-        BluetoothClient bluetoothClient;
-        public BluetoothClient Client
-        {
-            get
-            {
-                if (bluetoothClient == null)
-                {
-                    System.Threading.Interlocked.CompareExchange(ref bluetoothClient, new BluetoothClient(), null);
-                }
-                return bluetoothClient;
-            }
-        }
+        public bool IsConnected => client != null && client.Connection.IsConnected;
 
         /// <summary>
         /// Gets the devices.

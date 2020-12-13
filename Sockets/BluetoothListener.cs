@@ -202,8 +202,7 @@ namespace RemoteController.Sockets
 
         private void SetService(byte channelNumber)
         {
-            byte[] rawRecord = GetServiceRecordBytes(channelNumber);
-            serviceHandle = MicrosoftSdpService.SetService(rawRecord, codService);
+            serviceHandle = MicrosoftSdpService.SetService(GetServiceRecordBytes(channelNumber), codService);
         }
         #endregion
 

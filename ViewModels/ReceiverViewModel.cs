@@ -7,7 +7,6 @@ namespace RemoteController.ViewModels
     {
         private RemoteServer server;
 
-
         private Command.RelayCommand start;
         public ICommand Start
         {
@@ -41,6 +40,8 @@ namespace RemoteController.ViewModels
         {
             return server != null;
         }
+
+        public bool IsConnected => server != null;
 
         private bool CheckListener()
         {

@@ -8,6 +8,14 @@ namespace RemoteController
     public partial class App : Application
     {
         private Desktop.Traybar traybar;
+
+        public App()
+        {
+            
+        }
+
+        public static object MainModel => Current.TryFindResource(nameof(MainModel));
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

@@ -22,5 +22,10 @@ namespace RemoteController.Win32.Desktop
             X = x;
             Y = y;
         }
+
+        public System.Windows.Point ToPoint()
+        {
+            return new System.Windows.Point(X, Y);
+        }
     }
 }

@@ -30,7 +30,7 @@
         public System.DateTime LastHookEvent_Mouse = System.DateTime.UtcNow;
         public System.DateTime LastHookEvent_Keyboard = System.DateTime.UtcNow;
         public System.DateTime LastServerEvent_Mouse = System.DateTime.UtcNow;
-        public System.DateTime LastServerEvent_Keyboard = System.DateTime.UtcNow; 
+        public System.DateTime LastServerEvent_Keyboard = System.DateTime.UtcNow;
 #endif
 
     }

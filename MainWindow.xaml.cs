@@ -8,18 +8,31 @@ namespace RemoteController
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ViewModels.MainViewModel vm;
+        public ViewModels.MainViewModel ViewModel
+        {
+            get => (ViewModels.MainViewModel)GetValue(DataContextProperty);
+        }
 
         public MainWindow()
         {
-            DataContext = vm = new ViewModels.MainViewModel();
+            DataContext = App.MainModel;
             InitializeComponent();
         }
 
         protected override async void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            await vm.InitAsync();
+            await ViewModel.InitAsync();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            ViewModels.MainViewModel vm = ViewModel;
+            if (vm.Sender.IsConnected == false && vm.Receiver.IsConnected == false)
+            {
+                Application.Current.Shutdown();
+            }
         }
     }
 }

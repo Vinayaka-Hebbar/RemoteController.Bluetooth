@@ -1,7 +1,6 @@
 ﻿using RemoteController.Bluetooth;
 using RemoteController.Messages;
 using System;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace RemoteController.Core
@@ -11,6 +10,8 @@ namespace RemoteController.Core
         private readonly BluetoothEndPoint endPoint;
         private BluetoothClient client;
         private System.IO.Stream stream;
+
+        public bool IsConnected => client != null && client.Connected;
 
         public ServerConnectionManager(BluetoothEndPoint endPoint)
         {

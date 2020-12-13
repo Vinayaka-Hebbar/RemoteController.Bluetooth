@@ -550,19 +550,16 @@ namespace RemoteController.Win32.Hooks
         public override IList<Display> GetDisplays()
         {
             List<Display> displays = new List<Display>();
-            NativeMethods.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
-                delegate (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData)
-                {
-                    MONITORINFO mi = new MONITORINFO();
-                    mi.size = (uint)Marshal.SizeOf(mi);
-                    NativeMethods.GetMonitorInfo(hMonitor, ref mi);
+            NativeMethods.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData) =>
+               {
+                   MONITORINFO mi = new MONITORINFO();
+                   mi.size = (uint)Marshal.SizeOf(mi);
+                   NativeMethods.GetMonitorInfo(hMonitor, ref mi);
 
-                    int w = mi.monitor.right - mi.monitor.left;
-                    int h = mi.monitor.bottom - mi.monitor.top;
-                    displays.Add(new Display(mi.monitor.left, mi.monitor.top, w, h));
+                   displays.Add(new Display(mi.monitor.left, mi.monitor.top, mi.monitor.right - mi.monitor.left, mi.monitor.bottom - mi.monitor.top));
 
-                    return true;
-                }, IntPtr.Zero);
+                   return true;
+               }, IntPtr.Zero);
             return displays;
         }
 

@@ -6,6 +6,7 @@
              StartupUri="MainWindow.xaml"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
+        <vm:MainViewModel x:Key="MainModel"/>
         <ContextMenu x:Shared="false"
                      x:Key="SysTrayMenu">
             <MenuItem Header="Show Window"

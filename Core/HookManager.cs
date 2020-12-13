@@ -13,7 +13,7 @@ namespace RemoteController.Core
         public readonly IGlobalHook Hook;
 
 #if Bail
-        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);  
+        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
 #endif
 
         private readonly ClientState ClientState;
@@ -74,14 +74,14 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds 
 #if Bail
             if (ShouldHookBailKeyboard())
-                return; 
+                return;
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
             //Console.WriteLine("Sending clipboard to server");
 
 #if QUEUE_CLIENT
-            _dispatcher.Process(new ClipboardMessage(e.Value)); 
+            _dispatcher.Process(new ClipboardMessage(e.Value));
 #else
             _dispatcher.Send(ClipboardMessage.GetBytes(e.Value));
 #endif
@@ -97,11 +97,11 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds of receiving network events. 
 #if Bail
             if (ShouldHookBailMouse())
-                return; 
+                return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
 #if QUEUE_CLIENT
-            _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY)); 
+            _dispatcher.Process(new MouseWheelMessage(e.DeltaX, e.DeltaY));
 #else
             _dispatcher.Send(MouseWheelMessage.GetBytes(e.DeltaX, e.DeltaY));
 #endif
@@ -117,11 +117,11 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds 
 #if Bail
             if (ShouldHookBailMouse())
-                return; 
+                return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
 #if QUEUE_CLIENT
-            _dispatcher.Process(new MouseButtonMessage(e.Button, true)); 
+            _dispatcher.Process(new MouseButtonMessage(e.Button, true));
 #else
             _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, true));
 #endif
@@ -137,11 +137,11 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds 
 #if Bail
             if (ShouldHookBailMouse())
-                return; 
+                return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
 #if QUEUE_CLIENT
-            _dispatcher.Process(new MouseButtonMessage(e.Button, false)); 
+            _dispatcher.Process(new MouseButtonMessage(e.Button, false));
 #else
             _dispatcher.Send(MouseButtonMessage.GetBytes(e.Button, false));
 #endif
@@ -154,7 +154,7 @@ namespace RemoteController.Core
             //don't process a hook event within 2 seconds of a server event
 #if Bail
             if (ShouldHookBailMouse())
-                return; 
+                return;
 
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
@@ -208,7 +208,7 @@ namespace RemoteController.Core
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
 #if QUEUE_CLIENT
-            _dispatcher.Process(new KeyPressMessage(e.Key, true)); 
+            _dispatcher.Process(new KeyPressMessage(e.Key, true));
 #else
             _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, true));
 #endif
@@ -224,12 +224,12 @@ namespace RemoteController.Core
 
 #if Bail
             if (ShouldHookBailKeyboard())
-                return; 
+                return;
 
             ClientState.LastHookEvent_Keyboard = DateTime.UtcNow;
 #endif
 #if QUEUE_CLIENT
-            _dispatcher.Process(new KeyPressMessage(e.Key, false)); 
+            _dispatcher.Process(new KeyPressMessage(e.Key, false));
 #else
             _dispatcher.Send(KeyPressMessage.GetBytes(e.Key, false));
 #endif

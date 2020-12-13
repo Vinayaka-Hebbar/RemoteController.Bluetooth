@@ -1,11 +1,11 @@
 ﻿namespace RemoteController.Win32.Hooks
 {
-    public class Display
+    public readonly struct Display
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public int X { get; }
+        public int Y { get; }
+        public int Width { get; }
+        public int Height { get; }
 
         public Display(int x, int y, int width, int height)
         {
@@ -13,6 +13,19 @@
             Y = y;
             Width = width;
             Height = height;
+        }
+
+        public Display(int width, int height)
+        {
+            X = 0;
+            Y = 0;
+            Width = width;
+            Height = height;
+        }
+
+        public override string ToString()
+        {
+            return $"{Width}x{Height}";
         }
     }
 }

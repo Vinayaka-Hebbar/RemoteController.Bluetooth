@@ -16,6 +16,7 @@ namespace RemoteController.Desktop
     public partial class Traybar : FrameworkContentElement, IDisposable
     {
         private readonly object lockObject = new object();
+
         #region Members
 
         /// <summary>
@@ -337,8 +338,7 @@ namespace RemoteController.Desktop
                 return;
 
             // switch to UI thread
-            Action action = CloseBalloon;
-            Dispatcher.Invoke(action);
+            Dispatcher.Invoke(this.CloseBalloon);
         }
 
         #endregion
