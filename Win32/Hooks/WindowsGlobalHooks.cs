@@ -66,17 +66,16 @@ namespace RemoteController.Win32.Hooks
 
             return data;
         }
+
         public override void SetClipboard(string value)
         {
             if (value == null)
                 return;
             _ = Clippy.PushStringToClipboard(value);
-
         }
 
         public override void Start()
         {
-
             //https://stackoverflow.com/questions/8980873/implementing-a-win32-message-loop-and-creating-a-window-object-with-p-invoke
             _messageWindowProc = WndProc;
             w = new WNDCLASSEX
@@ -121,8 +120,6 @@ namespace RemoteController.Win32.Hooks
                 int errorCode = Marshal.GetLastWin32Error();
                 throw new Win32Exception(errorCode, $"Failed to adjust keyboard hooks for '{Process.GetCurrentProcess().ProcessName}'. Error {errorCode}: {new Win32Exception(Marshal.GetLastWin32Error()).Message}.");
             }
-
-
 
             //init initial cursor position
             if (NativeMethods.GetCursorPos(out Point p))
@@ -233,6 +230,7 @@ namespace RemoteController.Win32.Hooks
             NativeMethods.GetCursorPos(out Point point);
             return new MousePoint(point.X, point.Y);
         }
+
         public override void SendMouseWheel(int dx, int dy)
         {
             if (dx == 0 && dy == 0)
@@ -285,11 +283,9 @@ namespace RemoteController.Win32.Hooks
 
             }
 
-
-
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
-
         }
+
         public override void SendMouseDown(MouseButton button)
         {
             uint flag = 0;
@@ -331,7 +327,6 @@ namespace RemoteController.Win32.Hooks
             };
 
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
-
         }
 
         public override void SendMouseUp(MouseButton button)
@@ -377,8 +372,6 @@ namespace RemoteController.Win32.Hooks
             };
 
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
-
-
         }
 
         public override void SendKeyDown(Key key)
@@ -554,12 +547,8 @@ namespace RemoteController.Win32.Hooks
             NativeMethods.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(NativeMethods.INPUT)));
         }
 
-
-
-
         public override IList<Display> GetDisplays()
         {
-
             List<Display> displays = new List<Display>();
             NativeMethods.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
                 delegate (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData)
