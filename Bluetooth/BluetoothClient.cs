@@ -14,7 +14,7 @@ namespace RemoteController.Bluetooth
 
         public BluetoothClient()
         {
-            _socket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+            _socket = new NativeBluetoothSocket();
             option = new SocketOption(Socket);
         }
 
@@ -283,10 +283,10 @@ namespace RemoteController.Bluetooth
         }
 
         #region Get Stream
-        private NetworkStream dataStream;
+        private System.IO.Stream dataStream;
 
 
-        public NetworkStream GetStream()
+        public System.IO.Stream GetStream()
         {
             EnsureNotDisposed();
             if (!Socket.Connected)
@@ -296,7 +296,7 @@ namespace RemoteController.Bluetooth
 
             if (dataStream == null)
             {
-                dataStream = new NetworkStream(Socket, true);
+                dataStream = new BluetoothStream(Socket, true);
             }
 
             return dataStream;

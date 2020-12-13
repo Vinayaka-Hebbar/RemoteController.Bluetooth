@@ -10,7 +10,7 @@ namespace RemoteController.Core
     {
         private readonly BluetoothEndPoint endPoint;
         private BluetoothClient client;
-        private NetworkStream stream;
+        private System.IO.Stream stream;
 
         public ServerConnectionManager(BluetoothEndPoint endPoint)
         {

@@ -23,7 +23,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(service);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+            serverSocket = new NativeBluetoothSocket();
             option = new SocketOption(serverSocket);
         }
 
@@ -31,7 +31,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(sdpRecord);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+            serverSocket = new NativeBluetoothSocket();
             option = new SocketOption(serverSocket);
         }
 
@@ -39,7 +39,7 @@ namespace RemoteController.Sockets
         {
             InitServiceRecord(sdpRecord, channelOffset);
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
-            serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+            serverSocket = new NativeBluetoothSocket();
             option = new SocketOption(serverSocket);
         }
         #endregion
@@ -231,7 +231,7 @@ namespace RemoteController.Sockets
             }
 
             active = false;
-            serverSocket = new Socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
+            serverSocket = new NativeBluetoothSocket();
         }
         #endregion
 
@@ -322,7 +322,6 @@ namespace RemoteController.Sockets
             {
                 throw new InvalidOperationException("Not listening. You must call the Start() method before calling this method.");
             }
-
             return serverSocket.Accept();
         }
 

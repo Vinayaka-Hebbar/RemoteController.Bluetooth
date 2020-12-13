@@ -8,15 +8,22 @@ namespace RemoteController.Sockets
 {
     public sealed class BluetoothSocket : Socket
     {
-        private int _socket = 0;
-
         public BluetoothSocket() : base(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm)
         {
+        }
+    }
+
+    public sealed class NativeBluetoothSocket : Socket
+    {
+        private int _socket = 0;
+
+        public NativeBluetoothSocket() : base(SocketFamily.Bluetooth, SocketType.Stream, ProtocolType.Unspecified)
+        {
             // AF_BT, Type_Stream, Protocol_Rfcomm
-            _socket = NativeMethods.socket(32, 1, 3);
+            _socket = NativeMethods.socket(SocketFamily.Bluetooth, SocketType.Stream, BluetoothProtocolType.RFComm);
         }
 
-        internal BluetoothSocket(int socket) : base((AddressFamily)32, SocketType.Stream, (ProtocolType)3)
+        internal NativeBluetoothSocket(int socket) : base(SocketFamily.Bluetooth, SocketType.Stream, ProtocolType.Unspecified)
         {
             _socket = socket;
         }
@@ -49,7 +56,7 @@ namespace RemoteController.Sockets
 
             ThrowOnSocketError(newSocket, true);
 
-            return new BluetoothSocket(newSocket);
+            return new NativeBluetoothSocket(newSocket);
         }
 
         public new int Available
@@ -77,14 +84,16 @@ namespace RemoteController.Sockets
             ThrowOnSocketError(result, true);
         }
 
+        public new void Listen(int backlog)
+        {
+            ThrowOnSocketError(NativeMethods.listen(_socket, backlog), true);
+        }
+
         public new bool Connected
         {
             get
             {
-                if (_socket == 0)
-                    return false;
-
-                return RemoteEndPoint != null;
+                return _socket != 0 && RemoteEndPoint != null;
             }
         }
 
@@ -155,6 +164,7 @@ namespace RemoteController.Sockets
         {
             return Win32Receive(buffer, size, socketFlags);
         }
+
         public new int Receive(byte[] buffer, int offset, int size, SocketFlags socketFlags)
         {
             byte[] newBuffer = new byte[size];
@@ -184,8 +194,7 @@ namespace RemoteController.Sockets
                 newBuffer.CopyTo(buffer, offset);
             }
 
-            int socketError = NativeMethods.WSAGetLastError();
-            errorCode = (SocketError)socketError;
+            errorCode = (SocketError)NativeMethods.WSAGetLastError();
 
             return bytesReceived;
         }
@@ -221,12 +230,12 @@ namespace RemoteController.Sockets
 
         public new int Send(byte[] buffer)
         {
-            return Send(buffer, buffer.Length, 0);
+            return Send(buffer, 0, buffer.Length, 0);
         }
 
         public new int Send(byte[] buffer, SocketFlags socketFlags)
         {
-            return Send(buffer, buffer.Length, socketFlags);
+            return Send(buffer, 0, buffer.Length, socketFlags);
         }
 
         public new int Send(byte[] buffer, int size, SocketFlags socketFlags)
@@ -259,19 +268,20 @@ namespace RemoteController.Sockets
 
         public new void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, bool optionValue)
         {
-            int result = NativeMethods.setsockopt(_socket, (int)optionLevel, (int)optionName, BitConverter.GetBytes(Convert.ToInt32(optionValue)), Marshal.SizeOf(typeof(int)));
-            ThrowOnSocketError(result, true);
+            ThrowOnSocketError(NativeMethods.setsockopt(_socket, (int)optionLevel, (int)optionName, BitConverter.GetBytes(Convert.ToInt32(optionValue)), Marshal.SizeOf(typeof(int))), true);
         }
 
         public new void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
-            int result = NativeMethods.setsockopt(_socket, (int)optionLevel, (int)optionName, BitConverter.GetBytes(optionValue), Marshal.SizeOf(typeof(int)));
-            ThrowOnSocketError(result, true);
+            ThrowOnSocketError(NativeMethods.setsockopt(_socket, (int)optionLevel, (int)optionName, BitConverter.GetBytes(optionValue), Marshal.SizeOf(typeof(int))), true);
         }
 
         protected override void Dispose(bool disposing)
         {
-            Close();
+            if (disposing && Connected)
+            {
+                Close();
+            }
         }
 
         private static class NativeMethods
@@ -281,7 +291,7 @@ namespace RemoteController.Sockets
 
             [DllImport(winsockDll)]
 #pragma warning disable IDE1006 // Naming Styles - these are Win32 function names
-            internal static extern int socket(int af, int type, int protocol);
+            internal static extern int socket(AddressFamily af, SocketType type, ProtocolType protocol);
 
             [DllImport(winsockDll)]
             internal static extern int closesocket(int s);
@@ -300,6 +310,9 @@ namespace RemoteController.Sockets
 
             [DllImport(winsockDll)]
             internal static extern int accept(int s, byte[] addr, int addrlen);
+
+            [DllImport(winsockDll)]
+            internal static extern int listen(int s, int backlog);
 
             [DllImport(winsockDll)]
             internal static extern int getsockname(int s, byte[] addr, ref int addrlen);

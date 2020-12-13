@@ -16,7 +16,7 @@ namespace RemoteController.Messages
 
         public MessageType Type => Info.Type;
 
-        public static MessagePacket Parse(MessageInfo info, NetworkStream stream)
+        public static MessagePacket Parse(MessageInfo info, System.IO.Stream stream)
         {
             var buffer = new byte[info.Length];
             if (stream.Read(buffer, 0, info.Length) > 0)

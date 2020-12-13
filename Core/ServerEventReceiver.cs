@@ -147,7 +147,7 @@ namespace RemoteController.Core
 #endif
 
 #if SYNC_SERVER || QUEUE_SERVER
-        void ScreenConfig(NetworkStream stream)
+        void ScreenConfig(System.IO.Stream stream)
         {
             var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
             var buffer = config.GetBytes();
