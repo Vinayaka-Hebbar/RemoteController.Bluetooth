@@ -51,7 +51,6 @@ namespace RemoteController.Desktop
             newX = State.VirtualX + (deltaX = e.Mouse.X - State.LastPositionX);
             newY = State.VirtualY + (deltaY = e.Mouse.Y - State.LastPositionY);
 
-            System.Diagnostics.Debug.WriteLine(State);
             var s = ScreenConfiguration.ValidVirtualCoordinate(newX, newY);
             //Console.WriteLine("hook " + e.Mouse.X + "," + e.Mouse.Y + " : delta " + deltaX + "," + deltaY + " : virtual " + ClientState._virtualX + ", " + ClientState._virtualY + ", lastpos:"+ClientState._lastPositionX+","+ClientState._lastPositionY);
             if (s == null)
@@ -90,8 +89,8 @@ namespace RemoteController.Desktop
                     //hide mouse
                     //Console.WriteLine("detected coordinates outside of our current screen - hiding mouse at " + localMaxX + "," + localMaxY);
                     //_hook.Hook.SetMousePos((int)localMaxX, (int)localMaxY);
-                    State.LastPositionX = screen.Width;
-                    State.LastPositionY = screen.Height;
+                    State.LastPositionX = screen.Width - 1;
+                    State.LastPositionY = screen.Height - 1;
                     //Console.WriteLine("Setting last known position of mouse to " + localMaxX + "," + localMaxY);
 
                     //we are offscreen
