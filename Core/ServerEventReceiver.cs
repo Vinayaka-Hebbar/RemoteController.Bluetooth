@@ -271,28 +271,27 @@ namespace RemoteController.Core
                 var buffer = new byte[Message.HeaderSize];
                 if (await stream.ReadAsync(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
-                    var message = new MessageInfo(buffer);
-                    switch (message.Type)
+                    switch ((MessageType)(buffer[0] & Message.TypeMask))
                     {
                         case MessageType.MoveScreen:
                             break;
                         case MessageType.MouseWheel:
-                            OnMouseWheelFromServer(new MouseWheelMessage(message));
+                            OnMouseWheelFromServer(buffer);
                             break;
                         case MessageType.MouseButton:
-                            OnMouseButtonFromServer(new MouseButtonMessage(message));
+                            OnMouseButtonFromServer(buffer);
                             break;
                         case MessageType.MouseMove:
-                            OnMouseMoveFromServer(new MouseMoveMessage(message));
+                            OnMouseMoveFromServer(buffer);
                             break;
                         case MessageType.KeyPress:
-                            OnKeyPressFromServer(new KeyPressMessage(message));
+                            OnKeyPressFromServer(buffer);
                             break;
                         case MessageType.Clipboard:
-                            OnClipboardFromServer(new ClipboardMessage(await MessagePacket.ParseAsync(message, stream)));
+                            OnClipboardFromServer(new ClipboardMessage(await MessagePacket.ParseAsync(new MessageInfo(buffer), stream)));
                             break;
                         case MessageType.CheckIn:
-                            CheckInMessage checkIn = new CheckInMessage(await MessagePacket.ParseAsync(message, stream));
+                            CheckInMessage checkIn = new CheckInMessage(await MessagePacket.ParseAsync(new MessageInfo(buffer), stream));
                             await ScreenConfigASync(stream);
                             OnScreenConfig(checkIn.Screens);
                             break;
@@ -301,9 +300,9 @@ namespace RemoteController.Core
             }
         }
 
-        async Task ScreenConfigASync(NetworkStream stream)
+        async Task ScreenConfigASync(System.IO.Stream stream)
         {
-            var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
+            var config = new CheckInMessage(state.ClientName, _screen.ScreenConfiguration.Screens[state.ClientName]);
             var buffer = config.GetBytes();
             await stream.WriteAsync(buffer, 0, buffer.Length);
             await stream.FlushAsync();

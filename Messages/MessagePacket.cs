@@ -27,7 +27,7 @@ namespace RemoteController.Messages
         }
 
 
-        public static async Task<MessagePacket> ParseAsync(MessageInfo info, NetworkStream stream)
+        public static async Task<MessagePacket> ParseAsync(MessageInfo info, System.IO.Stream stream)
         {
             var buffer = new byte[info.Length];
             if (await stream.ReadAsync(buffer, 0, info.Length, cancellationToken: System.Threading.CancellationToken.None) > 0)
