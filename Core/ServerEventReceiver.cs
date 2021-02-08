@@ -310,12 +310,12 @@ namespace RemoteController.Core
 #endif
 
 #if BailServer
-        private bool ShouldServerBailKeyboard()
+        private bool ShouldBailKeyboard()
         {
             return (DateTime.UtcNow - state.LastHookEvent_Keyboard) < BailSec;
         }
 
-        private bool ShouldServerBailMouse()
+        private bool ShouldBailMouse()
         {
             return (DateTime.UtcNow - state.LastHookEvent_Mouse) < BailSec;
         }
@@ -329,7 +329,7 @@ namespace RemoteController.Core
             //historically this has been happening by a global hook reading my event taps and replaying back over the network
             //in a feedback loop. This should be solved, but i'm leaving this code here as an extra check.
 #if BailServer
-            if (ShouldServerBailKeyboard())
+            if (ShouldBailKeyboard())
                 return;
 
             state.LastServerEvent_Keyboard = DateTime.UtcNow;
@@ -341,7 +341,7 @@ namespace RemoteController.Core
         unsafe void OnMouseMoveFromServer(byte[] message)
         {
 #if BailServer
-            if (ShouldServerBailMouse())
+            if (ShouldBailMouse())
                 return;
 
             state.LastServerEvent_Mouse = DateTime.UtcNow;
@@ -381,7 +381,7 @@ namespace RemoteController.Core
         unsafe void OnMouseButtonFromServer(byte[] message)
         {
 #if BailServer
-            if (ShouldServerBailMouse())
+            if (ShouldBailMouse())
                 return;
             state.LastServerEvent_Mouse = DateTime.UtcNow;
 #endif
@@ -406,7 +406,7 @@ namespace RemoteController.Core
         unsafe void OnKeyPressFromServer(byte[] message)
         {
 #if BailServer
-            if (ShouldServerBailMouse())
+            if (ShouldBailMouse())
                 return;
 
             state.LastServerEvent_Keyboard = DateTime.UtcNow;
