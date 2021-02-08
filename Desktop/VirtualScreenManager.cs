@@ -46,18 +46,16 @@ namespace RemoteController.Desktop
         //decide whether to hide the mouse, pass the coords to the hook, or handle the event, or some combo.
         public CoordinateUpdateResult UpdateVirtualMouseCoordinates(MouseMoveEventArgs e)
         {
-            int deltaX, deltaY;
+            int deltaX, deltaY, newX, newY;
             //calculate the change from previous stored coordinates
-            State.VirtualX += deltaX = e.Mouse.X - State.LastPositionX;
-            State.VirtualY += deltaY = e.Mouse.Y - State.LastPositionY;
+            newX = State.VirtualX + (deltaX = e.Mouse.X - State.LastPositionX);
+            newY = State.VirtualY + (deltaY = e.Mouse.Y - State.LastPositionY);
 
             System.Diagnostics.Debug.WriteLine(State);
-            var s = ScreenConfiguration.ValidVirtualCoordinate(State.VirtualX, State.VirtualY);
+            var s = ScreenConfiguration.ValidVirtualCoordinate(newX, newY);
             //Console.WriteLine("hook " + e.Mouse.X + "," + e.Mouse.Y + " : delta " + deltaX + "," + deltaY + " : virtual " + ClientState._virtualX + ", " + ClientState._virtualY + ", lastpos:"+ClientState._lastPositionX+","+ClientState._lastPositionY);
             if (s == null)
             {
-                State.VirtualX -= deltaX;
-                State.VirtualY -= deltaY;
                 e.Handled = !State.CurrentClientFocused;
                 return CoordinateUpdateResult.Empty;
             }
@@ -65,8 +63,10 @@ namespace RemoteController.Desktop
             {
                 if (s.Client == State.ClientName)
                 {
-                    State.LastPositionX = Math.Abs(State.VirtualX - s.X) + s.LocalX;
-                    State.LastPositionY = Math.Abs(State.VirtualY - s.Y) + s.LocalY;
+                    State.VirtualX = newX;
+                    State.VirtualY = newY;
+                    State.LastPositionX = Math.Abs(newX - s.X) + s.LocalX;
+                    State.LastPositionY = Math.Abs(newY - s.Y) + s.LocalY;
 
                     //we previous weren't focused, but now we are
                     if (!State.CurrentClientFocused)
@@ -82,14 +82,16 @@ namespace RemoteController.Desktop
                 }
                 else if (State.CurrentClientFocused)
                 {
+                    State.VirtualX = newX;
+                    State.VirtualY = newY;
                     //we have moved off screen now - hide the mouse                    
                     VirtualScreen screen = ScreenConfiguration.Screens[State.ClientName].First();
 
                     //hide mouse
                     //Console.WriteLine("detected coordinates outside of our current screen - hiding mouse at " + localMaxX + "," + localMaxY);
                     //_hook.Hook.SetMousePos((int)localMaxX, (int)localMaxY);
-                    State.LastPositionX = 0 + screen.Width - 1;
-                    State.LastPositionY = 0 + screen.Height - 1;
+                    State.LastPositionX = screen.Width;
+                    State.LastPositionY = screen.Height;
                     //Console.WriteLine("Setting last known position of mouse to " + localMaxX + "," + localMaxY);
 
                     //we are offscreen
@@ -99,10 +101,9 @@ namespace RemoteController.Desktop
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("Other Screen " + State);
-                    State.VirtualX += deltaX * (s.ScaleX - 1);
-                    State.VirtualY += deltaY * (s.ScaleY - 1);
-                    System.Diagnostics.Debug.WriteLine("After Dpi " + State);
+                    State.VirtualX += deltaX * s.ScaleX;
+                    State.VirtualY += deltaY * s.ScaleY;
+                    e.Handled = true;
                     return CoordinateUpdateResult.ValidCoordinate;
                 }
 

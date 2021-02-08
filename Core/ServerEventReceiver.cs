@@ -353,7 +353,7 @@ namespace RemoteController.Core
                 state.VirtualX = *(int*)(b + 1);
                 state.VirtualY = *(int*)(b + 5);
             }
-
+            System.Diagnostics.Debug.WriteLine(state);
             //send this movement to our virtual screen manager for processing
             if (_screen.ProcessVirtualCoordinatesMove(true))
             {
