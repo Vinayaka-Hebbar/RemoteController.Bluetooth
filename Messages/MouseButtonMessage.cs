@@ -15,15 +15,6 @@ namespace RemoteController.Messages
             IsDown = isDown;
         }
 
-        public unsafe MouseButtonMessage(IMessage message)
-        {
-            fixed (byte* b = message.GetBytes())
-            {
-                MouseButton = (MouseButton)(*(b + 1));
-                IsDown = (*(b + 2)) == 1;
-            }
-        }
-
         public MessageType Type => MessageType.MouseButton;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

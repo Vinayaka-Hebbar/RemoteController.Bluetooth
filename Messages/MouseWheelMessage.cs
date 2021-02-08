@@ -13,15 +13,6 @@ namespace RemoteController.Messages
             DeltaY = deltaY;
         }
 
-        public unsafe MouseWheelMessage(IMessage packet)
-        {
-            fixed (byte* b = packet.GetBytes())
-            {
-                DeltaX = *(int*)(b + 1);
-                DeltaY = *(int*)(b + 5);
-            }
-        }
-
         public MessageType Type => MessageType.MouseWheel;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

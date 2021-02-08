@@ -20,7 +20,7 @@ namespace RemoteController.Core
         private readonly ClientState state;
 
 #if Bail
-        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
 #endif
 
 #if QUEUE_SERVER
@@ -199,28 +199,27 @@ namespace RemoteController.Core
                 var buffer = new byte[Message.HeaderSize];
                 if (stream.Read(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
-                    var message = new MessageInfo(buffer);
-                    switch (message.Type)
+                    switch ((MessageType)(buffer[0] & Message.TypeMask))
                     {
                         case MessageType.MoveScreen:
                             break;
                         case MessageType.MouseWheel:
-                            OnMouseWheelFromServer(new MouseWheelMessage(message));
+                            OnMouseWheelFromServer(buffer);
                             break;
                         case MessageType.MouseButton:
-                            OnMouseButtonFromServer(new MouseButtonMessage(message));
+                            OnMouseButtonFromServer(buffer);
                             break;
                         case MessageType.MouseMove:
-                            OnMouseMoveFromServer(new MouseMoveMessage(message));
+                            OnMouseMoveFromServer(buffer);
                             break;
                         case MessageType.KeyPress:
-                            OnKeyPressFromServer(new KeyPressMessage(message));
+                            OnKeyPressFromServer(buffer);
                             break;
                         case MessageType.Clipboard:
-                            OnClipboardFromServer(new ClipboardMessage(MessagePacket.Parse(message, stream)));
+                            OnClipboardFromServer(new ClipboardMessage(MessagePacket.Parse(new MessageInfo(buffer), stream)));
                             break;
                         case MessageType.CheckIn:
-                            CheckInMessage checkIn = new CheckInMessage(MessagePacket.Parse(message, stream));
+                            CheckInMessage checkIn = new CheckInMessage(MessagePacket.Parse(new MessageInfo(buffer), stream));
                             ScreenConfig(stream);
                             OnScreenConfig(checkIn.Screens);
                             break;
@@ -340,7 +339,7 @@ namespace RemoteController.Core
             _hook.SetClipboard(message.Data);
         }
 
-        private void OnMouseMoveFromServer(MouseMoveMessage message)
+        unsafe void OnMouseMoveFromServer(byte[] message)
         {
 #if Bail
             if (ShouldServerBailMouse())
@@ -348,10 +347,11 @@ namespace RemoteController.Core
 
             state.LastServerEvent_Mouse = DateTime.UtcNow;
 #endif
-
-
-            state.VirtualX = message.VirtualX;
-            state.VirtualY = message.VirtualY;
+            fixed (byte* b = message)
+            {
+                state.VirtualX = *(int*)(b + 1);
+                state.VirtualY = *(int*)(b + 5);
+            }
 
             //send this movement to our virtual screen manager for processing
             if (_screen.ProcessVirtualCoordinatesUpdate(true).MoveMouse)
@@ -360,7 +360,8 @@ namespace RemoteController.Core
             }
 
         }
-        private void OnMouseWheelFromServer(MouseWheelMessage message)
+
+        unsafe void OnMouseWheelFromServer(byte[] message)
         {
 #if Bail
             if (ShouldServerBailMouse())
@@ -369,10 +370,15 @@ namespace RemoteController.Core
 #endif
             //Console.WriteLine("Received mouse wheel from server");
             if (state.CurrentClientFocused)
-                _hook.SendMouseWheel(message.DeltaX, message.DeltaY);
-
+            {
+                fixed (byte* b = message)
+                {
+                    _hook.SendMouseWheel(*(int*)(b + 1), *(int*)(b + 5));
+                }
+            }
         }
-        private void OnMouseButtonFromServer(MouseButtonMessage message)
+
+        unsafe void OnMouseButtonFromServer(byte[] message)
         {
 #if Bail
             if (ShouldServerBailMouse())
@@ -382,19 +388,22 @@ namespace RemoteController.Core
             //Console.WriteLine("Received mouse down from server: " + button.ToString());
             if (state.CurrentClientFocused)
             {
-                if (message.IsDown)
+                fixed (byte* b = message)
                 {
-                    _hook.SendMouseDown(message.MouseButton);
-                }
-                else
-                {
-                    _hook.SendMouseUp(message.MouseButton);
+                    if ((*(b + 2)) == 1)
+                    {
+                        _hook.SendMouseDown((MouseButton)(*(b + 1)));
+                    }
+                    else
+                    {
+                        _hook.SendMouseUp((MouseButton)(*(b + 1)));
+                    }
                 }
             }
 
         }
 
-        private void OnKeyPressFromServer(KeyPressMessage message)
+        unsafe void OnKeyPressFromServer(byte[] message)
         {
 #if Bail
             if (ShouldServerBailMouse())
@@ -404,13 +413,16 @@ namespace RemoteController.Core
 #endif
             if (state.CurrentClientFocused)
             {
-                if (message.IsDown)
+                fixed (byte* b = message)
                 {
-                    _hook.SendKeyDown(message.Key);
-                }
-                else
-                {
-                    _hook.SendKeyUp(message.Key);
+                    if (*(int*)(b + 5) == 1)
+                    {
+                        _hook.SendKeyDown((Key)(*(int*)(b + 1)));
+                    }
+                    else
+                    {
+                        _hook.SendKeyUp((Key)(*(int*)(b + 1)));
+                    }
                 }
             }
         }

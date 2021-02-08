@@ -14,15 +14,6 @@ namespace RemoteController.Messages
             IsDown = isDown;
         }
 
-        public unsafe KeyPressMessage(IMessage packet)
-        {
-            fixed (byte* b = packet.GetBytes())
-            {
-                Key = (Key)(*(int*)(b + 1));
-                IsDown = *(int*)(b + 5) == 1;
-            }
-        }
-
         public MessageType Type => MessageType.KeyPress;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
