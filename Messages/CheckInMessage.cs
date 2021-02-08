@@ -43,7 +43,11 @@ namespace RemoteController.Messages
                     cu += 4;
                     int height = *(int*)cu;
                     cu += 4;
-                    screens[i] = new VirtualScreen(clientId)
+                    int dpiX = *(int*)cu;
+                    cu += 4;
+                    int dpiY = *(int*)cu;
+                    cu += 4;
+                    screens[i] = new VirtualScreen(clientId, new Win32.Hooks.Dpi(dpiX, dpiY))
                     {
                         LocalX = localX,
                         LocalY = localY,
@@ -69,7 +73,8 @@ namespace RemoteController.Messages
             int clientIdSize = Encoding.Default.GetByteCount(ClientName);
             size += clientIdSize;
             var count = Screens.Count;
-            size += count * 24;
+            // Single Virtual screen size
+            size += count * 32;
             var res = new byte[size];
             fixed (byte* b = res)
             {
@@ -101,6 +106,10 @@ namespace RemoteController.Messages
                     *(int*)bytes = item.Width;
                     bytes += 4;
                     *(int*)bytes = item.Height;
+                    bytes += 4;
+                    *(int*)bytes = item.Dpi.X;
+                    bytes += 4;
+                    *(int*)bytes = item.Dpi.Y;
                     bytes += 4;
                 }
             }

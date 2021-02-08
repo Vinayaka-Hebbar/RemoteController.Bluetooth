@@ -7,9 +7,8 @@
         public int Width { get; }
         public int Height { get; }
 
-        public uint ScaleX { get; }
-
-        public uint ScaleY { get; }
+        public uint DpiX { get; }
+        public uint DpiY { get; }
 
         public Display(int x, int y, int width, int height, uint dpiX, uint dpiY)
         {
@@ -17,8 +16,8 @@
             Y = y;
             Width = width;
             Height = height;
-            ScaleX = dpiX / 96;
-            ScaleY = dpiY / 96;
+            DpiX = dpiX;
+            DpiY = dpiY;
         }
 
         public Display(int width, int height)
@@ -27,13 +26,35 @@
             Y = 0;
             Width = width;
             Height = height;
-            ScaleX = 1;
-            ScaleY = 1;
+            DpiX = 96;
+            DpiY = 96;
+        }
+
+        public Dpi GetDpi()
+        {
+            return new Dpi((int)DpiX, (int)DpiY);
         }
 
         public override string ToString()
         {
             return $"{Width}x{Height}";
+        }
+    }
+
+
+    public readonly struct Dpi
+    {
+        public const int DefaultDpi = 96;
+
+        public static readonly Dpi Default = new Dpi(DefaultDpi, DefaultDpi);
+
+        public readonly int X;
+        public readonly int Y;
+
+        public Dpi(int x, int y)
+        {
+            X = x;
+            Y = y;
         }
     }
 }

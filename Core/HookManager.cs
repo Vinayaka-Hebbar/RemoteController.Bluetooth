@@ -161,32 +161,16 @@ namespace RemoteController.Core
 
             if (_screen.UpdateVirtualMouseCoordinates(e))
             {
-                CoordinateUpdateResult presult = _screen.ProcessVirtualCoordinatesUpdate(false);
-                if (presult.MoveMouse)
-                {
-                    //Console.WriteLine("Moving mouse to a position");
-                    Hook.SetMousePos(ClientState.LastPositionX, ClientState.LastPositionY);
-                }
-
-                if (presult.HandleEvent) //we are receiving local input, but mouse is on a virtual monitor. We need to lock the cursor in a position.
-                {
-                    e.Handled = true; //windows obeys this
-                }
+                //Console.WriteLine("Moving mouse to a position");
+                Hook.SetMousePos(ClientState.LastPositionX, ClientState.LastPositionY);
+            }
 
 #if QUEUE_CLIENT
-                //send over the net
-                _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
+            //send over the net
+            _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
 #else
-                _dispatcher.Send(MouseMoveMessage.GetBytes(ClientState.VirtualX, ClientState.VirtualY));
+            _dispatcher.Send(MouseMoveMessage.GetBytes(ClientState.VirtualX, ClientState.VirtualY));
 #endif
-            }
-            else if (!ClientState.CurrentClientFocused)
-            {
-                //if we're the current client, i'm letting this through to enable smoother scrolling along edges.
-
-                //if we're not the current client, handle it.
-                e.Handled = true;
-            }
 
         }
 

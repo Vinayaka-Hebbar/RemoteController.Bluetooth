@@ -55,7 +55,7 @@ namespace RemoteController.Core
             VirtualScreen s = null;
             foreach (Display display in _hook.GetDisplays())
             {
-                s = state.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
+                s = _screen.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, display.GetDpi(), state.ClientName);
             }
             state.LastPositionX = 0;
             state.LastPositionY = 0;
@@ -149,7 +149,7 @@ namespace RemoteController.Core
 #if SYNC_SERVER || QUEUE_SERVER
         void ScreenConfig(System.IO.Stream stream)
         {
-            var config = new CheckInMessage(state.ClientName, state.ScreenConfiguration.Screens[state.ClientName]);
+            var config = new CheckInMessage(state.ClientName, _screen.ScreenConfiguration.Screens[state.ClientName]);
             var buffer = config.GetBytes();
             stream.Write(buffer, 0, buffer.Length);
             stream.Flush();
@@ -310,7 +310,7 @@ namespace RemoteController.Core
         }
 #endif
 
-#if Bail
+#if Bail && QUEUE_SERVER
         private bool ShouldServerBailKeyboard()
         {
             return (DateTime.UtcNow - state.LastHookEvent_Keyboard) < BailSec;
@@ -329,7 +329,7 @@ namespace RemoteController.Core
             //clipboard. 
             //historically this has been happening by a global hook reading my event taps and replaying back over the network
             //in a feedback loop. This should be solved, but i'm leaving this code here as an extra check.
-#if Bail
+#if Bail && QUEUE_SERVER
             if (ShouldServerBailKeyboard())
                 return;
 
@@ -341,12 +341,13 @@ namespace RemoteController.Core
 
         unsafe void OnMouseMoveFromServer(byte[] message)
         {
-#if Bail
+#if Bail && QUEUE_SERVER
             if (ShouldServerBailMouse())
                 return;
 
             state.LastServerEvent_Mouse = DateTime.UtcNow;
 #endif
+
             fixed (byte* b = message)
             {
                 state.VirtualX = *(int*)(b + 1);
@@ -363,7 +364,7 @@ namespace RemoteController.Core
 
         unsafe void OnMouseWheelFromServer(byte[] message)
         {
-#if Bail
+#if Bail && QUEUE_SERVER && QUEUE_SERVER
             if (ShouldServerBailMouse())
                 return;
             state.LastServerEvent_Mouse = DateTime.UtcNow;
@@ -380,7 +381,7 @@ namespace RemoteController.Core
 
         unsafe void OnMouseButtonFromServer(byte[] message)
         {
-#if Bail
+#if Bail && QUEUE_SERVER
             if (ShouldServerBailMouse())
                 return;
             state.LastServerEvent_Mouse = DateTime.UtcNow;
@@ -405,7 +406,7 @@ namespace RemoteController.Core
 
         unsafe void OnKeyPressFromServer(byte[] message)
         {
-#if Bail
+#if Bail && QUEUE_SERVER
             if (ShouldServerBailMouse())
                 return;
 
@@ -429,22 +430,22 @@ namespace RemoteController.Core
 
         private void OnScreenConfig(IList<VirtualScreen> screens)
         {
-            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
+            ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
                 if (!screenConfiguration.Screens.ContainsKey(screen.Client))
                 {
                     screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    screenConfiguration.AddScreenLeft(screenConfiguration.GetFurthestRight(), screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    screenConfiguration.AddScreenLeft(screenConfiguration.GetFurthestRight(), screen);
                 }
 
             }
-            if (state.ScreenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
+            if (screenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
                 null)
                 return;
             //coordinates are invalid, grab a screen
-            var s = state.ScreenConfiguration.GetFurthestLeft();
+            var s = screenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             if (s.Client != state.ClientName)

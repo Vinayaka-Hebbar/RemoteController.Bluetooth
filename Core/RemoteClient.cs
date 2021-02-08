@@ -32,7 +32,7 @@ namespace RemoteController.Core
             //there is some kind of dpi awareness bug here on windows. not sure exactly what's up.
             foreach (Win32.Hooks.Display display in _hook.GetDisplays())
             {
-                configuration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, state.ClientName);
+                configuration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, display.GetDpi(), state.ClientName);
             }
             _connection.Start();
 #if QUEUE_CLIENT
@@ -41,11 +41,11 @@ namespace RemoteController.Core
             await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen).GetBytes());
             var checkIn = await _connection.WaitForCheckIn();
             var screens = checkIn.Screens;
-            ScreenConfiguration screenConfiguration = state.ScreenConfiguration;
+            ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
             screenConfiguration.AddScreensRight(screens);
             screenConfiguration.AddScreensLeft(configuration.AllScreen);
             _hook.Start();
-            var s = state.ScreenConfiguration.GetFurthestLeft();
+            var s = screenConfiguration.GetFurthestLeft();
             state.VirtualX = s.X;
             state.VirtualY = s.Y;
             if (s.Client == state.ClientName)

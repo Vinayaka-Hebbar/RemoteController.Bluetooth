@@ -4,8 +4,6 @@
     {
         public bool CurrentClientFocused { get; set; } = false;
         public string ClientName { get; }
-
-        public ScreenConfiguration ScreenConfiguration { get; } = new ScreenConfiguration();
         /// <summary>
         /// computed position
         /// </summary>

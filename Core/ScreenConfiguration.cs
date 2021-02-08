@@ -34,7 +34,7 @@ namespace RemoteController.Core
                 if (!Screens.ContainsKey(screen.Client))
                 {
                     Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    AddScreenRight(GetFurthestLeft(), screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    AddScreenRight(GetFurthestLeft(), screen);
                 }
             }
         }
@@ -47,12 +47,59 @@ namespace RemoteController.Core
                 if (!Screens.ContainsKey(screen.Client))
                 {
                     Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    AddScreenRight(GetFurthestLeft(), screen.X, screen.Y, screen.Width, screen.Height, screen.Client);
+                    AddScreenRight(GetFurthestLeft(), screen);
                 }
             }
         }
 
-        public VirtualScreen AddScreen(int localX, int localY, int virtualX, int virtualY, int width, int height, string client)
+        public VirtualScreen AddScreen(int virtualX, int virtualY, VirtualScreen other)
+        {
+            double newXBottomCorner = virtualX + other.Width - 1;
+            double newYBottomCorner = virtualY + other.Height - 1;
+            //check and make sure we can add this
+
+            foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
+            {
+                double existingX = s.X;
+                double existingY = s.Y;
+                double existingXBottomCorner = s.X + s.Width - 1;
+                double existingYBottomCorner = s.Y + s.Height - 1;
+
+                //no overlap of x coords
+                if (virtualX > existingXBottomCorner || newXBottomCorner < existingX)
+                    continue;
+
+                // If one rectangle is above other
+                //screen coordinates have the Y flipped, so we have to adjust this part by flipping the comparisons from what you would normally see
+                if (virtualY > existingYBottomCorner || newYBottomCorner < existingY)
+                    continue;
+
+                return null; //this is a coordinate overlap
+            }
+
+            //all good, add the new screen
+            VirtualScreen newScreen = new VirtualScreen(other.Client, other.Dpi)
+            {
+                LocalX = other.X,
+                LocalY = other.Y,
+                X = virtualX,
+                Y = virtualY,
+                Width = other.Width,
+                Height = other.Height
+            };
+
+            if (!Screens.ContainsKey(other.Client))
+            {
+                Screens.TryAdd(other.Client, new List<VirtualScreen>());
+
+            }
+            Screens[other.Client].Add(newScreen);
+
+
+            return newScreen;
+        }
+
+        public VirtualScreen AddScreen(int localX, int localY, int virtualX, int virtualY, int width, int height, Win32.Hooks.Dpi dpi, string client)
         {
             double newXBottomCorner = virtualX + width - 1;
             double newYBottomCorner = virtualY + height - 1;
@@ -78,7 +125,7 @@ namespace RemoteController.Core
             }
 
             //all good, add the new screen
-            VirtualScreen newScreen = new VirtualScreen(client)
+            VirtualScreen newScreen = new VirtualScreen(client, dpi)
             {
                 LocalX = localX,
                 LocalY = localY,
@@ -99,21 +146,21 @@ namespace RemoteController.Core
             return newScreen;
         }
 
-        public VirtualScreen AddScreenRight(VirtualScreen orig, int localX, int localY, int width, int height, string client)
+        public VirtualScreen AddScreenRight(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(localX, localY, orig.X + orig.Width, orig.Y, width, height, client);
+            return AddScreen(orig.X + orig.Width, orig.Y, other);
         }
-        public VirtualScreen AddScreenLeft(VirtualScreen orig, int localX, int localY, int width, int height, string client)
+        public VirtualScreen AddScreenLeft(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(localX, localY, orig.X - width, orig.Y, width, height, client);
+            return AddScreen(orig.X - other.Width, orig.Y, other);
         }
-        public VirtualScreen AddScreenAbove(VirtualScreen orig, int localX, int localY, int width, int height, string client)
+        public VirtualScreen AddScreenAbove(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(localX, localY, orig.X, orig.Y - height, width, height, client);
+            return AddScreen(orig.X, orig.Y - other.Height, other);
         }
-        public VirtualScreen AddScreenBelow(VirtualScreen orig, int localX, int localY, int width, int height, string client)
+        public VirtualScreen AddScreenBelow(VirtualScreen orig,  VirtualScreen other)
         {
-            return AddScreen(localX, localY, orig.X, orig.Y + orig.Height, width, height, client);
+            return AddScreen(orig.X, orig.Y + orig.Height, other);
         }
 
         public VirtualScreen ValidVirtualCoordinate(int x, int y)
@@ -129,6 +176,21 @@ namespace RemoteController.Core
             }
 
             return null;
+        }
+
+        public bool Contains(int x, int y)
+        {
+            //Console.WriteLine("checking:"+x+","+y);
+            foreach (var client in Screens.Values)
+            {
+                foreach (var s in client)
+                {
+                    if (x >= s.X && x < (s.X + s.Width) && y >= s.Y && y < (s.Y + s.Height))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public VirtualScreen GetFurthestRight()
