@@ -9,8 +9,18 @@ namespace RemoteController.Desktop
     {
         public static readonly CoordinateUpdateResult Empty = default;
 
-        public bool MoveMouse { get; set; }
-        public bool HandleEvent { get; set; }
+        public static readonly CoordinateUpdateResult ValidCoordinate = new CoordinateUpdateResult(false);
+
+        public static readonly CoordinateUpdateResult ValidMouseMove = new CoordinateUpdateResult(true);
+
+        public CoordinateUpdateResult(bool moveMouse)
+        {
+            MoveMouse = moveMouse;
+            IsValid = true;
+        }
+
+        public bool MoveMouse { get; }
+        public bool IsValid { get; }
     }
 
     public class VirtualScreenManager
@@ -34,20 +44,22 @@ namespace RemoteController.Desktop
 
         //based on the current position of the virtual coordinates
         //decide whether to hide the mouse, pass the coords to the hook, or handle the event, or some combo.
-        public bool UpdateVirtualMouseCoordinates(MouseMoveEventArgs e)
+        public CoordinateUpdateResult UpdateVirtualMouseCoordinates(MouseMoveEventArgs e)
         {
             int deltaX, deltaY;
             //calculate the change from previous stored coordinates
             State.VirtualX += deltaX = e.Mouse.X - State.LastPositionX;
             State.VirtualY += deltaY = e.Mouse.Y - State.LastPositionY;
 
+            System.Diagnostics.Debug.WriteLine(State);
             var s = ScreenConfiguration.ValidVirtualCoordinate(State.VirtualX, State.VirtualY);
             //Console.WriteLine("hook " + e.Mouse.X + "," + e.Mouse.Y + " : delta " + deltaX + "," + deltaY + " : virtual " + ClientState._virtualX + ", " + ClientState._virtualY + ", lastpos:"+ClientState._lastPositionX+","+ClientState._lastPositionY);
             if (s == null)
             {
                 State.VirtualX -= deltaX;
                 State.VirtualY -= deltaY;
-                return false;
+                e.Handled = !State.CurrentClientFocused;
+                return CoordinateUpdateResult.Empty;
             }
             else
             {
@@ -61,12 +73,12 @@ namespace RemoteController.Desktop
                     {
                         e.Handled = true;
                         State.CurrentClientFocused = true;
-                        return true;
+                        return CoordinateUpdateResult.ValidMouseMove;
                         //Console.WriteLine("regaining focus: " + localX + ","+ localY);
 
                         //mark this as handled since we manually set the cursor and don't want it to rubberband around
                     }
-                    return false;
+                    return CoordinateUpdateResult.ValidCoordinate;
                 }
                 else if (State.CurrentClientFocused)
                 {
@@ -82,17 +94,19 @@ namespace RemoteController.Desktop
 
                     //we are offscreen
                     State.CurrentClientFocused = false;
-                    return true;
+                    e.Handled = true;
+                    return CoordinateUpdateResult.ValidMouseMove;
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("Other Screen " + State);
                     State.VirtualX += deltaX * (s.ScaleX - 1);
                     State.VirtualY += deltaY * (s.ScaleY - 1);
+                    System.Diagnostics.Debug.WriteLine("After Dpi " + State);
+                    return CoordinateUpdateResult.ValidCoordinate;
                 }
 
-                e.Handled = true;
             }
-            return false;
         }
 
         public bool ProcessVirtualCoordinatesMove(bool replay)

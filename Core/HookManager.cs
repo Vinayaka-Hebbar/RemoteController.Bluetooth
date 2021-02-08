@@ -159,18 +159,22 @@ namespace RemoteController.Core
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
 #endif
 
-            if (_screen.UpdateVirtualMouseCoordinates(e))
+            CoordinateUpdateResult result = _screen.UpdateVirtualMouseCoordinates(e);
+            if (result.MoveMouse)
             {
                 //Console.WriteLine("Moving mouse to a position");
                 Hook.SetMousePos(ClientState.LastPositionX, ClientState.LastPositionY);
             }
-
+            if (result.IsValid)
+            {
 #if QUEUE_CLIENT
-            //send over the net
-            _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
+                //send over the net
+                _dispatcher.Process(new MouseMoveMessage(ClientState.VirtualX, ClientState.VirtualY));
 #else
             _dispatcher.Send(MouseMoveMessage.GetBytes(ClientState.VirtualX, ClientState.VirtualY));
 #endif
+            }
+
 
         }
 
