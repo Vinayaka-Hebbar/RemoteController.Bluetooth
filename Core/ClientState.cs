@@ -33,5 +33,12 @@
         public System.DateTime LastServerEvent_Keyboard = System.DateTime.UtcNow;
 #endif
 
+#if DEBUG
+        public override string ToString()
+        {
+            return $"{VirtualX}:{VirtualY}";
+        }
+#endif
+
     }
 }

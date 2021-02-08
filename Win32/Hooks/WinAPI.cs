@@ -7,6 +7,8 @@ namespace RemoteController.Win32
 {
     public static partial class NativeMethods
     {
+        private const string SHCore = "SHCore.dll";
+
         private const string User32Lib = "user32.dll";
 
         private const string Kernal32Lib = "kernel32.dll";
@@ -48,6 +50,9 @@ namespace RemoteController.Win32
 
         [DllImport(User32Lib)]
         public static extern bool GetMonitorInfo(IntPtr hmon, ref MONITORINFO mi);
+
+        [DllImport(SHCore, CharSet = CharSet.Unicode, PreserveSig = false)]
+        public static extern void GetDpiForMonitor(IntPtr hmonitor, int dpiType, ref uint dpiX, ref uint dpiY);
 
         /// <summary>
         /// The SetWindowsHookEx function installs an application-defined hook procedure into a hook chain.

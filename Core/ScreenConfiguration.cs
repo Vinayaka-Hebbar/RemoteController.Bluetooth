@@ -119,10 +119,13 @@ namespace RemoteController.Core
         public VirtualScreen ValidVirtualCoordinate(int x, int y)
         {
             //Console.WriteLine("checking:"+x+","+y);
-            foreach (VirtualScreen s in Screens.Values.SelectMany(s => s))
+            foreach (var client in Screens.Values)
             {
-                if (x >= s.X && x < (s.X + s.Width) && y >= s.Y && y < (s.Y + s.Height))
-                    return s;
+                foreach (var s in client)
+                {
+                    if (x >= s.X && x < (s.X + s.Width) && y >= s.Y && y < (s.Y + s.Height))
+                        return s;
+                }
             }
 
             return null;

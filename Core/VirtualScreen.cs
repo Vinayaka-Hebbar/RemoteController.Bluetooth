@@ -4,11 +4,12 @@
     {
         public static readonly VirtualScreen Empty = new VirtualScreen(string.Empty);
 
+
         public VirtualScreen(string client)
         {
             Client = client;
         }
-
+        
         public int LocalX { get; set; }
         public int LocalY { get; set; }
         public string Client { get; }

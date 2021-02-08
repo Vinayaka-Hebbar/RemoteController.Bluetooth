@@ -87,16 +87,16 @@ namespace RemoteController.Core
                                 case MessageType.MoveScreen:
                                     break;
                                 case MessageType.MouseWheel:
-                                    OnMouseWheelFromServer(new MouseWheelMessage(message));
+                                    OnMouseWheelFromServer(message.GetBytes());
                                     break;
                                 case MessageType.MouseButton:
-                                    OnMouseButtonFromServer(new MouseButtonMessage(message));
+                                    OnMouseButtonFromServer(message.GetBytes());
                                     break;
                                 case MessageType.MouseMove:
-                                    OnMouseMoveFromServer(new MouseMoveMessage(message));
+                                    OnMouseMoveFromServer(message.GetBytes());
                                     break;
                                 case MessageType.KeyPress:
-                                    OnKeyPressFromServer(new KeyPressMessage(message));
+                                    OnKeyPressFromServer(message.GetBytes());
                                     break;
                                 case MessageType.Clipboard:
                                     OnClipboardFromServer(new ClipboardMessage(message));
@@ -156,7 +156,7 @@ namespace RemoteController.Core
         }
 #endif
 
-#if SYNC_SERVER || !QUEUE_SERVER
+#if SYNC_SERVER || QUEUE_SERVER
         void Receive()
         {
             var token = cts.Token;
@@ -354,7 +354,7 @@ namespace RemoteController.Core
             }
 
             //send this movement to our virtual screen manager for processing
-            if (_screen.ProcessVirtualCoordinatesUpdate(true).MoveMouse)
+            if (_screen.ProcessVirtualCoordinatesMove(true))
             {
                 _hook.SetMousePos(state.LastPositionX, state.LastPositionY);
             }

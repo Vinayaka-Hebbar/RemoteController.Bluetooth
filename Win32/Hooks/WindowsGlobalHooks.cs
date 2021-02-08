@@ -553,10 +553,11 @@ namespace RemoteController.Win32.Hooks
             NativeMethods.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData) =>
                {
                    MONITORINFO mi = new MONITORINFO();
+                   uint dpiX = 0, dpiY = 0;
                    mi.size = (uint)Marshal.SizeOf(mi);
                    NativeMethods.GetMonitorInfo(hMonitor, ref mi);
-
-                   displays.Add(new Display(mi.monitor.left, mi.monitor.top, mi.monitor.right - mi.monitor.left, mi.monitor.bottom - mi.monitor.top));
+                   NativeMethods.GetDpiForMonitor(hMonitor, 0, ref dpiX, ref dpiY);
+                   displays.Add(new Display(mi.monitor.left, mi.monitor.top, mi.monitor.right - mi.monitor.left, mi.monitor.bottom - mi.monitor.top, dpiX, dpiY));
 
                    return true;
                }, IntPtr.Zero);
