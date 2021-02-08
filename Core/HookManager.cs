@@ -12,7 +12,7 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
         public readonly IGlobalHook Hook;
 
-#if Bail
+#if BailClient
         private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
 #endif
 
@@ -72,7 +72,7 @@ namespace RemoteController.Core
 
             //if our application has received a clipboard push from the server, this event still fires, so bail out if we are currently syncing the clipboard.
             //don't process a hook event within 2 seconds 
-#if Bail
+#if BailClient
             if (ShouldHookBailKeyboard())
                 return;
 
@@ -95,7 +95,7 @@ namespace RemoteController.Core
             }
 
             //don't process a hook event within 2 seconds of receiving network events. 
-#if Bail
+#if BailClient
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
@@ -115,7 +115,7 @@ namespace RemoteController.Core
                 return;
             }
             //don't process a hook event within 2 seconds 
-#if Bail
+#if BailClient
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
@@ -135,7 +135,7 @@ namespace RemoteController.Core
                 return;
             }
             //don't process a hook event within 2 seconds 
-#if Bail
+#if BailClient
             if (ShouldHookBailMouse())
                 return;
             ClientState.LastHookEvent_Mouse = DateTime.UtcNow;
@@ -152,7 +152,7 @@ namespace RemoteController.Core
         private void OnGlobalHookMouseMove(object sender, MouseMoveEventArgs e)
         {
             //don't process a hook event within 2 seconds of a server event
-#if Bail
+#if BailClient
             if (ShouldHookBailMouse())
                 return;
 
@@ -189,7 +189,7 @@ namespace RemoteController.Core
                 return;
             }
 
-#if Bail
+#if BailClient
             if (ShouldHookBailKeyboard())
                 return;
 
@@ -210,7 +210,7 @@ namespace RemoteController.Core
                 return;
             }
 
-#if Bail
+#if BailClient
             if (ShouldHookBailKeyboard())
                 return;
 
@@ -225,7 +225,7 @@ namespace RemoteController.Core
 
         }
 
-#if Bail
+#if BailClient
         private bool ShouldHookBailKeyboard()
         {
             return (DateTime.UtcNow - ClientState.LastServerEvent_Keyboard) < BailSec;

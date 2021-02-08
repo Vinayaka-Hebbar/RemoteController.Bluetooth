@@ -19,7 +19,7 @@ namespace RemoteController.Core
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
 
-#if Bail
+#if BailServer
         private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
 #endif
 
@@ -309,7 +309,7 @@ namespace RemoteController.Core
         }
 #endif
 
-#if Bail && QUEUE_SERVER
+#if BailServer
         private bool ShouldServerBailKeyboard()
         {
             return (DateTime.UtcNow - state.LastHookEvent_Keyboard) < BailSec;
@@ -328,7 +328,7 @@ namespace RemoteController.Core
             //clipboard. 
             //historically this has been happening by a global hook reading my event taps and replaying back over the network
             //in a feedback loop. This should be solved, but i'm leaving this code here as an extra check.
-#if Bail && QUEUE_SERVER
+#if BailServer
             if (ShouldServerBailKeyboard())
                 return;
 
@@ -340,7 +340,7 @@ namespace RemoteController.Core
 
         unsafe void OnMouseMoveFromServer(byte[] message)
         {
-#if Bail && QUEUE_SERVER
+#if BailServer
             if (ShouldServerBailMouse())
                 return;
 
@@ -363,8 +363,8 @@ namespace RemoteController.Core
 
         unsafe void OnMouseWheelFromServer(byte[] message)
         {
-#if Bail && QUEUE_SERVER && QUEUE_SERVER
-            if (ShouldServerBailMouse())
+#if BailServer 
+            if (ShouldBailMouse())
                 return;
             state.LastServerEvent_Mouse = DateTime.UtcNow;
 #endif
@@ -380,7 +380,7 @@ namespace RemoteController.Core
 
         unsafe void OnMouseButtonFromServer(byte[] message)
         {
-#if Bail && QUEUE_SERVER
+#if BailServer
             if (ShouldServerBailMouse())
                 return;
             state.LastServerEvent_Mouse = DateTime.UtcNow;
@@ -405,7 +405,7 @@ namespace RemoteController.Core
 
         unsafe void OnKeyPressFromServer(byte[] message)
         {
-#if Bail && QUEUE_SERVER
+#if BailServer
             if (ShouldServerBailMouse())
                 return;
 
