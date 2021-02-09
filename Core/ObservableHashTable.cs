@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 
 namespace RemoteController.Core
 {
-    public class ObservableHashTable<TKey, TValue> : IEnumerable<TValue>, INotifyCollectionChanged
+    public class ObservableHashTable<TKey, TValue> : System.Windows.DependencyObject, IEnumerable<TValue>, INotifyCollectionChanged
     {
         public struct Entry
         {
@@ -315,17 +315,26 @@ namespace RemoteController.Core
 
         void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
         {
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+            if(CollectionChanged != null)
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, CollectionChanged, this, new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+            }
         }
 
         void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
         {
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, item, index));
+            if (CollectionChanged != null)
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, CollectionChanged, this, new NotifyCollectionChangedEventArgs(action, item, index));
+            }
         }
 
         void OnCollectionReset()
         {
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            if (CollectionChanged != null)
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, CollectionChanged, this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
