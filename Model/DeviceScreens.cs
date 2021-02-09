@@ -1,5 +1,4 @@
-﻿using RemoteController.Win32.Hooks;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace RemoteController.Model
 {
@@ -13,17 +12,22 @@ namespace RemoteController.Model
         public DeviceScreens(string device)
         {
             Device = device;
-            Displays = new System.Collections.ObjectModel.ObservableCollection<Display>();
+            Displays = new System.Collections.ObjectModel.ObservableCollection<Core.IDisplay>();
         }
 
         public string Device { get; }
 
-        public IList<Display> Displays { get; set; }
+        public IList<Core.IDisplay> Displays { get; set; }
 
-        public DeviceScreens AddScreen(Display display)
+        public DeviceScreens AddScreen(Core.IDisplay display)
         {
             Displays.Add(display);
             return this;
+        }
+
+        public void RemoveScreen(Core.IDisplay display)
+        {
+            Displays.Remove(display);
         }
     }
 }

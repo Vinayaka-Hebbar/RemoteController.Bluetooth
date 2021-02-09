@@ -27,8 +27,6 @@ namespace RemoteController.Desktop
     {
         public readonly ClientState State;
 
-
-
         public ScreenConfiguration ScreenConfiguration { get; }
 
         public VirtualScreenManager(ClientState clientState)
@@ -84,7 +82,7 @@ namespace RemoteController.Desktop
                     State.VirtualX = newX;
                     State.VirtualY = newY;
                     //we have moved off screen now - hide the mouse                    
-                    VirtualScreen screen = ScreenConfiguration.Screens[State.ClientName].First();
+                    VirtualScreen screen = ScreenConfiguration[State.ClientName].First();
 
                     //hide mouse
                     //Console.WriteLine("detected coordinates outside of our current screen - hiding mouse at " + localMaxX + "," + localMaxY);
@@ -140,7 +138,7 @@ namespace RemoteController.Desktop
                 if (State.CurrentClientFocused)
                 {
                     //we have moved off screen now - hide the mouse                    
-                    VirtualScreen screen = ScreenConfiguration.Screens[State.ClientName].First();
+                    VirtualScreen screen = ScreenConfiguration[State.ClientName].First();
 
                     //hide mouse
                     //Console.WriteLine("detected coordinates outside of our current screen - hiding mouse at " + localMaxX + "," + localMaxY);

@@ -11,7 +11,24 @@ namespace RemoteController
 
         public App()
         {
-            
+            DispatcherUnhandledException += OnDispatcherUnhandled;
+        }
+
+        private void OnDispatcherUnhandled(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            var res = MessageBox.Show(e.Exception.Message, "UnhandledException", MessageBoxButton.OKCancel);
+            if (res == MessageBoxResult.OK)
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                res = MessageBox.Show(e.Exception.StackTrace, "UnhandledException", MessageBoxButton.OK);
+                if(res == MessageBoxResult.OK)
+                {
+                    Shutdown();
+                }
+            }
         }
 
         public static object MainModel => Current.TryFindResource(nameof(MainModel));

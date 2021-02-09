@@ -9,6 +9,8 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
         private readonly ClientState state;
 
+        public VirtualScreenManager Screens => _screen;
+
         public RemoteServer()
         {
             state = new ClientState(Environment.MachineName);

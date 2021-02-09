@@ -1,4 +1,5 @@
 ﻿using RemoteController.Desktop;
+using RemoteController.Extensions;
 using RemoteController.Messages;
 using RemoteController.Sockets;
 using RemoteController.Win32.Hooks;
@@ -18,6 +19,7 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
+        private IDictionary<Guid, Bluetooth.BluetoothClient> clients;
 
 #if BailServer
         private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
@@ -46,6 +48,7 @@ namespace RemoteController.Core
             _screen = screen;
             cts = new CancellationTokenSource();
             state = screen.State;
+            clients = new System.Collections.Concurrent.ConcurrentDictionary<Guid, Bluetooth.BluetoothClient>();
         }
 #endif
 
@@ -53,9 +56,19 @@ namespace RemoteController.Core
         {
             isRunning = true;
             VirtualScreen s = null;
-            foreach (Display display in _hook.GetDisplays())
+            IList<Display> displays = _hook.GetDisplays();
+            int count = displays.Count;
+            var client = state.ClientName;
+            if (count > 0)
             {
-                s = _screen.ScreenConfiguration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, display.GetDpi(), state.ClientName);
+                var screenConfiguration = _screen.ScreenConfiguration;
+                var display = displays[0];
+                s = screenConfiguration.AddScreen(display, display.GetDpi(), client);
+                for (int i = 1; i < count; i++)
+                {
+                    display = displays[i];
+                    s = screenConfiguration.AddScreenRight(s, display, display.GetDpi(), client);
+                }
             }
             state.LastPositionX = 0;
             state.LastPositionY = 0;
@@ -251,7 +264,7 @@ namespace RemoteController.Core
                             {
                                 return;
                             }
-                            await ProcessClientAsync(client); 
+                            await ProcessClientAsync(client);
                         }
                     }
                 }
@@ -295,6 +308,10 @@ namespace RemoteController.Core
                             await ScreenConfigASync(stream);
                             OnScreenConfig(checkIn.Screens);
                             break;
+                        case MessageType.CheckOut:
+                            RemoveScreen(await CheckOutMessage.ParseAsync(new MessageInfo(buffer), stream));
+                            break;
+
                     }
                 }
             }
@@ -302,7 +319,7 @@ namespace RemoteController.Core
 
         async Task ScreenConfigASync(System.IO.Stream stream)
         {
-            var config = new CheckInMessage(state.ClientName, _screen.ScreenConfiguration.Screens[state.ClientName]);
+            var config = new CheckInMessage(state.ClientName, _screen.ScreenConfiguration[state.ClientName]);
             var buffer = config.GetBytes();
             await stream.WriteAsync(buffer, 0, buffer.Length);
             await stream.FlushAsync();
@@ -427,17 +444,13 @@ namespace RemoteController.Core
             }
         }
 
-        private void OnScreenConfig(IList<VirtualScreen> screens)
+        void OnScreenConfig(IList<VirtualScreen> screens)
         {
             ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!screenConfiguration.Screens.ContainsKey(screen.Client))
-                {
-                    screenConfiguration.Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    screenConfiguration.AddScreenLeft(screenConfiguration.GetFurthestRight(), screen);
-                }
+                screenConfiguration.AddScreenLeft(screenConfiguration.GetFurthestRight(), screen);
 
             }
             if (screenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
@@ -453,6 +466,27 @@ namespace RemoteController.Core
             state.LastPositionX = 0;
             state.LastPositionY = 0;
             _hook.SetMousePos(0, 0);
+        }
+
+        void RemoveScreen(CheckOutMessage checkOut)
+        {
+            ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
+            if (screenConfiguration.Remove(checkOut.ClientName))
+            {
+                if (screenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
+                    null)
+                    return;
+                //coordinates are invalid, grab a screen
+                var s = screenConfiguration.GetFurthestLeft();
+                state.VirtualX = s.X;
+                state.VirtualY = s.Y;
+                if (s.Client != state.ClientName)
+                    return;
+                //set this local client to have 0,0 coords. then update the other clients with the new virtual position.
+                state.LastPositionX = 0;
+                state.LastPositionY = 0;
+                _hook.SetMousePos(0, 0);
+            }
         }
 
         private bool disposed;

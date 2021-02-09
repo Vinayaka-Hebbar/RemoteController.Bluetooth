@@ -19,7 +19,7 @@ namespace RemoteController.Messages
         public static MessagePacket Parse(MessageInfo info, System.IO.Stream stream)
         {
             var buffer = new byte[info.Length];
-            if (stream.Read(buffer, 0, info.Length) > 0)
+            if (stream.Read(buffer, 0, buffer.Length) > 0)
             {
                 return new MessagePacket(info, buffer);
             }
@@ -30,7 +30,7 @@ namespace RemoteController.Messages
         public static async Task<MessagePacket> ParseAsync(MessageInfo info, System.IO.Stream stream)
         {
             var buffer = new byte[info.Length];
-            if (await stream.ReadAsync(buffer, 0, info.Length, cancellationToken: System.Threading.CancellationToken.None) > 0)
+            if (await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken: System.Threading.CancellationToken.None) > 0)
             {
                 return new MessagePacket(info, buffer);
             }

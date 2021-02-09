@@ -4,16 +4,29 @@ using System.Linq;
 
 namespace RemoteController.Core
 {
+    public enum Direction
+    {
+        None,
+        Left,
+        Right,
+        Top,
+        Bottom
+    }
+
+    public delegate void ScreenAddedHandler(Direction direction, VirtualScreen screen);
+
+    public delegate void ScreenRemovedHandler(VirtualScreen screen);
+
     public class ScreenConfiguration
     {
-        public ConcurrentDictionary<string, List<VirtualScreen>> Screens { get; }
+        private readonly ConcurrentDictionary<string, List<VirtualScreen>> screens;
 
         public IList<VirtualScreen> AllScreen
         {
             get
             {
                 List<VirtualScreen> res = new List<VirtualScreen>();
-                foreach (var item in Screens)
+                foreach (var item in screens)
                 {
                     res.AddRange(item.Value);
                 }
@@ -21,21 +34,24 @@ namespace RemoteController.Core
             }
         }
 
+        public IList<VirtualScreen> this[string clientId]
+        {
+            get => screens[clientId];
+        }
+
+        public event ScreenAddedHandler Added;
+        public event ScreenRemovedHandler Removed;
+
         public ScreenConfiguration()
         {
-            Screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
+            screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
         }
 
         public void AddScreensRight(IList<VirtualScreen> screens)
         {
             foreach (var screen in screens)
             {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!Screens.ContainsKey(screen.Client))
-                {
-                    Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    AddScreenRight(GetFurthestLeft(), screen);
-                }
+                AddScreenRight(GetFurthestLeft(), screen);
             }
         }
 
@@ -44,11 +60,7 @@ namespace RemoteController.Core
             foreach (var screen in screens)
             {
                 //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                if (!Screens.ContainsKey(screen.Client))
-                {
-                    Screens.TryAdd(screen.Client, new List<VirtualScreen>());
-                    AddScreenRight(GetFurthestLeft(), screen);
-                }
+                AddScreenRight(GetFurthestLeft(), screen);
             }
         }
 
@@ -58,7 +70,7 @@ namespace RemoteController.Core
             double newYBottomCorner = virtualY + other.Height - 1;
             //check and make sure we can add this
 
-            foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
+            foreach (VirtualScreen s in screens.Values.SelectMany(x => x))
             {
                 double existingX = s.X;
                 double existingY = s.Y;
@@ -88,14 +100,11 @@ namespace RemoteController.Core
                 Height = other.Height
             };
 
-            if (!Screens.ContainsKey(other.Client))
+            if (!screens.ContainsKey(other.Client))
             {
-                Screens.TryAdd(other.Client, new List<VirtualScreen>());
-
+                screens.TryAdd(other.Client, new List<VirtualScreen>());
             }
-            Screens[other.Client].Add(newScreen);
-
-
+            screens[other.Client].Add(newScreen);
             return newScreen;
         }
 
@@ -105,7 +114,7 @@ namespace RemoteController.Core
             double newYBottomCorner = virtualY + height - 1;
             //check and make sure we can add this
 
-            foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
+            foreach (VirtualScreen s in screens.Values.SelectMany(x => x))
             {
                 double existingX = s.X;
                 double existingY = s.Y;
@@ -135,38 +144,59 @@ namespace RemoteController.Core
                 Height = height
             };
 
-            if (!Screens.ContainsKey(client))
+            if (!screens.ContainsKey(client))
             {
-                Screens.TryAdd(client, new List<VirtualScreen>());
-
+                screens.TryAdd(client, new List<VirtualScreen>());
             }
-            Screens[client].Add(newScreen);
-
-
+            screens[client].Add(newScreen);
             return newScreen;
+        }
+
+        public VirtualScreen AddScreen(IDisplay display, Win32.Hooks.Dpi dpi, string client)
+        {
+            return OnScreenChanged(Direction.None, AddScreen(display.X, display.Y, 0, 0, display.Width, display.Height, dpi, client));
         }
 
         public VirtualScreen AddScreenRight(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(orig.X + orig.Width, orig.Y, other);
+            return OnScreenChanged(Direction.Right, AddScreen(orig.X + orig.Width, orig.Y, other));
         }
+
         public VirtualScreen AddScreenLeft(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(orig.X - other.Width, orig.Y, other);
+            return OnScreenChanged(Direction.Left, AddScreen(orig.X - other.Width, orig.Y, other));
         }
         public VirtualScreen AddScreenAbove(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(orig.X, orig.Y - other.Height, other);
+            return OnScreenChanged(Direction.Top, AddScreen(orig.X, orig.Y - other.Height, other));
         }
-        public VirtualScreen AddScreenBelow(VirtualScreen orig,  VirtualScreen other)
+        public VirtualScreen AddScreenBelow(VirtualScreen orig, VirtualScreen other)
         {
-            return AddScreen(orig.X, orig.Y + orig.Height, other);
+            return OnScreenChanged(Direction.Bottom, AddScreen(orig.X, orig.Y + orig.Height, other));
+        }
+
+        public VirtualScreen AddScreenRight(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
+        {
+            return OnScreenChanged(Direction.Right, AddScreen(display.X, display.Y, orig.X + orig.Width, orig.Y, display.Width, display.Height,dpi,client));
+        }
+
+        public VirtualScreen AddScreenLeft(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
+        {
+            return OnScreenChanged(Direction.Left, AddScreen(display.X, display.Y, orig.X - display.Width, orig.Y, display.Width, display.Height, dpi, client));
+        }
+        public VirtualScreen AddScreenAbove(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
+        {
+            return OnScreenChanged(Direction.Top, AddScreen(display.X, display.Y, orig.X, orig.Y - display.Height, display.Width, display.Height, dpi, client));
+        }
+        public VirtualScreen AddScreenBelow(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
+        {
+            return OnScreenChanged(Direction.Bottom, AddScreen(display.X, display.Y, orig.X, orig.Y + orig.Height, display.Width, display.Height, dpi, client));
         }
 
         public VirtualScreen ValidVirtualCoordinate(int x, int y)
         {
             //Console.WriteLine("checking:"+x+","+y);
-            foreach (var client in Screens.Values)
+            foreach (var client in screens.Values)
             {
                 foreach (var s in client)
                 {
@@ -181,7 +211,7 @@ namespace RemoteController.Core
         public bool Contains(int x, int y)
         {
             //Console.WriteLine("checking:"+x+","+y);
-            foreach (var client in Screens.Values)
+            foreach (var client in screens.Values)
             {
                 foreach (var s in client)
                 {
@@ -197,7 +227,7 @@ namespace RemoteController.Core
         {
             VirtualScreen furthestRight = null;
             double maxX = double.MinValue;
-            foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
+            foreach (VirtualScreen s in screens.Values.SelectMany(x => x))
             {
                 double maxForThisScreen = s.X + s.Width;
                 if (maxForThisScreen > maxX)
@@ -215,7 +245,7 @@ namespace RemoteController.Core
         {
             VirtualScreen furthestLeft = VirtualScreen.Empty;
             double minX = double.MaxValue;
-            foreach (VirtualScreen s in Screens.Values.SelectMany(x => x))
+            foreach (VirtualScreen s in screens.Values.SelectMany(x => x))
             {
                 double minForThisScreen = s.X;
                 if (minForThisScreen < minX)
@@ -233,12 +263,11 @@ namespace RemoteController.Core
         //function to support removing screen in an arbitrary place. Will collapse other screens in.
         public void Remove(VirtualScreen s)
         {
-
             VirtualScreen left = GetFurthestLeft();
             VirtualScreen right = GetFurthestRight();
 
             //Screens
-            Screens[s.Client].Remove(s);
+            screens[s.Client].Remove(s);
 
             //so, right now i'm just adding screens left and right. I haven't done much with positioning up and down.
             //i'm going to keep this simple, but eventually we'll want to implement some kind of grid collapsing function
@@ -249,7 +278,7 @@ namespace RemoteController.Core
                 return;
 
             //for every screen with a starting X coord that's greater than this, move it back towards 0
-            foreach (VirtualScreen screen in Screens.Values.SelectMany(x => x).ToList())
+            foreach (VirtualScreen screen in screens.Values.SelectMany(x => x).ToList())
             {
                 if (screen.X > s.X)
                 {
@@ -257,6 +286,53 @@ namespace RemoteController.Core
                 }
             }
 
+        }
+
+        //function to support removing screen in an arbitrary place. Will collapse other screens in.
+        public bool Remove(string clientId)
+        {
+            if (screens.TryRemove(clientId, out List<VirtualScreen> removedScreens))
+            {
+                foreach (var s in removedScreens)
+                {
+
+                    VirtualScreen left = GetFurthestLeft();
+                    VirtualScreen right = GetFurthestRight();
+
+                    //Screens
+
+                    //so, right now i'm just adding screens left and right. I haven't done much with positioning up and down.
+                    //i'm going to keep this simple, but eventually we'll want to implement some kind of grid collapsing function
+                    //like masonry 
+
+                    if (s == left || s == right)
+                        continue;
+
+                    //for every screen with a starting X coord that's greater than this, move it back towards 0
+                    foreach (VirtualScreen screen in screens.Values.SelectMany(x => x).ToList())
+                    {
+                        if (screen.X > s.X)
+                        {
+                            screen.X -= s.Width;
+                        }
+                    }
+                    OnScreenRemoved(s);
+                }
+                return true;
+            }
+            return false;
+
+        }
+
+        protected VirtualScreen OnScreenChanged(Direction direction, VirtualScreen screen)
+        {
+            Added?.Invoke(direction, screen);
+            return screen;
+        }
+
+        protected void OnScreenRemoved(VirtualScreen screen)
+        {
+            Removed?.Invoke(screen);
         }
     }
 }

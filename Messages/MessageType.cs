@@ -8,6 +8,7 @@
         MouseMove = 4,
         KeyPress = 5,
         Clipboard = 6,
-        CheckIn = 7
+        CheckIn = 7,
+        CheckOut = 8
     }
 }

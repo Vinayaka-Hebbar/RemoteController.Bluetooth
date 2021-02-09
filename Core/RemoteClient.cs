@@ -14,6 +14,7 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
 
         private readonly ClientState state;
+        private bool isDisposed;
 
         public RemoteClient(Bluetooth.BluetoothEndPoint endPoint)
         {
@@ -86,14 +87,28 @@ namespace RemoteController.Core
             }
         }
 
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            _hook.Dispose();
-            _connection.Dispose();
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    _hook.Dispose();
 #if QUEUE_CLIENT
-            _dispatcher.Dispose();
+                    _dispatcher.Dispose();
 #endif
+                    _connection.Send(new CheckOutMessage(state.ClientName));
+                    _connection.Dispose();
+                }
+                isDisposed = true;
+            }
         }
 
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -11,21 +11,61 @@
         Height="450"
         Icon="{StaticResource AppIcon}"
         Width="800">
-    <Grid Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition MinHeight="150" />
-            <RowDefinition Height="5" />
-            <RowDefinition MinHeight="150" />
-        </Grid.RowDefinitions>
-        <GroupBox Header="Client"
-                  DataContext="{Binding Sender}"
-                  Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}"
-                  BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
+    <TabControl>
+        <TabItem Header="Reciever"
+                 DataContext="{Binding Receiver}">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal"
+                            Margin="5"
+                            DockPanel.Dock="Top">
+                    <Button Content="Start"
+                            Padding="5"
+                            Command="{Binding Start}" />
+                    <Button Content="Stop"
+                            Margin="5,0"
+                            Padding="5"
+                            Command="{Binding Stop}" />
+                </StackPanel>
+                <ListView ItemsSource="{Binding Screens}"
+                          SelectionMode="Single">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <GroupBox Margin="5"
+                                      Header="{Binding Device}">
+                                <ItemsControl ItemsSource="{Binding Displays}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="40,30"
+                                                    Margin="5"
+                                                    Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
+                                                <TextBlock Text="{Binding}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </GroupBox>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ListView>
+            </DockPanel>
+        </TabItem>
+        <TabItem Header="Sender"
+                 DataContext="{Binding Sender}">
 
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <ListView ItemsSource="{Binding Devices}"
                           SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
@@ -41,38 +81,10 @@
                             Command="{Binding Connect}"
                             CommandParameter="{Binding Text, ElementName=InputBox}"
                             DockPanel.Dock="Top"
-                            HorizontalAlignment="Right" 
-                            Padding="5"/>
-                    <HeaderedContentControl Header="Content">
-                        <TextBox x:Name="InputBox"
-                                 Text="{Binding TextIn}"
-                                 command:TextEvents.KeyDown="{Binding TextChanged}"
-                                 AcceptsReturn="True">
-                            <TextBox.Triggers>
-                            </TextBox.Triggers>
-                        </TextBox>
-                    </HeaderedContentControl>
+                            HorizontalAlignment="Right"
+                            Padding="5" />
                 </DockPanel>
             </Grid>
-        </GroupBox>
-        <GridSplitter Grid.Row="1"
-                      Height="5"
-                      HorizontalAlignment="Stretch" />
-        <GroupBox Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}"
-                  Header="Server"
-                  DataContext="{Binding Receiver}"
-                  Grid.Row="2"
-                  BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}">
-            <DockPanel>
-                <StackPanel Orientation="Horizontal"
-                            Margin="5"
-                            DockPanel.Dock="Top">
-                    <Button Content="Start" Padding="5" Command="{Binding Start}" />
-                    <Button Content="Stop"
-                            Margin="5,0" Padding="5" Command="{Binding Stop}"/>
-                </StackPanel>
-                <Label Content="{Binding}" />
-            </DockPanel>
-        </GroupBox>
-    </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

@@ -8,7 +8,8 @@
                          MouseMove = (int)MessageType.MouseMove,
                          KeyPress = (int)MessageType.KeyPress,
                          Clipboard = (int)MessageType.Clipboard,
-                         CheckIn = (int)MessageType.CheckIn;
+                         CheckIn = (int)MessageType.CheckIn,
+                         CheckOut = (int)MessageType.CheckOut;
 
         public const int TypeMask = 0xF;
 

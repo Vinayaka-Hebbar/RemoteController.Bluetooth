@@ -1,10 +1,13 @@
 ﻿using RemoteController.Core;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace RemoteController.ViewModels
 {
     public sealed class ReceiverViewModel : ViewModelBase
     {
+        public ObservableHashTable<string, Model.DeviceScreens> Screens { get; }
+
         private RemoteServer server;
 
         private Command.RelayCommand start;
@@ -19,6 +22,12 @@ namespace RemoteController.ViewModels
         }
 
         private Command.RelayCommand stop;
+
+        public ReceiverViewModel()
+        {
+            Screens = new ObservableHashTable<string, Model.DeviceScreens>();
+        }
+
         public ICommand Stop
         {
             get
@@ -32,6 +41,7 @@ namespace RemoteController.ViewModels
 
         private void StopServer()
         {
+            Screens.Clear();
             server.Dispose();
             server = null;
         }
@@ -55,7 +65,28 @@ namespace RemoteController.ViewModels
                 StopServer();
             }
             server = new RemoteServer();
+            ScreenConfiguration screens = server.Screens.ScreenConfiguration;
+            screens.Added += ScreensAdded;
+            screens.Removed += ScreensRemoved;
             server.Start();
+        }
+
+        void ScreensRemoved(VirtualScreen screen)
+        {
+            if (Screens.TryGetValue(screen.Client, out Model.DeviceScreens deviceScreens))
+            {
+                deviceScreens.RemoveScreen(screen);
+            }
+        }
+
+        void ScreensAdded(Direction direction, VirtualScreen screen)
+        {
+            if (!Screens.TryGetValue(screen.Client, out Model.DeviceScreens deviceScreens))
+            {
+                deviceScreens = new Model.DeviceScreens(screen.Client);
+                Screens.Add(screen.Client, deviceScreens);
+            }
+            deviceScreens.AddScreen(screen);
         }
     }
 }

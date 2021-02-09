@@ -2,7 +2,7 @@
 
 namespace RemoteController.Core
 {
-    public class VirtualScreen
+    public class VirtualScreen : IDisplay
     {
         public static readonly VirtualScreen Empty = new VirtualScreen(string.Empty, Dpi.Default);
         
@@ -27,6 +27,11 @@ namespace RemoteController.Core
         public int Height { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Width}x{Height}";
+        }
     }
 
 }

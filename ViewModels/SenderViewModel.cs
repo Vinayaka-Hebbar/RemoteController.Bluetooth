@@ -62,7 +62,7 @@ namespace RemoteController.ViewModels
                     if (await client.Start())
                     {
                         State = DisconnectState;
-                        client.RunMessageLoop();
+                        // client.RunMessageLoop();
                     }
                 }
             }

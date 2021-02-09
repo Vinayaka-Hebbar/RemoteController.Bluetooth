@@ -1,6 +1,6 @@
 ﻿namespace RemoteController.Win32.Hooks
 {
-    public readonly struct Display
+    public readonly struct Display : Core.IDisplay
     {
         public int X { get; }
         public int Y { get; }
