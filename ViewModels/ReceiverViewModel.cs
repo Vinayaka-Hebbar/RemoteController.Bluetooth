@@ -74,7 +74,7 @@ namespace RemoteController.ViewModels
         {
             if (Screens.TryGetValue(screen.Client, out Model.DeviceScreens deviceScreens))
             {
-                deviceScreens.RemoveScreen(screen);
+                 deviceScreens.RemoveScreen(screen);
             }
         }
 

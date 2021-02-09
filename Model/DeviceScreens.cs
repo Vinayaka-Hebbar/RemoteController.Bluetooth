@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace RemoteController.Model
 {
     [System.Windows.Markup.ContentProperty("Displays")]
-    public class DeviceScreens
+    public class DeviceScreens : System.Windows.DependencyObject
     {
         public DeviceScreens() : this(System.Environment.MachineName)
         {
@@ -21,13 +22,13 @@ namespace RemoteController.Model
 
         public DeviceScreens AddScreen(Core.IDisplay display)
         {
-            Displays.Add(display);
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (Action<Core.IDisplay>)Displays.Add, display);
             return this;
         }
 
         public void RemoveScreen(Core.IDisplay display)
         {
-            Displays.Remove(display);
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (Func<Core.IDisplay, bool>)Displays.Remove, display);
         }
     }
 }
