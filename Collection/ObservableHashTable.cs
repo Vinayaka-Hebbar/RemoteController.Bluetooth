@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace RemoteController.Core
+namespace RemoteController.Collection
 {
-    public class ObservableHashTable<TKey, TValue> : System.Windows.DependencyObject, IEnumerable<TValue>, INotifyCollectionChanged
+    public class ObservableHashTable<TKey, TValue> : System.Windows.Threading.DispatcherObject,
+        IObservableCollection<TValue>, INotifyCollectionChanged
     {
         public struct Entry
         {
@@ -18,40 +19,25 @@ namespace RemoteController.Core
         private int[] buckets;
         private Entry[] entries;
         private int count;
+        private int freeList;
+        private int freeCount;
+
         private readonly object _syncRoot = new object();
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public ObservableHashTable() : this(0, null) { }
+        private readonly Func<TValue, TKey> keySelector;
 
-        public ObservableHashTable(int capacity) : this(capacity, null) { }
+        public ObservableHashTable(Func<TValue, TKey> keySelector) : this(0, null, keySelector) { }
 
-        public ObservableHashTable(IEqualityComparer<TKey> comparer) : this(0, comparer) { }
-
-        public ObservableHashTable(int capacity, IEqualityComparer<TKey> comparer)
+        public ObservableHashTable(int capacity, IEqualityComparer<TKey> comparer, Func<TValue, TKey> keySelector)
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             if (capacity > 0)
                 Initialize(capacity);
             Comparer = comparer ?? EqualityComparer<TKey>.Default;
-        }
-
-        public ObservableHashTable(IDictionary<TKey, TValue> dictionary) : this(dictionary, null) { }
-
-        public ObservableHashTable(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) :
-            this(dictionary != null ? dictionary.Count : 0, comparer)
-        {
-
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-
-            foreach (KeyValuePair<TKey, TValue> pair in dictionary)
-            {
-                Add(pair.Key, pair.Value);
-            }
+            this.keySelector = keySelector;
         }
 
         public IReadOnlyCollection<Entry> Entries
@@ -120,7 +106,9 @@ namespace RemoteController.Core
                 {
                     for (int i = 0; i < buckets.Length; i++)
                         buckets[i] = -1;
+                    freeList = -1;
                     count = 0;
+                    freeCount = 0;
                     OnCollectionReset();
                 }
             }
@@ -172,6 +160,11 @@ namespace RemoteController.Core
             return -1;
         }
 
+        public int IndexOf(TValue value)
+        {
+            return FindEntry(keySelector(value));
+        }
+
         private void Initialize(int capacity)
         {
             int size = HashHelper.GetPrime(capacity);
@@ -210,13 +203,22 @@ namespace RemoteController.Core
                     }
                 }
                 int index;
-                if (count == entries.Length)
+                if (freeCount > 0)
                 {
-                    Resize();
-                    targetBucket = hashCode % buckets.Length;
+                    index = freeList;
+                    freeList = entries[index].Next;
+                    freeCount--;
                 }
-                index = count;
-                count++;
+                else
+                {
+                    if (count == entries.Length)
+                    {
+                        Resize();
+                        targetBucket = hashCode % buckets.Length;
+                    }
+                    index = count;
+                    count++;
+                }
 
                 entries[index].HashCode = hashCode;
                 entries[index].Next = buckets[targetBucket];
@@ -224,6 +226,46 @@ namespace RemoteController.Core
                 entries[index].Value = value;
                 buckets[targetBucket] = index;
                 OnCollectionChanged(NotifyCollectionChangedAction.Add, value, index);
+            }
+
+        }
+
+        public void Insert(int index, TValue value)
+        {
+            var key = keySelector(value);
+            if (key == null)
+            {
+                throw new KeyNotFoundException(nameof(key));
+            }
+
+            lock (_syncRoot)
+            {
+                if (buckets == null)
+                    Initialize(0);
+                int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
+                int targetBucket = hashCode % buckets.Length;
+
+                for (int i = buckets[targetBucket]; i >= 0; i = entries[i].Next)
+                {
+                    if (entries[i].HashCode == hashCode && Comparer.Equals(entries[i].Key, key))
+                    {
+                        throw new ArgumentException("Adding Duplicate");
+                    }
+                    if (index >= entries.Length)
+                    {
+                        Resize(HashHelper.ExpandPrime(index), false);
+                        count = index;
+                        targetBucket = hashCode % buckets.Length;
+                        count++;
+                    }
+
+                    entries[index].HashCode = hashCode;
+                    entries[index].Next = buckets[targetBucket];
+                    entries[index].Key = key;
+                    entries[index].Value = value;
+                    buckets[targetBucket] = index;
+                    OnCollectionChanged(NotifyCollectionChangedAction.Add, value, index);
+                }
             }
 
         }
@@ -264,6 +306,42 @@ namespace RemoteController.Core
             entries = newEntries;
         }
 
+        public void Move(int oldIndex, int newIndex)
+        {
+            lock (_syncRoot)
+            {
+                if (oldIndex < count)
+                {
+                    var removedItem = entries[oldIndex];
+                    entries[oldIndex].HashCode = -1;
+                    entries[oldIndex].Next = -1;
+                    entries[oldIndex].Key = default;
+                    entries[oldIndex].Value = default;
+                    freeList = oldIndex;
+                    freeCount++;
+
+                    int hashCode = removedItem.HashCode;
+                    int targetBucket = hashCode % buckets.Length;
+
+                    if (newIndex >= entries.Length)
+                    {
+                        Resize(HashHelper.ExpandPrime(newIndex), false);
+                        targetBucket = hashCode % buckets.Length;
+                        count = newIndex;
+                        count++;
+                    }
+
+                    entries[newIndex].HashCode = hashCode;
+                    entries[newIndex].Next = buckets[targetBucket];
+                    entries[newIndex].Key = removedItem.Key;
+                    entries[newIndex].Value = removedItem.Value;
+                    buckets[targetBucket] = newIndex;
+                    OnCollectionChanged(NotifyCollectionChangedAction.Move, removedItem.Value, newIndex, oldIndex);
+                }
+            }
+
+        }
+
         public bool Remove(TKey key)
         {
             if (key == null)
@@ -293,6 +371,8 @@ namespace RemoteController.Core
                         entries[i].Next = -1;
                         entries[i].Key = default;
                         entries[i].Value = default;
+                        freeList = i;
+                        freeCount++;
                         OnCollectionChanged(NotifyCollectionChangedAction.Remove, value, i);
                         return true;
                     }
@@ -315,9 +395,17 @@ namespace RemoteController.Core
 
         void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
         {
-            if(CollectionChanged != null)
+            if (CollectionChanged != null)
             {
                 Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, CollectionChanged, this, new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
+            }
+        }
+
+        void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
+        {
+            if (CollectionChanged != null)
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, CollectionChanged, this, new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
             }
         }
 

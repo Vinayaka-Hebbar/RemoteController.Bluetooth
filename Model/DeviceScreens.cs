@@ -1,34 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace RemoteController.Model
 {
     [System.Windows.Markup.ContentProperty("Displays")]
-    public class DeviceScreens : System.Windows.DependencyObject
+    public class DeviceScreens
     {
-        public DeviceScreens() : this(System.Environment.MachineName)
+        private readonly string name;
+
+        public DeviceScreens() : this(Environment.MachineName)
         {
         }
 
-        public DeviceScreens(string device)
+        public DeviceScreens(string name)
         {
-            Device = device;
+            this.name = name;
             Displays = new System.Collections.ObjectModel.ObservableCollection<Core.IDisplay>();
         }
 
-        public string Device { get; }
+        public bool IsEmpty => Displays.Count == 0;
+
+        public string Name => name;
 
         public IList<Core.IDisplay> Displays { get; set; }
 
         public DeviceScreens AddScreen(Core.IDisplay display)
         {
-            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (Action<Core.IDisplay>)Displays.Add, display);
+            InternalAdd(display);
             return this;
         }
 
-        public void RemoveScreen(Core.IDisplay display)
+        public async Task<bool> RemoveScreenAsync(Core.IDisplay display)
         {
-            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, (Func<Core.IDisplay, bool>)Displays.Remove, display);
+            var dispatcher = Application.Current.Dispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                return Displays.Remove(display);
+            }
+            else
+            {
+                return await dispatcher.InvokeAsync(new Func<bool>(() => Displays.Remove(display)), System.Windows.Threading.DispatcherPriority.Normal);
+            }
         }
+
+        void InternalAdd(Core.IDisplay item)
+        {
+            var dispatcher = Application.Current.Dispatcher;
+            if (dispatcher.CheckAccess())
+            {
+                Displays.Add(item);
+            }
+            else
+            {
+                dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => Displays.Add(item)));
+            }
+        }
+
+
+
+        public static string GetDeviceName(DeviceScreens device) => device.name;
     }
 }

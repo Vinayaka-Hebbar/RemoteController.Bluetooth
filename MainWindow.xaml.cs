@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace RemoteController
@@ -8,21 +9,48 @@ namespace RemoteController
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Controls.ListViewDragDropManager<Model.DeviceScreens> dragDropManager;
+
+        public MainWindow()
+        {
+            DataContext = App.MainModel;
+            dragDropManager = new Controls.ListViewDragDropManager<Model.DeviceScreens>();
+            InitializeComponent();
+        }
+
         public ViewModels.MainViewModel ViewModel
         {
             get => (ViewModels.MainViewModel)GetValue(DataContextProperty);
         }
 
-        public MainWindow()
+        internal static bool IsAdminUser
         {
-            DataContext = App.MainModel;
-            InitializeComponent();
+            get
+            {
+                return new System.Security.Principal.WindowsPrincipal
+                    (System.Security.Principal.WindowsIdentity.GetCurrent())
+                    .IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+            }
         }
 
         protected override async void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
+            dragDropManager.ListView = DeviceListView;
+            await Dispatcher.InvokeAsync(UpdateTitle);
             await ViewModel.InitAsync();
+        }
+
+        void UpdateTitle()
+        {
+            if (IsAdminUser)
+            {
+                Title = "Remote Controller (Admin)";
+            }
+            else
+            {
+                Title = "Remote Controller";
+            }
         }
 
         protected override void OnClosed(EventArgs e)
@@ -33,6 +61,12 @@ namespace RemoteController
             {
                 Application.Current.Shutdown();
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            dragDropManager.ListView = null;
         }
     }
 }

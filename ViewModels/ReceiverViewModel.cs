@@ -1,4 +1,5 @@
-﻿using RemoteController.Core;
+﻿using RemoteController.Collection;
+using RemoteController.Core;
 using System.Windows.Input;
 
 namespace RemoteController.ViewModels
@@ -24,7 +25,7 @@ namespace RemoteController.ViewModels
 
         public ReceiverViewModel()
         {
-            Screens = new ObservableHashTable<string, Model.DeviceScreens>();
+            Screens = new ObservableHashTable<string, Model.DeviceScreens>(Model.DeviceScreens.GetDeviceName);
         }
 
         public ICommand Stop
@@ -70,11 +71,13 @@ namespace RemoteController.ViewModels
             server.Start();
         }
 
-        void ScreensRemoved(VirtualScreen screen)
+        async void ScreensRemoved(VirtualScreen screen)
         {
-            if (Screens.TryGetValue(screen.Client, out Model.DeviceScreens deviceScreens))
+            if (Screens.TryGetValue(screen.Client, out Model.DeviceScreens deviceScreens)
+                && await deviceScreens.RemoveScreenAsync(screen)
+                && deviceScreens.IsEmpty)
             {
-                 deviceScreens.RemoveScreen(screen);
+                Screens.Remove(screen.Client);
             }
         }
 

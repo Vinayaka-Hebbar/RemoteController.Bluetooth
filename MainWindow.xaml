@@ -3,13 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RemoteController"
         mc:Ignorable="d"
-        xmlns:command="clr-namespace:RemoteController.Command"
         xmlns:model="clr-namespace:RemoteController.Model"
-        Title="MainWindow"
         Height="450"
-        Icon="{StaticResource AppIcon}"
+        Icon="{StaticResource AppIconDark}"
         Width="800">
     <TabControl>
         <TabItem Header="Reciever"
@@ -26,12 +23,13 @@
                             Padding="5"
                             Command="{Binding Stop}" />
                 </StackPanel>
-                <ListView ItemsSource="{Binding Screens}"
-                          SelectionMode="Single">
+                <ListView x:Name="DeviceListView" ItemsSource="{Binding Screens}"
+                          SelectionMode="Single"
+                          Padding="5">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <GroupBox Margin="5"
-                                      Header="{Binding Device}">
+                                      Header="{Binding Name}">
                                 <ItemsControl ItemsSource="{Binding Displays}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

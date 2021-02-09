@@ -248,8 +248,6 @@ namespace RemoteController.Bluetooth
                 return result;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "Returned to caller.")]
         static Exception ParseInternal(string bluetoothString, out BluetoothAddress result)
         {
             const Exception Success = null;

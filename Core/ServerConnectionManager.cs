@@ -35,6 +35,24 @@ namespace RemoteController.Core
             }
         }
 
+        public void SafeSend(IMessage message)
+        {
+            if (stream != null)
+            {
+                try
+                {
+                    var bytes = message.GetBytes();
+                    stream.Write(bytes, 0, bytes.Length);
+                    stream.Flush();
+                }
+                catch (System.Net.Sockets.SocketException)
+                {
+                    // socket either closed or other problem
+                    stream = null;
+                }
+            }
+        }
+
         public async Task Send(byte[] message)
         {
             if (stream != null)

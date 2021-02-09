@@ -11,7 +11,7 @@ namespace RemoteController
         public Test()
         {
             InitializeComponent();
-            ItemsList.ItemsSource = new System.Collections.ObjectModel.ObservableCollection<Model.DeviceScreens>
+            ItemsList.ItemsSource = new ItemSource
             {
                 new Model.DeviceScreens()
                 .AddScreen(new Win32.Hooks.Display(200,200))
@@ -24,6 +24,11 @@ namespace RemoteController
                 .AddScreen(new Win32.Hooks.Display(250,200)),
             };
             dragDropManager = new Controls.ListViewDragDropManager<Model.DeviceScreens>(ItemsList);
+        }
+
+        public class ItemSource : System.Collections.ObjectModel.ObservableCollection<Model.DeviceScreens>, Collection.IObservableCollection<Model.DeviceScreens>
+        {
+
         }
     }
 }

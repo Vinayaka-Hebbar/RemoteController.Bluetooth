@@ -19,7 +19,6 @@ namespace RemoteController.Core
         private readonly VirtualScreenManager _screen;
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
-        private IDictionary<Guid, Bluetooth.BluetoothClient> clients;
 
 #if BailServer
         private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
@@ -48,7 +47,6 @@ namespace RemoteController.Core
             _screen = screen;
             cts = new CancellationTokenSource();
             state = screen.State;
-            clients = new System.Collections.Concurrent.ConcurrentDictionary<Guid, Bluetooth.BluetoothClient>();
         }
 #endif
 
@@ -310,7 +308,8 @@ namespace RemoteController.Core
                             break;
                         case MessageType.CheckOut:
                             RemoveScreen(await CheckOutMessage.ParseAsync(new MessageInfo(buffer), stream));
-                            break;
+                            client.Dispose();
+                            return;
 
                     }
                 }
@@ -369,7 +368,6 @@ namespace RemoteController.Core
                 state.VirtualX = *(int*)(b + 1);
                 state.VirtualY = *(int*)(b + 5);
             }
-            System.Diagnostics.Debug.WriteLine(state);
             //send this movement to our virtual screen manager for processing
             if (_screen.ProcessVirtualCoordinatesMove(true))
             {

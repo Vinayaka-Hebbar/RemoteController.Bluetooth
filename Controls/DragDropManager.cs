@@ -329,7 +329,7 @@ namespace RemoteController.Controls
                 return;
 
             // Get the ObservableCollection<ItemType> which contains the dropped data object.
-            if (listView.ItemsSource is ObservableCollection<ItemType> itemsSource)
+            if (listView.ItemsSource is Collection.IObservableCollection<ItemType> itemsSource)
             {
                 int oldIndex = itemsSource.IndexOf(data);
                 int newIndex = IndexUnderDragCursor;
@@ -771,7 +771,7 @@ namespace RemoteController.Controls
     {
         #region Data
 
-        private readonly ObservableCollection<ItemType> itemsSource;
+        private readonly Collection.IObservableCollection<ItemType> itemsSource;
         private readonly ItemType dataItem;
         int oldIndex;
         int newIndex;
@@ -783,7 +783,7 @@ namespace RemoteController.Controls
         #region Constructor
 
         internal ProcessDropEventArgs(
-            ObservableCollection<ItemType> itemsSource,
+            Collection.IObservableCollection<ItemType> itemsSource,
             ItemType dataItem,
             int oldIndex,
             int newIndex,
@@ -803,7 +803,7 @@ namespace RemoteController.Controls
         /// <summary>
         /// The items source of the ListView where the drop occurred.
         /// </summary>
-        public ObservableCollection<ItemType> ItemsSource
+        public Collection.IObservableCollection<ItemType> ItemsSource
         {
             get { return itemsSource; }
         }
