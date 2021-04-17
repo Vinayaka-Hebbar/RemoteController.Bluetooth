@@ -3,6 +3,7 @@
     public class ClientState
     {
         public bool CurrentClientFocused { get; set; } = false;
+
         public string ClientName { get; }
         /// <summary>
         /// computed position

@@ -13,13 +13,12 @@ namespace RemoteController.ViewModels
         const string ConnectState = "Connect";
         const string DisconnectState = "Disconnect";
 
-        private readonly Guid _serviceClassId;
+        private static readonly Guid _serviceClassId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
         private Device selectedDevice;
         private RemoteClient client;
 
         public SenderViewModel()
         {
-            _serviceClassId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
             Devices = new ObservableCollection<Device>()
             {
                new Device(null) { DeviceName = "Searching..." }
@@ -81,6 +80,7 @@ namespace RemoteController.ViewModels
 
         public async Task InitAsync()
         {
+            var settings = DependencyService.Instance.GetService<IServiceProvider>();
             BluetoothRadio radio = BluetoothRadio.Default;
             if (radio != null && radio.Mode == RadioMode.PowerOff)
             {

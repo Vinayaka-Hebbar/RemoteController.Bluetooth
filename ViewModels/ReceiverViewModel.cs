@@ -32,7 +32,6 @@ namespace RemoteController.ViewModels
         {
             get
             {
-
                 if (stop == null)
                     stop = new Command.RelayCommand(StopServer, CanStop);
                 return stop;

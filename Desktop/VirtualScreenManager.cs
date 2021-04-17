@@ -70,6 +70,7 @@ namespace RemoteController.Desktop
                     {
                         e.Handled = true;
                         State.CurrentClientFocused = true;
+                        System.Windows.Input.Mouse.SetCursor(System.Windows.Input.Cursors.Arrow);
                         return CoordinateUpdateResult.ValidMouseMove;
                         //Console.WriteLine("regaining focus: " + localX + ","+ localY);
 

@@ -36,6 +36,7 @@ namespace RemoteController
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            DependencyService.Instance.Register<Services.ApplicationSettings>();
             traybar = (Desktop.Traybar)FindResource("SysTrayBar");
         }
 

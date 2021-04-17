@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace RemoteController.ViewModels
 {
@@ -18,5 +19,20 @@ namespace RemoteController.ViewModels
         public SenderViewModel Sender { get; }
 
         public ReceiverViewModel Receiver { get; }
+
+        private Command.RelayCommand settings;
+        public Command.RelayCommand Settings
+        {
+            get
+            {
+                if (settings == null)
+                    settings = new Command.RelayCommand(OnSettings);
+                return settings;
+            }
+        }
+
+        void OnSettings()
+        {
+        }
     }
 }

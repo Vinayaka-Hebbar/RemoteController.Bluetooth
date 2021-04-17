@@ -80,6 +80,7 @@ namespace RemoteController.Core
 #endif
         }
 
+        #region Queue Server
 #if QUEUE_SERVER
         void Dispatch()
         {
@@ -238,7 +239,8 @@ namespace RemoteController.Core
                 }
             }
         }
-#endif
+#endif 
+        #endregion
 
 
 #if !QUEUE_SERVER && !SYNC_SERVER
