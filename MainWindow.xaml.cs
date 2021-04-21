@@ -37,6 +37,7 @@ namespace RemoteController
         {
             base.OnInitialized(e);
             dragDropManager.ListView = DeviceListView;
+            DeviceTypeCombo.ItemsSource = Enum.GetValues(typeof(Model.RemoteDeviceType));
             await Dispatcher.InvokeAsync(UpdateTitle);
             await ViewModel.InitAsync();
         }

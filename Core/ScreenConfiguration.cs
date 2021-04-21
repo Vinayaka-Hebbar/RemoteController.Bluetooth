@@ -21,7 +21,7 @@ namespace RemoteController.Core
     {
         private readonly ConcurrentDictionary<string, List<VirtualScreen>> screens;
 
-        public IList<VirtualScreen> AllScreen
+        public IReadOnlyList<VirtualScreen> AllScreen
         {
             get
             {
@@ -34,9 +34,12 @@ namespace RemoteController.Core
             }
         }
 
-        public IList<VirtualScreen> this[string clientId]
+        public IReadOnlyList<VirtualScreen> this[string clientId]
         {
-            get => screens[clientId];
+            get
+            {
+                return screens[clientId];
+            }
         }
 
         public event ScreenAddedHandler Added;
@@ -47,20 +50,44 @@ namespace RemoteController.Core
             screens = new ConcurrentDictionary<string, List<VirtualScreen>>();
         }
 
-        public void AddScreensRight(IList<VirtualScreen> screens)
+        public void AddVirtualScreen(VirtualScreen screen)
         {
-            foreach (var screen in screens)
+            if (!screens.TryGetValue(screen.Client, out var virtualScreens))
             {
-                AddScreenRight(GetFurthestLeft(), screen);
+                virtualScreens = new List<VirtualScreen>();
+                this.screens[screen.Client] = virtualScreens;
+            }
+            virtualScreens.Add(screen);
+        }
+
+        public void AddScreensRight(IEnumerable<VirtualScreen> screens)
+        {
+            var s = GetFurthestRight();
+            foreach (VirtualScreen screen in screens)
+            {
+                s = AddScreenRight(s, screen);
             }
         }
 
-        public void AddScreensLeft(IList<VirtualScreen> screens)
+        public void AddScreensLeft(IEnumerable<VirtualScreen> screens)
+        {
+            var s = GetFurthestLeft();
+            foreach (var screen in screens)
+            {
+                s = AddScreenLeft(s, screen);
+            }
+        }
+
+        public void AddScreens(IEnumerable<VirtualScreen> screens)
         {
             foreach (var screen in screens)
             {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                AddScreenRight(GetFurthestLeft(), screen);
+                if (!this.screens.TryGetValue(screen.Client, out var virtualScreens))
+                {
+                    virtualScreens = new List<VirtualScreen>();
+                    this.screens.TryAdd(screen.Client, virtualScreens);
+                }
+                virtualScreens.Add(screen);
             }
         }
 
@@ -177,7 +204,7 @@ namespace RemoteController.Core
 
         public VirtualScreen AddScreenRight(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
         {
-            return OnScreenChanged(Direction.Right, AddScreen(display.X, display.Y, orig.X + orig.Width, orig.Y, display.Width, display.Height,dpi,client));
+            return OnScreenChanged(Direction.Right, AddScreen(display.X, display.Y, orig.X + orig.Width, orig.Y, display.Width, display.Height, dpi, client));
         }
 
         public VirtualScreen AddScreenLeft(VirtualScreen orig, IDisplay display, Win32.Hooks.Dpi dpi, string client)
@@ -225,7 +252,7 @@ namespace RemoteController.Core
 
         public VirtualScreen GetFurthestRight()
         {
-            VirtualScreen furthestRight = null;
+            VirtualScreen furthestRight = VirtualScreen.Empty;
             double maxX = double.MinValue;
             foreach (VirtualScreen s in screens.Values.SelectMany(x => x))
             {

@@ -64,7 +64,6 @@ namespace RemoteController.Desktop
                     State.VirtualY = newY;
                     State.LastPositionX = Math.Abs(newX - s.X) + s.LocalX;
                     State.LastPositionY = Math.Abs(newY - s.Y) + s.LocalY;
-
                     //we previous weren't focused, but now we are
                     if (!State.CurrentClientFocused)
                     {
@@ -91,7 +90,6 @@ namespace RemoteController.Desktop
                     State.LastPositionX = screen.Width - 1;
                     State.LastPositionY = screen.Height - 1;
                     //Console.WriteLine("Setting last known position of mouse to " + localMaxX + "," + localMaxY);
-
                     //we are offscreen
                     State.CurrentClientFocused = false;
                     e.Handled = true;

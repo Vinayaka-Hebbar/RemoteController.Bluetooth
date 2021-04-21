@@ -39,6 +39,16 @@ namespace RemoteController.Messages
             return res;
         }
 
+        public static CheckOutMessage Parse(MessageInfo info, System.IO.Stream stream)
+        {
+            var buffer = new byte[info.Length];
+            if (stream.Read(buffer, 0, buffer.Length) > 0)
+            {
+                return new CheckOutMessage(Encoding.UTF8.GetString(buffer));
+            }
+            return default;
+        }
+
         public async static Task<CheckOutMessage> ParseAsync(MessageInfo info, System.IO.Stream stream)
         {
             var buffer = new byte[info.Length];

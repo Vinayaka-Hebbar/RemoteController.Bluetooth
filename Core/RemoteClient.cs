@@ -2,6 +2,7 @@
 using RemoteController.Messages;
 using RemoteController.Win32;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace RemoteController.Core
@@ -16,7 +17,7 @@ namespace RemoteController.Core
         private readonly ClientState state;
         private bool isDisposed;
 
-        public RemoteClient(Bluetooth.BluetoothEndPoint endPoint)
+        public RemoteClient(EndPoint endPoint)
         {
             state = new ClientState(Environment.MachineName);
 
@@ -31,29 +32,33 @@ namespace RemoteController.Core
             _hook.Init();
             ScreenConfiguration configuration = new ScreenConfiguration();
             //there is some kind of dpi awareness bug here on windows. not sure exactly what's up.
-            foreach (Win32.Hooks.Display display in _hook.GetDisplays())
+            var displays = _hook.GetDisplays();
+            var count = displays.Count;
+            var display = displays[0];
+            var s = configuration.AddScreen(display, display.GetDpi(), state.ClientName);
+            for (int i = 1; i < count; i++)
             {
-                configuration.AddScreen(display.X, display.Y, display.X, display.Y, display.Width, display.Height, display.GetDpi(), state.ClientName);
+                display = displays[i];
+                s = configuration.AddScreenRight(s, display, display.GetDpi(), state.ClientName);
             }
             _connection.Start();
 #if QUEUE_CLIENT
             _dispatcher.StartDispatcher();
 #endif
-            await _connection.Send(new CheckInMessage(state.ClientName, configuration.AllScreen).GetBytes());
+            var localScreens = configuration.AllScreen;
+            await _connection.Send(new CheckInMessage(state.ClientName, localScreens).GetBytes());
             var checkIn = await _connection.WaitForCheckIn();
+            // server screens
             var screens = checkIn.Screens;
             ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
-            screenConfiguration.AddScreensRight(screens);
-            screenConfiguration.AddScreensLeft(configuration.AllScreen);
+            screenConfiguration.AddScreens(screens);
+            screenConfiguration.AddScreensRight(localScreens);
+            // Focus Current Client
+            state.CurrentClientFocused = true;
+            _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
+
             _hook.Start();
-            var s = _screen.ScreenConfiguration.GetFurthestLeft();
-            state.VirtualX = s.X;
-            state.VirtualY = s.Y;
-            if (s.Client == state.ClientName)
-            {
-                _hook.Hook.SetMousePos(state.LastPositionX, state.LastPositionY);
-                state.CurrentClientFocused = true;
-            }
+
             return true;
         }
 

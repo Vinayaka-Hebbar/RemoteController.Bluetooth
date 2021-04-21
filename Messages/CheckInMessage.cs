@@ -8,9 +8,9 @@ namespace RemoteController.Messages
     {
         public readonly string ClientName;
 
-        public readonly IList<VirtualScreen> Screens;
+        public readonly IReadOnlyList<VirtualScreen> Screens;
 
-        public CheckInMessage(string clientName, IList<VirtualScreen> screens)
+        public CheckInMessage(string clientName, IReadOnlyList<VirtualScreen> screens)
         {
             ClientName = clientName;
             Screens = screens;
@@ -22,6 +22,7 @@ namespace RemoteController.Messages
             fixed (byte* b = buffer)
             {
                 var cu = b;
+                // first byte is client Id Size
                 int clientIdSize = *(short*)b;
                 cu += 2;
                 var clientId = Encoding.Default.GetString(buffer, (int)(cu - b), clientIdSize);

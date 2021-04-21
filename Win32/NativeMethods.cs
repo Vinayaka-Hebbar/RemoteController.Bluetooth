@@ -13,6 +13,26 @@ namespace RemoteController.Win32
 
     public static partial class NativeMethods
     {
+        internal const string Tab = "    ";
+
+        // from winuser.h
+        private const int GWL_STYLE = -16,
+                          WS_MAXIMIZEBOX = 0x10000,
+                          WS_MINIMIZEBOX = 0x20000;
+
+        [DllImport("user32.dll")]
+        public extern static int GetWindowLong(IntPtr hwnd, int index);
+
+        [DllImport("user32.dll")]
+        public extern static int SetWindowLong(IntPtr hwnd, int index, int value);
+
+        internal static void HideMinimizeAndMaximizeButtons(System.Windows.Window window)
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(window).Handle;
+            var currentStyle = GetWindowLong(hwnd, GWL_STYLE);
+
+            SetWindowLong(hwnd, GWL_STYLE, (currentStyle & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX));
+        }
         private const string bthpropsDll = "bthprops.cpl";
         private const string irpropsDll = "Irprops.cpl";
         private const string wsDll = "ws2_32.dll";

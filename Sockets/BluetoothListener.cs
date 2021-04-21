@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace RemoteController.Sockets
 {
-    public class BluetoothListener
+    public class BluetoothListener : ISocketListener
     {
         private bool active;
         private readonly BluetoothEndPoint serverEP;
@@ -25,6 +25,12 @@ namespace RemoteController.Sockets
             serverEP = new BluetoothEndPoint(BluetoothAddress.None, service);
             serverSocket = new BluetoothSocket();
             option = new SocketOption(serverSocket);
+        }
+
+        public BluetoothListener(Model.BluetoothOption option) : this(option.ServiceId)
+        {
+            ServiceClass = option.ServiceClass;
+            ServiceName = option.ServiceName;
         }
 
         public BluetoothListener(Guid service, ServiceRecord sdpRecord)
@@ -339,6 +345,13 @@ namespace RemoteController.Sockets
         {
             Socket s = AcceptSocket();
             return new BluetoothClient(s);
+        }
+        #endregion
+
+        #region AccentClient
+        ISocketClient ISocketListener.AcceptClient()
+        {
+            return AcceptBluetoothClient();
         }
         #endregion
 

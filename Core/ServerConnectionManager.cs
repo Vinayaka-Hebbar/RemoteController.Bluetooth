@@ -1,26 +1,29 @@
 ﻿using RemoteController.Bluetooth;
 using RemoteController.Messages;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace RemoteController.Core
 {
     public class ServerConnectionManager : IDisposable
     {
-        private readonly BluetoothEndPoint endPoint;
-        private BluetoothClient client;
+        private readonly EndPoint endPoint;
+        private Sockets.ISocketClient client;
         private System.IO.Stream stream;
 
         public bool IsConnected => client != null && client.Connected;
 
-        public ServerConnectionManager(BluetoothEndPoint endPoint)
+        public ServerConnectionManager(EndPoint endPoint)
         {
             this.endPoint = endPoint;
         }
 
         internal void Start()
         {
-            client = new BluetoothClient();
+            client = DependencyService.Instance
+                .GetService<Services.RemoteFactoryProvider>()
+                .CreateClient();
             client.Connect(endPoint);
             stream = client.GetStream();
         }

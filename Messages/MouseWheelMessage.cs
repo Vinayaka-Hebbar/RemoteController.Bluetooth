@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace RemoteController.Messages
+﻿namespace RemoteController.Messages
 {
     public readonly struct MouseWheelMessage : IMessage
     {
@@ -15,13 +13,7 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.MouseWheel;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
-        {
-            return GetBytes(DeltaX, DeltaY);
-        }
-
-        public static unsafe byte[] GetBytes(int deltaX, int deltaY)
         {
             var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
@@ -30,9 +22,9 @@ namespace RemoteController.Messages
                 *bytes = Message.MouseWheel;
                 // skip the header
                 bytes++;
-                *(int*)bytes = deltaX;
+                *(int*)bytes = DeltaX;
                 bytes += 4;
-                *(int*)bytes = deltaY;
+                *(int*)bytes = DeltaY;
             }
             return res;
         }

@@ -1,5 +1,4 @@
 ﻿using RemoteController.Win32.Hooks;
-using System.Runtime.CompilerServices;
 
 namespace RemoteController.Messages
 {
@@ -16,13 +15,7 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.KeyPress;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
-        {
-            return GetBytes(Key, IsDown);
-        }
-
-        public static unsafe byte[] GetBytes(Key key, bool isDown)
         {
             var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
@@ -31,9 +24,9 @@ namespace RemoteController.Messages
                 *bytes = Message.KeyPress;
                 // skip the header
                 bytes++;
-                *(int*)bytes = (int)key;
+                *(int*)bytes = (int)Key;
                 bytes += 4;
-                *bytes = (byte)(isDown ? 1 : 0);
+                *bytes = (byte)(IsDown ? 1 : 0);
             }
             return res;
         }

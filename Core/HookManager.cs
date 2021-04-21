@@ -182,7 +182,7 @@ namespace RemoteController.Core
         {
             //TODO: remove this
             //I put this here for when I wanted a fail-safe bailout :)
-            if (e.Key == Key.Tilde)
+            if (e.Key == Key.Tilde && e.Control)
                 Environment.Exit(-1);
             if (ClientState.CurrentClientFocused)
             {

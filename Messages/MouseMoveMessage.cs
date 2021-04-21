@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace RemoteController.Messages
+﻿namespace RemoteController.Messages
 {
     public readonly struct MouseMoveMessage : IMessage
     {
@@ -24,13 +22,7 @@ namespace RemoteController.Messages
 
         public MessageType Type => MessageType.MouseMove;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe byte[] GetBytes()
-        {
-            return GetBytes(VirtualX, VirtualY);
-        }
-
-        public unsafe static byte[] GetBytes(int virtualX, int virtualY)
         {
             var res = new byte[Message.HeaderSize];
             fixed (byte* b = res)
@@ -39,9 +31,9 @@ namespace RemoteController.Messages
                 *bytes = Message.MouseMove;
                 // skip the header bytes
                 bytes++;
-                *(int*)bytes = virtualX;
+                *(int*)bytes = VirtualX;
                 bytes += 4;
-                *(int*)bytes = virtualY;
+                *(int*)bytes = VirtualY;
             }
             return res;
         }

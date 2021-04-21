@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace RemoteController.ViewModels
 {
@@ -11,9 +10,9 @@ namespace RemoteController.ViewModels
             Receiver = new ReceiverViewModel();
         }
 
-        public async Task InitAsync()
+        public Task InitAsync()
         {
-            await Sender.InitAsync();
+            return Task.FromResult(0);
         }
 
         public SenderViewModel Sender { get; }

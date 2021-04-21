@@ -1,10 +1,12 @@
 ﻿using RemoteController.Desktop;
 using RemoteController.Extensions;
 using RemoteController.Messages;
+using RemoteController.Model;
 using RemoteController.Sockets;
 using RemoteController.Win32.Hooks;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +15,13 @@ namespace RemoteController.Core
 {
     internal class ServerEventReceiver : IDisposable
     {
-        private static readonly Guid ServiceId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
+        public static readonly Guid ServiceId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
 
         private readonly IGlobalHook _hook;
         private readonly VirtualScreenManager _screen;
         private readonly CancellationTokenSource cts;
         private readonly ClientState state;
+        private readonly IDeviceOption option;
 
 #if BailServer
         private static readonly TimeSpan BailSec = TimeSpan.FromSeconds(1);
@@ -41,8 +44,9 @@ namespace RemoteController.Core
             state = screen.State;
         }
 #else
-        public ServerEventReceiver(VirtualScreenManager screen)
+        public ServerEventReceiver(VirtualScreenManager screen, IDeviceOption device)
         {
+            this.option = device;
             _hook = new WindowsGlobalHook();
             _screen = screen;
             cts = new CancellationTokenSource();
@@ -244,27 +248,24 @@ namespace RemoteController.Core
 
 
 #if !QUEUE_SERVER && !SYNC_SERVER
-        async void Receive()
+        void Receive()
         {
             var token = cts.Token;
             try
             {
-                var _listener = new BluetoothListener(ServiceId)
+                ISocketListener listener = CreateListener();
+                listener.Start();
+                using (token.Register(listener.Stop))
                 {
-                    ServiceName = "BluetoothRemoteController"
-                };
-                _listener.Start();
-                using (token.Register(_listener.Stop))
-                {
-                    while (true)
+                    while (isRunning)
                     {
-                        using (var client = _listener.AcceptBluetoothClient())
+                        using (var client = listener.AcceptClient())
                         {
                             if (token.IsCancellationRequested)
                             {
                                 return;
                             }
-                            await ProcessClientAsync(client);
+                            ProcessClient(client);
                         }
                     }
                 }
@@ -276,13 +277,25 @@ namespace RemoteController.Core
             }
         }
 
-        async Task ProcessClientAsync(Bluetooth.BluetoothClient client)
+        public ISocketListener CreateListener()
+        {
+            ISocketListener listener;
+            if (option.Type == RemoteDeviceType.Bluetooth)
+                listener = new BluetoothListener((BluetoothOption)option);
+            else if (option.Type == RemoteDeviceType.Socket)
+                listener = new SocketListener(option.GetEndPoint());
+            else
+                throw new ArgumentNullException(nameof(listener));
+            return listener;
+        }
+
+        void ProcessClient(ISocketClient client)
         {
             var stream = client.GetStream();
-            while (true)
+            while (isRunning)
             {
                 var buffer = new byte[Message.HeaderSize];
-                if (await stream.ReadAsync(buffer, 0, Message.HeaderSize) > 0 && isRunning)
+                if (stream.Read(buffer, 0, Message.HeaderSize) > 0 && isRunning)
                 {
                     switch ((MessageType)(buffer[0] & Message.TypeMask))
                     {
@@ -301,15 +314,16 @@ namespace RemoteController.Core
                             OnKeyPressFromServer(buffer);
                             break;
                         case MessageType.Clipboard:
-                            OnClipboardFromServer(new ClipboardMessage(await MessagePacket.ParseAsync(new MessageInfo(buffer), stream)));
+                            OnClipboardFromServer(new ClipboardMessage(MessagePacket.Parse(new MessageInfo(buffer), stream)));
                             break;
                         case MessageType.CheckIn:
-                            CheckInMessage checkIn = new CheckInMessage(await MessagePacket.ParseAsync(new MessageInfo(buffer), stream));
-                            await ScreenConfigASync(stream);
+                            CheckInMessage checkIn = new CheckInMessage(MessagePacket.Parse(new MessageInfo(buffer), stream));
+                            // Config
                             OnScreenConfig(checkIn.Screens);
+                            ScreenConfig(stream);
                             break;
                         case MessageType.CheckOut:
-                            RemoveScreen(await CheckOutMessage.ParseAsync(new MessageInfo(buffer), stream));
+                            RemoveScreen(CheckOutMessage.Parse(new MessageInfo(buffer), stream));
                             client.Dispose();
                             return;
 
@@ -318,7 +332,7 @@ namespace RemoteController.Core
             }
         }
 
-        async Task ScreenConfigASync(System.IO.Stream stream)
+        async void ScreenConfig(System.IO.Stream stream)
         {
             var config = new CheckInMessage(state.ClientName, _screen.ScreenConfiguration[state.ClientName]);
             var buffer = config.GetBytes();
@@ -444,15 +458,10 @@ namespace RemoteController.Core
             }
         }
 
-        void OnScreenConfig(IList<VirtualScreen> screens)
+        void OnScreenConfig(IReadOnlyList<VirtualScreen> screens)
         {
             ScreenConfiguration screenConfiguration = _screen.ScreenConfiguration;
-            foreach (var screen in screens)
-            {
-                //Console.WriteLine("Screen:"+screen.X+","+screen.Y + ", LocalX:"+screen.LocalX + ", "+screen.LocalY + " , Width:"+screen.Width + " , height:"+screen.Height+", client: "+ screen.Client);
-                screenConfiguration.AddScreenLeft(screenConfiguration.GetFurthestRight(), screen);
-
-            }
+            screenConfiguration.AddScreensRight(screens);
             if (screenConfiguration.ValidVirtualCoordinate(state.VirtualX, state.VirtualY) !=
                 null)
                 return;

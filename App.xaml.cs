@@ -37,6 +37,7 @@ namespace RemoteController
         {
             base.OnStartup(e);
             DependencyService.Instance.Register<Services.ApplicationSettings>();
+            DependencyService.Instance.Register<Services.RemoteFactoryProvider>();
             traybar = (Desktop.Traybar)FindResource("SysTrayBar");
         }
 

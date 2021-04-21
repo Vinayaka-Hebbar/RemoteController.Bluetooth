@@ -1,4 +1,5 @@
-﻿using RemoteController.Sockets;
+﻿using RemoteController.Extensions;
+using RemoteController.Sockets;
 using RemoteController.Win32;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Net.Sockets;
 
 namespace RemoteController.Bluetooth
 {
-    public class BluetoothClient : IDisposable
+    public class BluetoothClient : ISocketClient
     {
         private readonly SocketOption option;
         string m_pinForConnect;
@@ -140,7 +141,30 @@ namespace RemoteController.Bluetooth
         /// Connects a client to a specified endpoint.
         /// </summary>
         /// <param name="remoteEP">A <see cref="BluetoothEndPoint"/> that represents the remote device.</param>
-        public void Connect(BluetoothEndPoint remoteEP)
+        public void Connect(EndPoint remoteEP)
+        {
+            EnsureNotDisposed();
+            if (!(remoteEP is BluetoothEndPoint endPoint))
+            {
+                throw new ArgumentNullException("remoteEP");
+            }
+
+            Connect_StartAuthenticator(endPoint);
+            try
+            {
+                _socket.Connect(remoteEP);
+            }
+            finally
+            {
+                Connect_StopAuthenticator();
+            }
+        }
+
+        /// <summary>
+        /// Connects a client to a specified endpoint.
+        /// </summary>
+        /// <param name="remoteEP">A <see cref="BluetoothEndPoint"/> that represents the remote device.</param>
+        public async System.Threading.Tasks.Task ConnectAsync(BluetoothEndPoint remoteEP, int timeout = 3000)
         {
             EnsureNotDisposed();
             if (remoteEP == null)
@@ -151,7 +175,7 @@ namespace RemoteController.Bluetooth
             Connect_StartAuthenticator(remoteEP);
             try
             {
-                _socket.Connect(remoteEP);
+                await _socket.ConnectAsync(remoteEP, timeout);
             }
             finally
             {
@@ -262,7 +286,6 @@ namespace RemoteController.Bluetooth
         {
             get { return _socket; }
             set { _socket = value; }
-
         }
 
         public string RemoteMachineName
@@ -296,7 +319,7 @@ namespace RemoteController.Bluetooth
 
             if (dataStream == null)
             {
-                dataStream = new BluetoothStream(Socket, true);
+                dataStream = new SocketStream(Socket, true);
             }
 
             return dataStream;
@@ -313,30 +336,33 @@ namespace RemoteController.Bluetooth
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
+            OnDispose();
+            GC.SuppressFinalize(this);
+        }
+
+        ~BluetoothClient()
+        {
+            OnDispose();
         }
 
         private bool isDisposed = false; // To detect redundant calls
 
-        void Dispose(bool disposing)
+        void OnDispose()
         {
             if (!isDisposed)
             {
-                if (disposing)
+                IDisposable idStream = dataStream;
+                if (idStream != null)
                 {
-                    IDisposable idStream = dataStream;
-                    if (idStream != null)
+                    //dispose the stream which will also close the socket
+                    idStream.Dispose();
+                }
+                else
+                {
+                    if (_socket != null)
                     {
-                        //dispose the stream which will also close the socket
-                        idStream.Dispose();
-                    }
-                    else
-                    {
-                        if (_socket != null)
-                        {
-                            _socket.Close();
-                            _socket = null;
-                        }
+                        _socket.Close();
+                        _socket = null;
                     }
                 }
 

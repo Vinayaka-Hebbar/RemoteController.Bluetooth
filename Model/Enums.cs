@@ -2,7 +2,7 @@
 {
     public enum RemoteDeviceType
     {
+        Socket,
         Bluetooth,
-        Socket
     }
 }

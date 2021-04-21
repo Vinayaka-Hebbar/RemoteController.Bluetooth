@@ -3,12 +3,12 @@ using System.Net.Sockets;
 
 namespace RemoteController.Sockets
 {
-    public sealed class BluetoothStream : System.IO.Stream
+    public sealed class SocketStream : System.IO.Stream
     {
         private readonly Socket _socket;
         private readonly bool _ownsSocket;
 
-        public BluetoothStream(Socket socket, bool ownsSocket)
+        public SocketStream(Socket socket, bool ownsSocket)
         {
             if (socket is null)
                 throw new ArgumentNullException(nameof(socket));

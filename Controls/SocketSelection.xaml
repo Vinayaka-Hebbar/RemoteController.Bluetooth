@@ -1,0 +1,61 @@
+﻿<local:DeviceSelectionBase x:Class="RemoteController.Controls.SocketSelection"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:local="clr-namespace:RemoteController.Controls"
+                           xmlns:validations="clr-namespace:RemoteController.Validations"
+                           mc:Ignorable="d"
+                           d:DesignHeight="450"
+                           d:DesignWidth="800">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="3*" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+        <RowDefinition />
+        <RowDefinition />
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0"
+               VerticalAlignment="Center"
+               Text="Host"
+               HorizontalAlignment="Right"
+               Grid.Column="0" />
+    <TextBox Grid.Row="0"
+             Grid.Column="1"
+             VerticalAlignment="Center"
+             Margin="10,0"
+             Padding="0,2"
+             x:Name="HostInput">
+        <TextBox.Text>
+            <Binding RelativeSource="{RelativeSource Self}"
+                     Path="Text">
+                <Binding.ValidationRules>
+                    <validations:MandatoryRule Name="Host" />
+                </Binding.ValidationRules>
+            </Binding>
+        </TextBox.Text>
+    </TextBox>
+    <TextBlock Grid.Row="1"
+               VerticalAlignment="Center"
+               Text="Port"
+               HorizontalAlignment="Right"
+               Grid.Column="0" />
+    <TextBox Grid.Row="1"
+             Grid.Column="1"
+             VerticalAlignment="Center"
+             Margin="10,0"
+             Padding="0,2"
+             x:Name="PortInput">
+        <TextBox.Text>
+            <Binding RelativeSource="{RelativeSource Self}"
+                     Path="Text">
+                <Binding.ValidationRules>
+                    <validations:MandatoryRule Name="Port" />
+                    <validations:IntegerRangeRule Min="0"
+                                                  Max="65535" />
+                </Binding.ValidationRules>
+            </Binding>
+        </TextBox.Text>
+    </TextBox>
+</local:DeviceSelectionBase>

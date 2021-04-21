@@ -5,9 +5,23 @@ namespace RemoteController.ViewModels
 {
     public class ViewModelBase : INotifyPropertyChanged
     {
+        private bool isBusy;
+
         protected ViewModelBase()
         {
 
+        }
+
+        public bool IsBusy
+        {
+            get => isBusy;
+            set
+            {
+                if (isBusy == value)
+                    return;
+                isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

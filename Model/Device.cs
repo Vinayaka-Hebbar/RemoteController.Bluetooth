@@ -1,13 +1,16 @@
 ﻿using RemoteController.Bluetooth;
 using System;
+using System.Net;
 
 namespace RemoteController.Model
 {
     /// <summary>
     /// The device.
     /// </summary>
-    public sealed class Device
+    public sealed class Device 
     {
+        public static readonly Guid ServiceClassId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
+
         /// <summary>
         /// Gets or sets the device name.
         /// </summary>
@@ -111,6 +114,11 @@ namespace RemoteController.Model
         public override string ToString()
         {
             return DeviceName;
+        }
+
+        public EndPoint GetEndPoint()
+        {
+            return new BluetoothEndPoint(DeviceInfo.DeviceAddress, ServiceClassId);
         }
     }
 }

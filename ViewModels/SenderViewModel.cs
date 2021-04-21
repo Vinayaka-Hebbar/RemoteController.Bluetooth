@@ -1,10 +1,11 @@
 ﻿using RemoteController.Bluetooth;
+using RemoteController.Command;
 using RemoteController.Core;
 using RemoteController.Model;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace RemoteController.ViewModels
 {
@@ -13,16 +14,12 @@ namespace RemoteController.ViewModels
         const string ConnectState = "Connect";
         const string DisconnectState = "Disconnect";
 
-        private static readonly Guid _serviceClassId = new Guid("9bde4762-89a6-418e-bacf-fcd82f1e0677");
-        private Device selectedDevice;
+        private IDeviceOption selectedDevice;
         private RemoteClient client;
 
         public SenderViewModel()
         {
-            Devices = new ObservableCollection<Device>()
-            {
-               new Device(null) { DeviceName = "Searching..." }
-            };
+            Devices = new ObservableCollection<IDeviceOption>();
         }
 
         private string state = ConnectState;
@@ -36,18 +33,38 @@ namespace RemoteController.ViewModels
             }
         }
 
-        private Command.RelayCommand connect;
-        public Command.RelayCommand Connect
+        private ICommand pick;
+        public ICommand Pick
+        {
+            get
+            {
+                if (pick == null)
+                    pick = new RelayCommand(OnPick, (d) => !IsBusy && state.Equals(ConnectState));
+                return pick;
+            }
+        }
+
+        private ICommand connect;
+        public ICommand Connect
         {
             get
             {
                 if (connect == null)
-                    connect = new Command.RelayCommand(OnConnect, d => SelectedDevice != null && SelectedDevice.DeviceInfo != null);
+                    connect = new AsyncRelayCommand(OnConnect, d => selectedDevice != null);
                 return connect;
             }
         }
 
-        async void OnConnect(object arg)
+        void OnPick(object _)
+        {
+            var dialog = new Dialogs.DeviceDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                Devices.Add(dialog.Device);
+            }
+        }
+
+        async Task OnConnect(object arg)
         {
             try
             {
@@ -57,7 +74,7 @@ namespace RemoteController.ViewModels
                 }
                 else
                 {
-                    client = new RemoteClient(new BluetoothEndPoint(SelectedDevice.DeviceInfo.DeviceAddress, _serviceClassId));
+                    client = new RemoteClient(selectedDevice.GetEndPoint());
                     if (await client.Start())
                     {
                         State = DisconnectState;
@@ -73,24 +90,14 @@ namespace RemoteController.ViewModels
 
         void Stop()
         {
-            client.Dispose();
-            client = null;
-            State = ConnectState;
-        }
-
-        public async Task InitAsync()
-        {
-            var settings = DependencyService.Instance.GetService<IServiceProvider>();
-            BluetoothRadio radio = BluetoothRadio.Default;
-            if (radio != null && radio.Mode == RadioMode.PowerOff)
+            try
             {
-                radio.Mode = RadioMode.Connectable;
+                client.Dispose();
             }
-            IList<Device> devices = await GetDevices();
-            Devices.Clear();
-            foreach (Device device in devices)
+            finally
             {
-                Devices.Add(device);
+                client = null;
+                State = ConnectState;
             }
         }
 
@@ -100,12 +107,12 @@ namespace RemoteController.ViewModels
         /// <value>
         /// The devices.
         /// </value>
-        public ObservableCollection<Device> Devices
+        public ObservableCollection<IDeviceOption> Devices
         {
-            get; 
+            get;
         }
 
-        public Device SelectedDevice
+        public IDeviceOption SelectedDevice
         {
             get => selectedDevice;
             set
@@ -116,27 +123,5 @@ namespace RemoteController.ViewModels
         }
 
         public bool IsConnected => client != null;
-
-        /// <summary>
-        /// Gets the devices.
-        /// </summary>
-        /// <returns>The list of the devices.</returns>
-        public static async Task<IList<Device>> GetDevices()
-        {
-            // for not block the UI it will run in a different threat
-            Task<List<Device>> task = Task.Run(() =>
-            {
-                List<Device> devices = new List<Device>();
-                IReadOnlyList<BluetoothDeviceInfo> array = BluetoothClient.DiscoverDevices();
-                int count = array.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    devices.Add(new Device(array[i]));
-                }
-                return devices;
-            });
-            return await task;
-        }
-
     }
 }

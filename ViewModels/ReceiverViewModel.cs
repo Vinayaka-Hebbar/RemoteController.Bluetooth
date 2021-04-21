@@ -1,5 +1,6 @@
 ﻿using RemoteController.Collection;
 using RemoteController.Core;
+using System.Net;
 using System.Windows.Input;
 
 namespace RemoteController.ViewModels
@@ -52,22 +53,42 @@ namespace RemoteController.ViewModels
 
         public bool IsConnected => server != null;
 
-        private bool CheckListener()
+        private bool CheckListener(object _)
         {
             return server == null;
         }
 
-        private void OnStart()
+        private void OnStart(object arg)
         {
-            if (server != null)
+            if (arg is Model.RemoteDeviceType type)
             {
-                StopServer();
+                if (server != null)
+                {
+                    StopServer();
+                }
+                Model.IDeviceOption option = null;
+                if (type == Model.RemoteDeviceType.Bluetooth)
+                {
+                    option = new Model.BluetoothOption
+                    {
+                        ServiceClass = ServiceClass.Information,
+                        ServiceName = "RemoteController",
+                    };
+                }
+                else
+                {
+                    option = new Model.SocketOption()
+                    {
+                        EndPoint = new IPEndPoint(IPAddress.Any, 40580)
+                    };
+                }
+
+                server = new RemoteServer(option);
+                ScreenConfiguration screens = server.Screens.ScreenConfiguration;
+                screens.Added += ScreensAdded;
+                screens.Removed += ScreensRemoved;
+                server.Start();
             }
-            server = new RemoteServer();
-            ScreenConfiguration screens = server.Screens.ScreenConfiguration;
-            screens.Added += ScreensAdded;
-            screens.Removed += ScreensRemoved;
-            server.Start();
         }
 
         async void ScreensRemoved(VirtualScreen screen)

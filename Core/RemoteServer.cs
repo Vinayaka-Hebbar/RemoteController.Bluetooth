@@ -1,5 +1,6 @@
 ﻿using RemoteController.Desktop;
 using System;
+using System.Net;
 
 namespace RemoteController.Core
 {
@@ -11,11 +12,11 @@ namespace RemoteController.Core
 
         public VirtualScreenManager Screens => _screen;
 
-        public RemoteServer()
+        public RemoteServer(Model.IDeviceOption option)
         {
             state = new ClientState(Environment.MachineName);
             _screen = new VirtualScreenManager(state);
-            _receiver = new ServerEventReceiver(_screen);
+            _receiver = new ServerEventReceiver(_screen, option);
         }
 
         public bool Start()

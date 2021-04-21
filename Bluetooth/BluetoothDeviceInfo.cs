@@ -79,7 +79,7 @@ namespace RemoteController.Bluetooth
             }
         }
 
-        public IReadOnlyCollection<Guid> InstalledServices
+        public Guid[] InstalledServices
         {
             get
             {
@@ -90,16 +90,16 @@ namespace RemoteController.Bluetooth
                 if (result < 0)
                     return new Guid[0];
 
-                List<Guid> foundServices = new List<Guid>();
+                var foundServices = new Guid[serviceCount];
                 byte[] buffer = new byte[16];
 
                 for (int s = 0; s < serviceCount; s++)
                 {
                     Buffer.BlockCopy(services, s * 16, buffer, 0, 16);
-                    foundServices.Add(new Guid(buffer));
+                    foundServices[s] = new Guid(buffer);
                 }
 
-                return foundServices.AsReadOnly();
+                return foundServices;
             }
         }
 
